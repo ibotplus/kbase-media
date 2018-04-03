@@ -1,0 +1,17 @@
+body {
+    margin: 3px;
+    font-size: 12px;
+    padding-top: 3px;
+}
+
+img, video {
+    max-width: 500px;
+    max-height: 500px;
+    border: 0px solid;
+}
+
+.panel {
+    border: 1px solid #cdcdcd;
+    border-raduis: 3px;
+    padding: 3px;
+}
