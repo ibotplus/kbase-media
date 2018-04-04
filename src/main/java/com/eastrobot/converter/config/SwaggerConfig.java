@@ -32,7 +32,7 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("SpringBoot 使用Springfox-Swagger 构建RESTful API")
+                .title("MultipartFile Converter-API")
                 .description("converter multimedia to text(e.g. video, audio, image)")
                 .termsOfServiceUrl("http://localhost:8080/converter-api")
                 .contact(new Contact("Yogurt_lei", "", "yogurt_lei@foxmail.com"))

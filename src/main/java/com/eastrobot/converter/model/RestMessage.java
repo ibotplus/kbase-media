@@ -1,10 +1,8 @@
 package com.eastrobot.converter.model;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 /**
@@ -13,16 +11,28 @@ import java.io.Serializable;
  * @author <a href="yogurt.lei@xiaoi.com">Yogurt_lei</a>
  * @version v1.0 , 2018-04-03 19:30
  */
-@Getter
-@Setter
-@ApiModel(description = "返回响应数据")
+// @Getter
+// @Setter
+// @ApiModel(description = "返回响应数据")
+@Data
+@XmlRootElement
 public class RestMessage implements Serializable {
-    @ApiModelProperty(value = "是否成功")
-    private boolean success = true;
-    @ApiModelProperty(value = "返回对象")
-    private Object data;
-    @ApiModelProperty(value = "错误编号")
-    private Integer errCode;
-    @ApiModelProperty(value = "错误信息")
-    private String message;
+    // @ApiModelProperty(value = "是否成功")
+    private Integer errorCode;
+    private String errorMessage;
+
+    public RestMessage(ErrorCode error) {
+        this.errorCode = error.getCode();
+        this.errorMessage = error.getMsg();
+    }
+
+    public RestMessage() {
+        this.errorCode = ErrorCode.SUCCESS.getCode();
+        this.errorMessage = ErrorCode.SUCCESS.getMsg();
+    }
+
+    public void setIErrorCode(ErrorCode error) {
+        this.errorCode = error.getCode();
+        this.errorMessage = error.getMsg();
+    }
 }

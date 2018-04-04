@@ -1,0 +1,56 @@
+spring:
+  profiles:
+    active: dev
+  #redeploy thymeleaf
+  thymeleaf:
+    cache: false
+  servlet:
+  # default multipart config
+    multipart:
+      max-file-size: 50mb
+      max-request-size: 50mb
+
+logging:
+  level: info
+
+# default server config
+server:
+  port: 8081
+  servlet:
+    context-path: /converter-api
+
+# default user converter config
+converter:
+  output: E:\\converter-output
+  #default is false, if true while extract keyword split image content(ocr) every image
+  image:
+    split-segment: false
+  video:
+    ffmpeg: D:\\ffmpeg\\bin
+    #default split seconds, every audio segment,
+    segment-seconds: 60
+    #ffmpeg parse video -> image (-r 0.2), this param mean 0.2fps
+    frame-rate: 0.2
+  tools:
+    audio:
+      # default asr tool
+      asr:
+        #baidu asr config
+        baidu:
+          appId: 10879396
+          apiKey: 3l1ZjunSuCLyvhYi91WXQvas
+          secretKey: uFVS2XNUvuDlFxPVfpUUA7jxqzw4AMN9
+    image:
+      #default ocr tool
+      ocr:
+        #tencent youtu ocr tool config
+        youtu:
+          appId: 10122322
+          secretId: AKIDPtKafZsvZ3QceWiiB9511uhtvFammodG
+          secretKey: mfR7bu2G2oRsIXaYL2Yt7B4KD0rcCfw3
+          time: 600000
+          userId: 563603794
+
+
+
+

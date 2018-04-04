@@ -1,15 +1,20 @@
 package com.eastrobot.converter.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.eastrobot.converter.model.ErrorCode;
 import com.eastrobot.converter.service.MultiMediaConverterService;
 import io.swagger.annotations.*;
+import lombok.Lombok;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 
 /**
  * MutilMediaConverterController
@@ -29,47 +34,56 @@ public class MultiMediaConverterController {
      *
      * @param file input file
      *             <pre>
-     *             return demo
+     *                         return demo
      *
-     *             // return for success
-     *             {
-     *              "sn":"Serial Number",
-     *              "flag":"success",
-     *              "file_type": "image", // or video or audio
-     *              "content": "parse result(video or audio) content", // with image equals keyword
-     *              "keyword": "limit to 200 keyword"
-     *             }
+     *                         // return for success
+     *                         {
+     *                          "sn":"Serial Number",
+     *                          "flag":"success",
+     *                          "file_type": "image", // or video or audio
+     *                          "content": "parse result(video or audio) content", // with image equals keyword
+     *                          "keyword": "limit to 200 keyword"
+     *                         }
      *
-     *             // return for failed
-     *             {
-     *              "sn":"Serial Number",
-     *              "flag":"failed",
-     *              "err_code": 2000,
-     *              "err_msg": "data empty."
-     *             }
-     *             </pre>
+     *                         // return for failed
+     *                         {
+     *                          "sn":"Serial Number",
+     *                          "flag":"failed",
+     *                          "err_code": 2000,
+     *                          "err_msg": "data empty."
+     *                         }
+     *                         </pre>
      *
      * @author Yogurt_lei
      * @date 2018-03-29 13:23
      */
     @ApiOperation("上传视频,音频,图片文件,转换为文本.")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "file", value = "传入的文件", required = true, paramType = "multipartFile")
+        @ApiImplicitParam(name = "file", value = "传入待转换文件", required = true, dataType = "file", paramType = "body"),
+        @ApiImplicitParam(name = "type", value = "转换类型", defaultValue = "keyword", dataType = "String", paramType = "body")
     })
     @ApiResponses({
-            @ApiResponse(code = 400, message = "请求参数没填好"),
-            @ApiResponse(code = 404, message = "请求路径没有或页面跳转路径不对")
+        @ApiResponse(code = 0, message = "参数不正确"),
     })
-    @RequestMapping("/driver")
-    public JSONObject driver(@RequestParam("file") MultipartFile file) {
+    @PostMapping(value = "/driver",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public JSONObject driver(@RequestParam("file") MultipartFile file, @RequestParam(value = "type", required = false) String type) {
+        //CommonsMultipartFile 为何不能接收
+
         String folder = converterService.getDefaultOutputFolderPath();
         String inputFile = folder + File.separator + file.getOriginalFilename();
         JSONObject resultJson = new JSONObject();
         if (!file.isEmpty()) {
             try {
-                File f = new File(inputFile);
-                f.mkdirs();
-                file.transferTo(f);
+                String fileName = file.getOriginalFilename();
+                byte[] bytes = file.getBytes();
+                BufferedOutputStream buffStream =
+                        new BufferedOutputStream(new FileOutputStream(new File("/tmp/" + fileName)));
+                buffStream.write(bytes);
+                buffStream.close();
+                // File f = new File(inputFile);
+                // if (f.mkdirs()) {
+                //     file.transferTo(f);
+                // }
             } catch (Exception e) {
                 resultJson.put("flag", "failed");
                 resultJson.put("err_code", "1000");
@@ -78,6 +92,10 @@ public class MultiMediaConverterController {
                 return resultJson;
             }
         }
+
+        ErrorCode errorCode = ErrorCode.SUCCESS;
+        errorCode.getCode();
+        Lombok l = new Lombok();
 
         return converterService.driver(inputFile);
     }

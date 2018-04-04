@@ -8,7 +8,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>converter</name>
+    <name>converter-api</name>
     <description>converter multimedia to text(e.g. video, audio, image)</description>
 
     <parent>
@@ -44,7 +44,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
         <!--springfox-swagger2-->
@@ -196,12 +196,12 @@
             <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/youtu-java-sdk.jar</systemPath>
         </dependency>
 
-        <!--静态资源热部署-->
+        <!--静态资源热部署
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
-        </dependency>
+        </dependency>-->
 
     </dependencies>
 
@@ -210,10 +210,10 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <!--java热部署-->
+                <!--java热部署
                 <configuration>
                     <fork>true</fork>
-                </configuration>
+                </configuration>-->
             </plugin>
         </plugins>
     </build>
