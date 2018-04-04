@@ -17,16 +17,16 @@ public class YouTuServiceImpl implements YouTuService {
 
     private static final Logger log = LoggerFactory.getLogger(YouTuServiceImpl.class);
 
-    @Value("${convert.tools.image.ocr.youtu.appId}")
+    @Value("${convert.image.ocr.youtu.appId}")
     private String appId;
 
-    @Value("${convert.tools.image.ocr.youtu.secretId}")
+    @Value("${convert.image.ocr.youtu.secretId}")
     private String appSecretId;
 
-    @Value("${convert.tools.image.ocr.youtu.secretKey}")
+    @Value("${convert.image.ocr.youtu.secretKey}")
     private String appSecretKey;
 
-    @Value("${convert.tools.image.ocr.youtu.userId}")
+    @Value("${convert.image.ocr.youtu.userId}")
     private String appUserId;
 
     @Override
@@ -37,7 +37,7 @@ public class YouTuServiceImpl implements YouTuService {
             System.out.println(image_path);
             JSONObject generalOcr = faceYoutu.GeneralOcr(image_path);
             result = handleOcrRes(generalOcr);
-        } catch (KeyManagementException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             log.error("orc error [%s]:", e.getMessage());
         }
@@ -57,7 +57,7 @@ public class YouTuServiceImpl implements YouTuService {
         return result;
     }
 
-    private String handleOcrRes(JSONObject ocrJson) {
+    private String handleOcrRes(JSONObject ocrJson) throws Exception {
         StringBuffer sb = new StringBuffer();
         JSONArray jsonUrl = ocrJson.getJSONArray("items");
         for (int i = 0; i < jsonUrl.length(); i++) {

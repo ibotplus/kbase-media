@@ -1,0 +1,52 @@
+# default multipart config
+spring:
+  servlet:
+    multipart:
+      max-request-size: 50mb
+      max-file-size: 50mb
+  # redeploy thymeleaf
+  thymeleaf:
+    cache: false
+
+logging:
+  level:
+    root: info
+
+# default server config
+server:
+  port: 8080
+  servlet:
+    context-path: /converter-api
+
+# default user converter config
+convert:
+  # default output-folder
+  outputFolder: E:\\converter-output
+  video:
+    vca:
+      default: ffmpeg
+      ffmpeg:
+        path: D:\\ffmpeg\\bin
+        toImage:
+          fps: 0.2
+  audio:
+    # default asr tool
+    asr:
+      default: baidu
+      #baidu asr config
+      baidu:
+        appId: 10879396
+        apiKey: 3l1ZjunSuCLyvhYi91WXQvas
+        secretKey: uFVS2XNUvuDlFxPVfpUUA7jxqzw4AMN9
+        segmentTime: 60
+  image:
+    #default ocr tool
+    ocr:
+      default: youtu
+      #tencent youtu ocr tool config
+      youtu:
+        appId: 10122322
+        secretId: AKIDPtKafZsvZ3QceWiiB9511uhtvFammodG
+        secretKey: mfR7bu2G2oRsIXaYL2Yt7B4KD0rcCfw3
+        userId: 563603794
+        time: 600000

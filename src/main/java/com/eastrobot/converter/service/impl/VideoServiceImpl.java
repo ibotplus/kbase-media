@@ -4,19 +4,21 @@ import com.alibaba.fastjson.JSONObject;
 import com.eastrobot.converter.service.AudioService;
 import com.eastrobot.converter.service.ImageService;
 import com.eastrobot.converter.service.VideoService;
-import com.eastrobot.converter.util.PropertiesUtil;
 import com.eastrobot.converter.util.ResUtil;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.hankcs.hanlp.HanLP;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.*;
 
 /**
@@ -28,14 +30,6 @@ import java.util.concurrent.*;
 @Service
 public class VideoServiceImpl implements VideoService {
     private static final Logger logger = LoggerFactory.getLogger(VideoServiceImpl.class);
-
-    @Value("${converter.ffmpeg}")
-    private String ffmpegPath;
-
-    /**
-     * 图片内容是否需要分段提取关键字
-     */
-    private static boolean isImgContentSplitSegment = PropertiesUtil.getBoolean("converter.image.split-segment", false);
 
     @Autowired
     private ImageService imageService;
@@ -151,7 +145,8 @@ public class VideoServiceImpl implements VideoService {
         }
 
         String imgContentResult = null;
-        if (isImgContentSplitSegment) {
+        // 如果是 分段提取关键字
+        if (true) {
             StringBuilder segmentContent = new StringBuilder();
             //分段提取
             TreeMap<String, String> treeMap = ResUtil.map2SortByKey(imageContentMap);

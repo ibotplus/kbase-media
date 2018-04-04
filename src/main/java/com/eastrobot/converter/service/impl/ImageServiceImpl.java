@@ -22,14 +22,9 @@ import java.io.File;
 public class ImageServiceImpl implements ImageService {
     private static final Logger logger = LoggerFactory.getLogger(ImageServiceImpl.class);
 
-    @Value("${converter.ffmpeg}")
-    private String ffmpegPath;
 
-    /**
-     * 转图片的帧设置  0.2表示每秒0.2帧(也即1帧/5s)
-     */
-    @Value("${converter.video.frame-rate}")
-    private String frameRateStr;
+    @Value("${convert.video.vca.default}")
+    private String VCA_TOOL;
 
     @Autowired
     private YouTuService youTuService;
@@ -38,12 +33,12 @@ public class ImageServiceImpl implements ImageService {
     public Boolean runFfmpegParseImagesCmd(final String videoPath) {
         String folder = ResUtil.getFolder(videoPath, "");
 
-        FFmpeg fFmpeg = new FFmpeg(ffmpegPath);
+        FFmpeg fFmpeg = new FFmpeg("D:\\ffmpeg\\bin");
         fFmpeg.addParam("-y");
         fFmpeg.addParam("-i");
         fFmpeg.addParam(videoPath);
         fFmpeg.addParam("-r");
-        fFmpeg.addParam(frameRateStr);
+        fFmpeg.addParam("0.2");
         fFmpeg.addParam(folder + File.separator + "%005d.jpg");
 
         try {

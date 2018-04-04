@@ -24,7 +24,7 @@ import java.util.Date;
 @Service
 public class MultiMediaConverterServiceImpl implements MultiMediaConverterService {
 
-    @Value("${converter.output}")
+    @Value("${convert.output-folder}")
     private String OUTPUT_FOLDER;
 
     @Autowired

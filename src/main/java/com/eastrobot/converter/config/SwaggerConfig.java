@@ -25,7 +25,7 @@ public class SwaggerConfig {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.eastrobot.converter.controller"))
+                .apis(RequestHandlerSelectors.basePackage("com.eastrobot.converter.web.controller"))
                 .paths(PathSelectors.any())
                 .build();
     }

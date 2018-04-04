@@ -1,4 +1,4 @@
-package com.eastrobot.converter.controller;
+package com.eastrobot.converter.web.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.eastrobot.converter.model.ErrorCode;

@@ -10,9 +10,9 @@ public class BaiduSpeechUtils {
 
     private static final Logger log = LoggerFactory.getLogger(BaiduSpeechUtils.class);
 
-    private static final String APP_ID = PropertiesUtil.getString("convert.tools.audio.asr.baidu.appId");
-    private static final String API_KEY = PropertiesUtil.getString("convert.tools.audio.asr.baidu.apiKey");
-    private static final String SECRET_KEY = PropertiesUtil.getString("convert.tools.audio.asr.baidu.secretKey");
+    private static final String APP_ID = PropertiesUtil.getString("convert.audio.asr.baidu.appId");
+    private static final String API_KEY = PropertiesUtil.getString("convert.audio.asr.baidu.apiKey");
+    private static final String SECRET_KEY = PropertiesUtil.getString("convert.audio.asr.baidu.secretKey");
 
     /*
      * AipSpeech是语音识别的Java客户端，为使用语音识别的开发人员提供了一系列的交互方法。

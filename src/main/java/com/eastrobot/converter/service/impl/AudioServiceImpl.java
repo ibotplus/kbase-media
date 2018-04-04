@@ -24,14 +24,8 @@ import org.springframework.stereotype.Service;
 public class AudioServiceImpl implements AudioService {
     private static final Logger logger = LoggerFactory.getLogger(AudioServiceImpl.class);
 
-    @Value("${converter.ffmpeg}")
-    private String ffmpegPath;
-
-    @Value("${convert.tools.audio.asr}")
+    @Value("${convert.audio.asr.default}")
     private String ASR_TOOL;
-
-    @Value("${converter.video.segment-seconds}")
-    private String segmentSecondStr;
 
     private static final String BAIDU = "baidu";
 
@@ -41,12 +35,12 @@ public class AudioServiceImpl implements AudioService {
 
         StringBuffer resultBuffer = new StringBuffer();
         int totalSeconds = FFmpegUtil.getVideoTime(videoPath);
-        int segmentSecond = Integer.parseInt(segmentSecondStr);
+        int segmentSecond = 60;
         int totalSegment = totalSeconds / segmentSecond + ((totalSeconds % segmentSecond) > 0 ? 1 : 0);
         logger.debug("total segment :[%s], total second: [%s]", totalSegment, totalSeconds);
 
         for (int i = 1; i <= totalSegment; i++) {
-            FFmpeg fFmpeg = new FFmpeg(ffmpegPath);
+            FFmpeg fFmpeg = new FFmpeg("D:\\ffmpeg\\bin");
             fFmpeg.addParam("-y");
             fFmpeg.addParam("-i");
             fFmpeg.addParam(videoPath);
@@ -78,10 +72,10 @@ public class AudioServiceImpl implements AudioService {
         //TODO 调用 NTE 接口实现语音提取文本
         if (BAIDU.equals(ASR_TOOL)) {
             JSONObject asr = BaiduSpeechUtils.asr(audioFilePath, "pcm", 16000);
-            if (asr.getInt("err_no") == 0) {
+            if (asr.optInt("err_no",-1) == 0) {
                 //success
                 //数组字符串
-                String result = asr.getString("result");
+                String result = asr.optString("result");
                 result = StringUtils.substringBetween(result, "[\"", "\"]");
 
                 return result;
