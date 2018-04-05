@@ -1,12 +1,11 @@
 package com.eastrobot.converter.model;
 
-import lombok.Getter;
-import lombok.Setter;
-
+/**
+ * 定义错误码
+ */
 public enum ErrorCode {
     SUCCESS(0, "SUCCESS"),
     FAILURE(1, "请求失败"),
-    SYSTEM_ERROR(1, "系统错误"),
     SYSTEM_BUSY(2, "系统繁忙"),
     PARAM_ERROR(3, "参数错误"),
     CFG_ERROR(4, "配置文件错误"),
@@ -14,11 +13,7 @@ public enum ErrorCode {
     UPDATE_CACHE_ERROR(6, "更新缓存失败"),
     ILLEGAL_OPERATION(7, "操作不合法"),;
 
-    @Getter
-    @Setter
     private int code;
-    @Getter
-    @Setter
     private String msg;
 
     ErrorCode(int code, String msg) {
@@ -26,4 +21,11 @@ public enum ErrorCode {
         this.msg = msg;
     }
 
+    public int getCode() {
+        return code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
 }

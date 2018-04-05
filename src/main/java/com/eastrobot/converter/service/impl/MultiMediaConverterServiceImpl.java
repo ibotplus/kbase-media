@@ -2,8 +2,8 @@ package com.eastrobot.converter.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.eastrobot.converter.service.AudioService;
+import com.eastrobot.converter.service.ConvertService;
 import com.eastrobot.converter.service.ImageService;
-import com.eastrobot.converter.service.MultiMediaConverterService;
 import com.eastrobot.converter.service.VideoService;
 import com.eastrobot.converter.util.ResUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -22,7 +22,7 @@ import java.util.Date;
  * @version v1.0 , 2018-03-29 14:39
  */
 @Service
-public class MultiMediaConverterServiceImpl implements MultiMediaConverterService {
+public class MultiMediaConverterServiceImpl implements ConvertService {
 
     @Value("${convert.output-folder}")
     private String OUTPUT_FOLDER;
@@ -45,8 +45,6 @@ public class MultiMediaConverterServiceImpl implements MultiMediaConverterServic
     public JSONObject driver(String resPath) {
         JSONObject json = new JSONObject();
         File resFile = new File(resPath);
-
-        String text = new String();
 
         if (ResUtil.isVideo(resPath) || ResUtil.isAudio(resPath)) {
             JSONObject videoJSON = videoService.parseVideo(resPath);
