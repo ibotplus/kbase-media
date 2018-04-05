@@ -2,13 +2,18 @@
 spring:
   servlet:
     multipart:
-      max-request-size: 50mb
-      max-file-size: 50mb
+      max-request-size: 50MB
+      max-file-size: 50MB
+      enabled: true
+      # if not config the uploadfile is null.....
+      location: E:\\converter-output\\tmp
   # redeploy thymeleaf
   thymeleaf:
     cache: false
 
+
 logging:
+  config: classpath:logback.xml
   level:
     root: info
 
