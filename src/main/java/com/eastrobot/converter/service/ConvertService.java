@@ -1,12 +1,12 @@
 package com.eastrobot.converter.service;
 
 
-import com.alibaba.fastjson.JSONObject;
+import com.eastrobot.converter.model.ResponseMessage;
 
 /**
  * ConvertService
  *
- * @author <a href="yogurt.lei@xiaoi.com">Yogurt_lei</a>
+ * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
  * @version v1.0 , 2018-03-29 14:39
  */
 public interface ConvertService {
@@ -17,7 +17,7 @@ public interface ConvertService {
      * @author Yogurt_lei
      * @date 2018-03-29 14:41
      */
-    String getDefaultOutputFolderPath();
+    String getDefaultOutputFolderPath(String sn);
 
     /**
      *
@@ -26,5 +26,5 @@ public interface ConvertService {
      * @author Yogurt_lei
      * @date 2018-03-29 15:00
      */
-    JSONObject driver(String resPath);
+    ResponseMessage driver(String resPath);
 }

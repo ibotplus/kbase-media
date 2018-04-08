@@ -1,9 +1,12 @@
 package com.eastrobot.converter.service;
 
+
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * AudioService
  *
- * @author <a href="yogurt.lei@xiaoi.com">Yogurt_lei</a>
+ * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
  * @version v1.0 , 2018-03-26 15:14
  */
 public interface AudioService {
@@ -27,4 +30,6 @@ public interface AudioService {
      * @date 2018-03-27 11:54
      */
     String handle(String audioFilePath);
+
+    JSONObject parseAudio(String audioFilePath);
 }

@@ -11,7 +11,7 @@ spring:
   thymeleaf:
     cache: false
 
-
+#default logger config
 logging:
   config: classpath:logback.xml
   level:
@@ -50,8 +50,8 @@ convert:
       default: youtu
       #tencent youtu ocr tool config
       youtu:
-        appId: 10122322
-        secretId: AKIDPtKafZsvZ3QceWiiB9511uhtvFammodG
-        secretKey: mfR7bu2G2oRsIXaYL2Yt7B4KD0rcCfw3
-        userId: 563603794
+        appId: 10125304
+        secretId: AKIDVs45xejwtvmW5SpdkjYGpDUZTIwOp0Hn
+        secretKey: a0EHCwgHhgnogMCvUr33uhKl195qSwip
+        userId: 1071552744
         time: 600000

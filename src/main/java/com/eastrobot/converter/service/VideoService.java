@@ -6,7 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 /**
  * VideoService
  *
- * @author <a href="yogurt.lei@xiaoi.com">Yogurt_lei</a>
+ * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
  * @version v1.0 , 2018-03-26 10:15
  */
 public interface VideoService {

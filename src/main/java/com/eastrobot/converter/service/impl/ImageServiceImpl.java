@@ -1,13 +1,15 @@
 package com.eastrobot.converter.service.impl;
 
+import com.eastrobot.converter.config.ConvertConfig;
+import com.eastrobot.converter.model.Constants;
+import com.eastrobot.converter.model.OcrParseResult;
+import com.eastrobot.converter.model.ResultCode;
 import com.eastrobot.converter.service.ImageService;
 import com.eastrobot.converter.service.YouTuService;
-import com.eastrobot.converter.util.ResUtil;
+import com.eastrobot.converter.util.ResourceUtil;
 import com.eastrobot.converter.util.ffmpeg.FFmpeg;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -15,23 +17,22 @@ import java.io.File;
 /**
  * ImageServiceImpl
  *
- * @author <a href="yogurt.lei@xiaoi.com">Yogurt_lei</a>
+ * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
  * @version v1.0 , 2018-03-26 18:54
  */
+@Slf4j
 @Service
 public class ImageServiceImpl implements ImageService {
-    private static final Logger logger = LoggerFactory.getLogger(ImageServiceImpl.class);
 
-
-    @Value("${convert.video.vca.default}")
-    private String VCA_TOOL;
+    @Autowired
+    private ConvertConfig convertConfig;
 
     @Autowired
     private YouTuService youTuService;
 
     @Override
     public Boolean runFfmpegParseImagesCmd(final String videoPath) {
-        String folder = ResUtil.getFolder(videoPath, "");
+        String folder = ResourceUtil.getFolder(videoPath, "");
 
         FFmpeg fFmpeg = new FFmpeg("D:\\ffmpeg\\bin");
         fFmpeg.addParam("-y");
@@ -51,13 +52,21 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public String handle(String imageFilePath) {
-        try {
-            return youTuService.ocr(imageFilePath);
-        } catch (Exception e) {
-            logger.error("ocr [%s] failed : [%s]", imageFilePath, e.getMessage());
-        }
+    public OcrParseResult handle(String imageFilePath) {
+        String imageTool = (String) convertConfig.getDefaultImageConfig().get(Constants.DEFAULT_TOOL);
 
-        return "";
+        if (Constants.YOUTU.equals(imageTool)) {
+            try {
+                String result = youTuService.ocr(imageFilePath);
+
+                return new OcrParseResult(ResultCode.SUCCESS.getCode(), result);
+            } catch (Exception e) {
+                log.error("ocr {} failed : {}", imageFilePath, e.getMessage());
+
+                return new OcrParseResult(ResultCode.OCR_FAILURE.getCode(), e.getMessage());
+            }
+        } else {
+            return new OcrParseResult(ResultCode.PARSE_EMPTY.getCode(), "");
+        }
     }
 }

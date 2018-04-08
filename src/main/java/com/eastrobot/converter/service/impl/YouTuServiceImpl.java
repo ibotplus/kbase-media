@@ -1,21 +1,16 @@
 package com.eastrobot.converter.service.impl;
 
-
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.eastrobot.converter.service.YouTuService;
-import com.eastrobot.converter.util.Youtu;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.eastrobot.converter.util.youtu.YouTu;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.security.KeyManagementException;
-
+@Slf4j
 @Service
 public class YouTuServiceImpl implements YouTuService {
-
-    private static final Logger log = LoggerFactory.getLogger(YouTuServiceImpl.class);
 
     @Value("${convert.image.ocr.youtu.appId}")
     private String appId;
@@ -30,41 +25,24 @@ public class YouTuServiceImpl implements YouTuService {
     private String appUserId;
 
     @Override
-    public String ocr(String image_path) throws Exception {
-        String result = "";
-        try {
-            Youtu faceYoutu = new Youtu(appId, appSecretId, appSecretKey, Youtu.API_YOUTU_END_POINT, appUserId);
-            System.out.println(image_path);
-            JSONObject generalOcr = faceYoutu.GeneralOcr(image_path);
-            result = handleOcrRes(generalOcr);
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error("orc error [%s]:", e.getMessage());
-        }
-        return result;
-    }
+    public String ocr(String imagePath) throws Exception {
+        YouTu faceYoutu = new YouTu(appId, appSecretId, appSecretKey, YouTu.API_YOUTU_END_POINT, appUserId);
+        JSONObject ocrJson = faceYoutu.generalOcr(imagePath);
 
-    @Override
-    public String ocrUlr(String image_url) throws Exception {
-        String result = "";
-        try {
-            Youtu faceYoutu = new Youtu(appId, appSecretId, appSecretKey, Youtu.API_YOUTU_END_POINT, appUserId);
-            JSONObject generalOcrUrl = faceYoutu.GeneralOcrUrl(image_url);
-            result = handleOcrRes(generalOcrUrl);
-        } catch (KeyManagementException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
+        log.debug("ocr {} result: {}", imagePath, ocrJson);
 
-    private String handleOcrRes(JSONObject ocrJson) throws Exception {
         StringBuffer sb = new StringBuffer();
-        JSONArray jsonUrl = ocrJson.getJSONArray("items");
-        for (int i = 0; i < jsonUrl.length(); i++) {
-            JSONObject json = jsonUrl.getJSONObject(i);
-            sb.append(json.optString("itemstring"));
+        if ("0".equals(ocrJson.getString("errorcode"))) {
+            JSONArray items = ocrJson.getJSONArray("items");
+            for (int i = 0; i < items.size(); i++) {
+                JSONObject json = items.getJSONObject(i);
+                sb.append(json.getString("itemstring"));
+            }
+
+            return sb.toString();
+        } else {
+            throw new Exception("parse image failed: " + ocrJson);
         }
-        return sb.toString();
     }
 
 }

@@ -4,9 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.JSONPObject;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -16,8 +15,8 @@ import java.io.IOException;
  * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
  * @version v1.0 , 2018-04-06 19:30
  */
+@Slf4j
 public class JsonMapper {
-    private static Logger logger = LoggerFactory.getLogger(JsonMapper.class);
 
     private ObjectMapper mapper;
 
@@ -41,11 +40,10 @@ public class JsonMapper {
      * 如果集合为空集合, 返回"[]".
      */
     public String toJson(Object object) {
-
         try {
             return mapper.writeValueAsString(object);
         } catch (IOException e) {
-            logger.warn("write to json string error:" + object, e);
+            log.warn("write to json string error:" + object, e);
             return null;
         }
     }
@@ -65,7 +63,7 @@ public class JsonMapper {
         try {
             return mapper.readValue(jsonString, clazz);
         } catch (IOException e) {
-            logger.warn("parse json string error:" + jsonString, e);
+            log.warn("parse json string error:" + jsonString, e);
             return null;
         }
     }

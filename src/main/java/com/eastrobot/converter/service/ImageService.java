@@ -1,9 +1,11 @@
 package com.eastrobot.converter.service;
 
+import com.eastrobot.converter.model.OcrParseResult;
+
 /**
  * ImageService
  *
- * @author <a href="yogurt.lei@xiaoi.com">Yogurt_lei</a>
+ * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
  * @version v1.0 , 2018-03-26 15:14
  */
 public interface ImageService {
@@ -26,5 +28,5 @@ public interface ImageService {
      * @author Yogurt_lei
      * @date 2018-03-27 11:55
      */
-    String handle(String imageFilePath);
+    OcrParseResult handle(String imageFilePath);
 }

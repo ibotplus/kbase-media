@@ -194,16 +194,6 @@
             <artifactId>hanlp</artifactId>
             <version>portable-1.6.2</version>
         </dependency>
-
-        <!--Tencent Youtu-->
-        <dependency>
-            <groupId>youtu-java-sdk</groupId>
-            <artifactId>youtu-java-sdk</artifactId>
-            <version>1.0.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/youtu-java-sdk.jar</systemPath>
-        </dependency>
-
     </dependencies>
 
     <build>

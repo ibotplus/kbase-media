@@ -1,5 +1,6 @@
 package com.eastrobot.converter.config;
 
+import com.eastrobot.converter.model.Constants;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -19,10 +20,6 @@ import java.util.Map;
 @Configuration
 @ConfigurationProperties(prefix = "convert")
 public class ConvertConfig {
-    private static final String VCA = "vca";
-    private static final String ASR = "asr";
-    private static final String OCR = "ocr";
-    private static final String DEFAULT = "default";
     /**
      * 默认转换输出路径
      */
@@ -41,21 +38,14 @@ public class ConvertConfig {
     private Map image = new HashMap<>();
 
     public Map getDefaultVideoConfig() {
-        Map videoConfig = (Map) video.get(VCA);
-        String videoTool = (String) videoConfig.get(DEFAULT);
-
-        return (Map) videoConfig.get(videoTool);
+        return (Map) video.get(Constants.VCA);
     }
 
     public Map getDefaultAudioConfig() {
-        Map audioConfig = (Map) audio.get(ASR);
-        String audioTool = (String) audioConfig.get(DEFAULT);
-
-        return (Map) audioConfig.get(audioTool);    }
+        return (Map) audio.get(Constants.ASR);
+    }
 
     public Map getDefaultImageConfig() {
-        Map imageConfig = (Map) image.get(OCR);
-        String imageTool = (String) imageConfig.get(DEFAULT);
-
-        return (Map) imageConfig.get(imageTool);    }
+        return (Map) image.get(Constants.OCR);
+    }
 }

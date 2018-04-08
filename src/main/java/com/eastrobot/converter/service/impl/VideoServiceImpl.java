@@ -4,8 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.eastrobot.converter.service.AudioService;
 import com.eastrobot.converter.service.ImageService;
 import com.eastrobot.converter.service.VideoService;
-import com.eastrobot.converter.util.ResUtil;
-import com.fasterxml.jackson.databind.util.JSONPObject;
+import com.eastrobot.converter.util.ResourceUtil;
 import com.hankcs.hanlp.HanLP;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -24,7 +23,7 @@ import java.util.concurrent.*;
 /**
  * VideoServiceImpl
  *
- * @author <a href="yogurt.lei@xiaoi.com">Yogurt_lei</a>
+ * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
  * @version v1.0 , 2018-03-26 10:18
  */
 @Service
@@ -81,7 +80,7 @@ public class VideoServiceImpl implements VideoService {
 
     private JSONObject doParseVideo(final String videoPath) {
         // 排序生成的文件
-        File dir = new File(ResUtil.getFolder(videoPath, ""));
+        File dir = new File(ResourceUtil.getFolder(videoPath, ""));
         List<File> allFiles = Arrays.asList(dir.listFiles());
         allFiles.sort((o1, o2) -> {
             if (o1.isDirectory() && o2.isFile())
@@ -124,7 +123,8 @@ public class VideoServiceImpl implements VideoService {
                     @Override
                     public void run() {
                         try {
-                            String content = imageService.handle(filepath);
+                            // String content = imageService.handle(filepath);
+                            String content = "";
                             logger.debug("imageService parse [%s] result : [%s]", filepath, content);
                             imageContentMap.put(FilenameUtils.getBaseName(filepath), content);
                         } finally {
@@ -149,20 +149,20 @@ public class VideoServiceImpl implements VideoService {
         if (true) {
             StringBuilder segmentContent = new StringBuilder();
             //分段提取
-            TreeMap<String, String> treeMap = ResUtil.map2SortByKey(imageContentMap);
+            TreeMap<String, String> treeMap = ResourceUtil.map2SortByKey(imageContentMap);
             for (Map.Entry<String, String> entry : treeMap.entrySet()) {
-                segmentContent.append(ResUtil.List2String(HanLP.extractKeyword(entry.getValue(), 10), "")).append(",");
+                segmentContent.append(ResourceUtil.list2String(HanLP.extractKeyword(entry.getValue(), 10), "")).append(",");
             }
             imgContentResult = segmentContent.toString();
         } else {
-            String imageContent = ResUtil.map2SortStringByKey(imageContentMap, "");
+            String imageContent = ResourceUtil.map2SortStringByKey(imageContentMap, "");
             //整文提取
             List<String> phraseList = HanLP.extractKeyword(imageContent, 200);
-            imgContentResult = ResUtil.List2String(phraseList, "");
+            imgContentResult = ResourceUtil.list2String(phraseList, "");
         }
 
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("audios", ResUtil.map2SortStringByKey(audioContentMap, ""));
+        jsonObject.put("audios", ResourceUtil.map2SortStringByKey(audioContentMap, ""));
         jsonObject.put("images", imgContentResult);
 
         logger.info("parse video result Json: [%s]", jsonObject);

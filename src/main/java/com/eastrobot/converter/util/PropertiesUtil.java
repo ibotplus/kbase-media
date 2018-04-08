@@ -15,7 +15,7 @@ import java.util.Properties;
 /**
  * PropertiesUtil
  *
- * @author <a href="yogurt.lei@xiaoi.com">Yogurt_lei</a>
+ * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
  * @version v1.0 , 2018-04-02 18:01
  */
 public class PropertiesUtil {

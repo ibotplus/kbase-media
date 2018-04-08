@@ -12,13 +12,13 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * ResUtil
+ * ResourceUtil
  *
- * @author <a href="yogurt.lei@xiaoi.com">Yogurt_lei</a>
+ * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
  * @version v1.0 , 2018-03-26 9:23
  */
-public class ResUtil {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResUtil.class);
+public class ResourceUtil {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceUtil.class);
     public static final String IMAGE = "1";
     public static final String PLACE = "2";
     public static final String AUDIO = "3";
@@ -32,7 +32,7 @@ public class ResUtil {
      * @date 2018-03-26 10:51
      */
     public static List getAllowFileType() {
-        return Arrays.asList(new String[]{IMAGE, PLACE, AUDIO, VIDEO, FILE});
+        return Arrays.asList(IMAGE, PLACE, AUDIO, VIDEO, FILE);
     }
 
     /**
@@ -58,8 +58,8 @@ public class ResUtil {
      *
      * @author eko.zhan at 2017年12月21日 下午1:18:33
      */
-    public static String List2String(Collection<String> list) {
-        return List2String(list, " ");
+    public static String list2String(Collection<String> list) {
+        return list2String(list, " ");
     }
 
     /**
@@ -67,7 +67,7 @@ public class ResUtil {
      *
      * @author eko.zhan at 2017年12月21日 下午1:18:51
      */
-    public static String List2String(Collection<String> list, String split) {
+    public static String list2String(Collection<String> list, String split) {
         StringBuffer sb = new StringBuffer();
         for (String s : list) {
             sb.append(s + split);
@@ -195,7 +195,7 @@ public class ResUtil {
      * @date 2018-03-29 10:03
      */
     public static String getRootPath() {
-        String path = ResUtil.class.getResource("/").getPath();
+        String path = ResourceUtil.class.getResource("/").getPath();
         if (SystemUtils.isLinux()) {
             return StringUtils.substringBefore(path, "/WEB-INF/classes/");
         } else {
@@ -214,32 +214,20 @@ public class ResUtil {
      * 是否是视频文件
      */
     public static Boolean isVideo(String filename){
-        String extension = FilenameUtils.getExtension(filename).toLowerCase();
-        if (ArrayUtils.contains(videoArray, extension)){
-            return true;
-        }
-        return false;
+        return ArrayUtils.contains(videoArray, FilenameUtils.getExtension(filename).toLowerCase());
     }
     /**
      * 是否是图片文件
      */
     public static Boolean isImage(String filename){
-        String extension = FilenameUtils.getExtension(filename).toLowerCase();
-        if (ArrayUtils.contains(imageArray, extension)){
-            return true;
-        }
-        return false;
+        return ArrayUtils.contains(imageArray, FilenameUtils.getExtension(filename).toLowerCase());
     }
 
     /**
      * 是否是声音文件
      */
     public static Boolean isAudio(String filename){
-        String extension = FilenameUtils.getExtension(filename).toLowerCase();
-        if (ArrayUtils.contains(audioArray, extension)){
-            return true;
-        }
-        return false;
+        return ArrayUtils.contains(audioArray, FilenameUtils.getExtension(filename).toLowerCase());
     }
 
     /**
@@ -254,7 +242,7 @@ public class ResUtil {
 
         StringBuilder result = new StringBuilder();
         for (Map.Entry<String, String> entry : sortMap.entrySet()) {
-            result.append(entry.getValue() + split);
+            result.append(entry.getValue()).append(split);
         }
 
         return result.toString();
@@ -269,12 +257,7 @@ public class ResUtil {
      * @date 2018-03-29 20:20
      */
     public static TreeMap<String, String> map2SortByKey(Map<String, String> map) {
-        TreeMap<String, String> sortMap = new TreeMap<String, String>(new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                return o1.compareTo(o2);
-            }
-        });
+        TreeMap<String, String> sortMap = new TreeMap<>(String::compareTo);
         sortMap.putAll(map);
 
         return sortMap;
