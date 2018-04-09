@@ -5,6 +5,7 @@ import com.eastrobot.converter.service.AudioService;
 import com.eastrobot.converter.service.ImageService;
 import com.eastrobot.converter.service.VideoService;
 import com.eastrobot.converter.util.ResourceUtil;
+import com.eastrobot.converter.util.baidu.BaiduSpeechUtils;
 import com.hankcs.hanlp.HanLP;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -41,7 +42,7 @@ public class VideoServiceImpl implements VideoService {
      *     视频分段抽取音轨(*.pcm),
      *     原始视频抽图片(see {@link com.eastrobot.converter.util.ffmpeg.FFmpeg}),遍历分段音轨解析文字,遍历图片解析文字提取关键字.
      *     图片识别调用腾讯Youtu-API (see {@link com.eastrobot.converter.service.YouTuService#ocr}),
-     *     语音识别调用百度Speech-API (see {@link com.eastrobot.converter.util.BaiduSpeechUtils#asr})
+     *     语音识别调用百度Speech-API (see {@link BaiduSpeechUtils#asr})
      * </pre>
      *
      * @author Yogurt_lei
@@ -56,7 +57,7 @@ public class VideoServiceImpl implements VideoService {
             Future<Boolean> handleFuture = executor.submit(new Callable() {
                 @Override
                 public Object call() throws Exception {
-                    audioService.runFfmpegParseAudiosCmd(videoPath);
+                    // audioService.runFfmpegParseAudiosCmd(videoPath);
                     imageService.runFfmpegParseImagesCmd(videoPath);
 
                     return true;
@@ -106,7 +107,8 @@ public class VideoServiceImpl implements VideoService {
                     @Override
                     public void run() {
                         try {
-                            String content = audioService.handle(filepath);
+                            String content = "";
+                            // String content = audioService.handle(filepath);
                             logger.debug("audioService parse [%s] result : [%s]", filepath, content);
                             audioContentMap.put(FilenameUtils.getBaseName(filepath), content);
                             // 语音文件转写完删除

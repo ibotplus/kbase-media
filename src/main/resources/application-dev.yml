@@ -31,7 +31,8 @@ convert:
     vca:
       default: ffmpeg
       ffmpeg:
-        path: D:\\ffmpeg\\bin
+        # in windows os, it's Necessary, if you use baidu asr api it's necessary too. (use it to cut audio as 60s/seg.)
+        path: D:\\ffmpeg\\bin\\
         toImage:
           fps: 0.2
   audio:
@@ -40,10 +41,9 @@ convert:
       default: baidu
       #baidu asr config
       baidu:
-        appId: 10879396
-        apiKey: 3l1ZjunSuCLyvhYi91WXQvas
-        secretKey: uFVS2XNUvuDlFxPVfpUUA7jxqzw4AMN9
-        segmentTime: 60
+        appId: 11067243
+        apiKey: iDEvPvY4zT9CzFgYKMQY6eAi
+        secretKey: Wkeh8gIbB2LrNBtGwuechG8TUkLlB2TY
   image:
     #default ocr tool
     ocr:
@@ -54,4 +54,3 @@ convert:
         secretId: AKIDVs45xejwtvmW5SpdkjYGpDUZTIwOp0Hn
         secretKey: a0EHCwgHhgnogMCvUr33uhKl195qSwip
         userId: 1071552744
-        time: 600000

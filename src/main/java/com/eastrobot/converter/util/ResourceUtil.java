@@ -1,6 +1,6 @@
 package com.eastrobot.converter.util;
 
-import com.eastrobot.converter.util.ffmpeg.FFmpeg;
+import net.bramp.ffmpeg.FFmpeg;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -151,7 +151,7 @@ public class ResourceUtil {
                 try {
                     FFmpeg fFmpeg = new FFmpeg(PropertiesUtil.getString("ocr.ffmpeg"));
                     //TODO 指定视频编码格式（ 带有 H.264 视频编码和 AAC 音频编码）：-acodec aac -vcodec h264
-                    fFmpeg.addParam("-y").addParam("-i").addParam(originResPath).addParam(newFileName).execute();
+                    // fFmpeg.addParam("-y").addParam("-i").addParam(originResPath).addParam(newFileName).execute();
 
                     File file = new File(originResPath);
                     file.delete();
@@ -167,19 +167,19 @@ public class ResourceUtil {
             try {
                 FFmpeg fFmpeg = new FFmpeg(PropertiesUtil.getString("ocr.ffmpeg"));
                 //缩放2倍生成xPixel
-                fFmpeg.addParam("-y").addParam("-i").addParam(resPath).addParam("-vf").addParam("\"scale=256:256/a\"")
-                        .addParam(folder + "xPixel." + FilenameUtils.getExtension(resPath));
-                fFmpeg.execute();
-
-                //缩放3倍生成mPixel
-                fFmpeg.addParam("-y").addParam("-i").addParam(resPath).addParam("-vf").addParam("\"scale=128:128/a\"")
-                        .addParam(folder + "mPixel." + FilenameUtils.getExtension(resPath));
-                fFmpeg.execute();
-
-                //缩放4倍生成sPixel
-                fFmpeg.addParam("-y").addParam("-i").addParam(resPath).addParam("-vf").addParam("\"scale=64:64/a\"")
-                        .addParam(folder + "sPixel." + FilenameUtils.getExtension(resPath));
-                fFmpeg.execute();
+                // fFmpeg.addParam("-y").addParam("-i").addParam(resPath).addParam("-vf").addParam("\"scale=256:256/a\"")
+                //         .addParam(folder + "xPixel." + FilenameUtils.getExtension(resPath));
+                // fFmpeg.execute();
+                //
+                // //缩放3倍生成mPixel
+                // fFmpeg.addParam("-y").addParam("-i").addParam(resPath).addParam("-vf").addParam("\"scale=128:128/a\"")
+                //         .addParam(folder + "mPixel." + FilenameUtils.getExtension(resPath));
+                // fFmpeg.execute();
+                //
+                // //缩放4倍生成sPixel
+                // fFmpeg.addParam("-y").addParam("-i").addParam(resPath).addParam("-vf").addParam("\"scale=64:64/a\"")
+                //         .addParam(folder + "sPixel." + FilenameUtils.getExtension(resPath));
+                // fFmpeg.execute();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -237,7 +237,7 @@ public class ResourceUtil {
      * @author Yogurt_lei
      * @date 2018-03-29 20:20
      */
-    public static String map2SortStringByKey(Map<String, String> map, String split) {
+    public static String map2SortStringByKey(Map map, String split) {
         TreeMap<String, String> sortMap = map2SortByKey(map);
 
         StringBuilder result = new StringBuilder();
@@ -256,8 +256,8 @@ public class ResourceUtil {
      * @author Yogurt_lei
      * @date 2018-03-29 20:20
      */
-    public static TreeMap<String, String> map2SortByKey(Map<String, String> map) {
-        TreeMap<String, String> sortMap = new TreeMap<>(String::compareTo);
+    public static TreeMap map2SortByKey(Map<String, String> map) {
+        TreeMap sortMap = new TreeMap<>(String::compareTo);
         sortMap.putAll(map);
 
         return sortMap;

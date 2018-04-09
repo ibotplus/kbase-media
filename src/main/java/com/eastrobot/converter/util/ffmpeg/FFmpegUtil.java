@@ -1,41 +1,64 @@
 package com.eastrobot.converter.util.ffmpeg;
 
-import com.alibaba.fastjson.JSONObject;
-import com.eastrobot.converter.util.PropertiesUtil;
+import com.eastrobot.converter.util.SystemUtils;
+import lombok.extern.slf4j.Slf4j;
+import net.bramp.ffmpeg.FFmpeg;
+import net.bramp.ffmpeg.FFmpegExecutor;
+import net.bramp.ffmpeg.FFprobe;
+import net.bramp.ffmpeg.builder.FFmpegBuilder;
+import net.bramp.ffmpeg.probe.FFmpegProbeResult;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * FFmpegUtil
  *
  * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
- * @version v1.0 , 2018-03-29 11:02
+ * @version v1.0 , 2018-04-09 17:19
  */
+@Slf4j
+@Component
 public class FFmpegUtil {
-    public static final String MOV = "mov";
-    public static final String FLV = "flv";
-    public static final String AVI = "avi";
-    public static final String MP4 = "mp4";
-    public static final String PCM = "pcm";
 
-    public boolean convert(String sourcePath, String targetPath, String format) {
+    @Value("${convert.video.vca.ffmpeg.path}")
+    private String path;
 
-        return false;
+    private static FFmpeg ffmpeg;
+
+    private static FFprobe ffprobe;
+
+    @PostConstruct
+    public void init() {
+        try {
+            if (SystemUtils.isLinux()) {
+                ffmpeg = new FFmpeg();
+                ffprobe = new FFprobe();
+            } else {
+                ffmpeg = new FFmpeg(path + "ffmpeg");
+                ffprobe = new FFprobe(path + "ffprobe");
+            }
+        } catch (IOException e) {
+            log.error("initialize ffmpeg tools occured error:{}!", e);
+        }
     }
 
     /**
-     * 获取视频总播放时长秒数(seconds)
+     *
+     * 获取文件时长
      *
      * @author Yogurt_lei
-     * @date 2018-03-26 15:26
+     * @date 2018-04-09 17:24
      */
-    public static int getVideoTime(String videoPath) {
+    public static double getDuration(String filePath) {
         try {
-            FFprobe fFprobe = new FFprobe(PropertiesUtil.getString("ocr.ffmpeg"));
-            JSONObject probe = fFprobe.probe(videoPath);
-            String duration = probe.getJSONObject("format").getString("duration");
-            int seconds = Math.round(Float.valueOf(duration));
-
-            return seconds;
-        } catch (Exception e) {
+            FFprobe ffprobe = new FFprobe(filePath);
+            FFmpegProbeResult probeResult = ffprobe.probe(filePath);
+            return probeResult.getFormat().duration;
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -43,25 +66,84 @@ public class FFmpegUtil {
     }
 
     /**
-     * 将秒表示时长转为{h:}m:s格式
      *
-     * @param second 秒数时长
+     * 切割百度asr可用音频 长度59s
+     * ffmpeg -y -i {input.wav|.mp3} -ss {startOffset} -t {duration} -acodec pcm_s16le -f s16le -ac 1 -ar 16000 {output.pcm}
      *
-     * @return 字符串格式时长
+     * @author Yogurt_lei
+     * @date 2018-04-09 18:49
      */
-    public static String parseTimeToString(int second) {
-        int end = second % 60;
-        int mid = second / 60;
-        if (mid < 60) {
-            return mid + ":" + end;
-        } else if (mid == 60) {
-            return "1:00:" + end;
-        } else {
-            int first = mid / 60;
-            mid = mid % 60;
-
-            return first + ":" + mid + ":" + end;
-        }
+    public static void splitBaiduAsrAudio(String audioPath, long startOffset, String outputFileFullPath) {
+        FFmpegBuilder builder = new FFmpegBuilder();
+        builder.addInput(audioPath)
+                .overrideOutputFiles(true)
+                .addOutput(outputFileFullPath)
+                .disableVideo()
+                .setStartOffset(startOffset, TimeUnit.SECONDS)
+                .setDuration(59, TimeUnit.SECONDS)
+                .setAudioCodec("pcm_s16le")
+                .setFormat("s16le")
+                .setAudioChannels(1)
+                .setAudioSampleRate(16000)
+                .setStrict(FFmpegBuilder.Strict.EXPERIMENTAL)
+                .done();
+        FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
+        executor.createJob(builder).run();
     }
-
 }
+/**
+ * Video Encoding
+ FFmpeg ffmpeg = new FFmpeg("/path/to/ffmpeg");
+ FFprobe ffprobe = new FFprobe("/path/to/ffprobe");
+
+ FFmpegBuilder builder = new FFmpegBuilder()
+
+ .setInput("input.mp4")     // Filename, or a FFmpegProbeResult
+ .overrideOutputFiles(true) // Override the output if it exists
+
+ .addOutput("output.mp4")   // Filename for the destination
+ .setFormat("mp4")        // Format is inferred from filename, or can be set
+ .setTargetSize(250_000)  // Aim for a 250KB file
+
+ .disableSubtitle()       // No subtiles
+
+ .setAudioChannels(1)         // Mono audio
+ .setAudioCodec("aac")        // using the aac codec
+ .setAudioSampleRate(48_000)  // at 48KHz
+ .setAudioBitRate(32768)      // at 32 kbit/s
+
+ .setVideoCodec("libx264")     // Video using x264
+ .setVideoFrameRate(24, 1)     // at 24 frames per second
+ .setVideoResolution(640, 480) // at 640x480 resolution
+
+ .setStrict(FFmpegBuilder.Strict.EXPERIMENTAL) // Allow FFmpeg to use experimental specs
+ .done();
+
+ FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
+
+ // Run a one-pass encode
+ executor.createJob(builder).run();
+
+ // Or run a two-pass encode (which is slower at the cost of better quality)
+ executor.createTwoPassJob(builder).run();
+ **/
+/**
+ Get Media Information
+
+ FFprobe ffprobe = new FFprobe("/path/to/ffprobe");
+ FFmpegProbeResult probeResult = ffprobe.probe("input.mp4");
+
+ FFmpegFormat format = probeResult.getFormat();
+ System.out.format("%nFile: '%s' ; Format: '%s' ; Duration: %.3fs",
+ format.filename,
+ format.format_long_name,
+ format.duration
+ );
+
+ FFmpegStream stream = probeResult.getStreams().get(0);
+ System.out.format("%nCodec: '%s' ; Width: %dpx ; Height: %dpx",
+ stream.codec_long_name,
+ stream.width,
+ stream.height
+ );
+ **/

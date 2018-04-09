@@ -49,18 +49,8 @@ public class ConvertServiceImpl implements ConvertService {
         ResponseMessage responseMessage = new ResponseMessage();
 
         if (ResourceUtil.isAudio(resPath)) {
-            JSONObject audioJSON = audioService.parseAudio(resPath);
-            String audioContent = audioJSON.getString(Constants.AUDIO_CONTENT);
+            AsrParseResult handle = audioService.handle(resPath);
 
-            if (StringUtils.isBlank(audioContent)) {
-                json.put("flag", "failed");
-                json.put("err_code", "1001");
-                json.put("err_msg", "empty result");
-            } else {
-                json.put("content", audioContent);
-                json.put("flag", "success");
-                json.put("file_type", Constants.AUDIO);
-            }
         } else if (ResourceUtil.isVideo(resPath)) {
             JSONObject videoJSON = videoService.parseVideo(resPath);
             String audioContent = videoJSON.getString(Constants.AUDIO_CONTENT);

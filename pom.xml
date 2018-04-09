@@ -194,6 +194,17 @@
             <artifactId>hanlp</artifactId>
             <version>portable-1.6.2</version>
         </dependency>
+        <!--ffmpeg 处理包-->
+        <dependency>
+            <groupId>net.bramp.ffmpeg</groupId>
+            <artifactId>ffmpeg</artifactId>
+            <version>0.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>20.0</version>
+        </dependency>
     </dependencies>
 
     <build>

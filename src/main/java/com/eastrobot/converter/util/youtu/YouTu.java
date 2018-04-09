@@ -36,6 +36,7 @@ public class YouTu {
     }
 
     /**
+     * 通用印刷体文字识别
      * see http://open.youtu.qq.com/#/develop/api-ocr-general
      */
     public JSONObject generalOcr(String image_path) throws IOException, KeyManagementException, NoSuchAlgorithmException {
@@ -54,7 +55,7 @@ public class YouTu {
         if (imageFile.exists()) {
             InputStream in = new FileInputStream(imageFile);
             byte data[] = new byte[(int) imageFile.length()]; // 创建合适文件大小的数组
-            in.read(data); // 读取文件中的内容到b[]数组
+            in.read(data); // 读取文件中的内容到byte[]数组
             in.close();
 
             return Base64Util.encode(data);

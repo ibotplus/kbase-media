@@ -1,29 +1,36 @@
-package com.eastrobot.converter.util;
+package com.eastrobot.converter.util.baidu;
 
 
 import com.baidu.aip.speech.AipSpeech;
+import com.eastrobot.converter.config.ConvertConfig;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+
+/**
+ * see http://ai.baidu.com/docs#/ASR-Online-Java-SDK/top
+ */
+@Component
 public class BaiduSpeechUtils {
 
-    private static final Logger log = LoggerFactory.getLogger(BaiduSpeechUtils.class);
+    @Value("${convert.audio.asr.baidu.appId}")
+    private String APP_ID;
+    @Value("${convert.audio.asr.baidu.apiKey}")
+    private String API_KEY;
+    @Value("${convert.audio.asr.baidu.secretKey}")
+    private String SECRET_KEY;
 
-    private static final String APP_ID = PropertiesUtil.getString("convert.audio.asr.baidu.appId");
-    private static final String API_KEY = PropertiesUtil.getString("convert.audio.asr.baidu.apiKey");
-    private static final String SECRET_KEY = PropertiesUtil.getString("convert.audio.asr.baidu.secretKey");
-
-    /*
-     * AipSpeech是语音识别的Java客户端，为使用语音识别的开发人员提供了一系列的交互方法。
-     * 采用单列初始化AipSpeech，避免重复获取access_token：
-     * */
     private static AipSpeech client;
 
-    static {
-        if (client == null) {
-            client = new AipSpeech(APP_ID, API_KEY, SECRET_KEY);
-        }
+    @Autowired
+    private ConvertConfig convertConfig;
+
+    @PostConstruct
+    public void init() {
+        client = new AipSpeech(APP_ID, API_KEY, SECRET_KEY);
     }
 
     /**
@@ -43,5 +50,4 @@ public class BaiduSpeechUtils {
     public static JSONObject asr(byte[] data, String format, int rate) {
         return client.asr(data, format, rate, null);
     }
-
 }

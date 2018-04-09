@@ -6,13 +6,10 @@ import com.eastrobot.converter.model.OcrParseResult;
 import com.eastrobot.converter.model.ResultCode;
 import com.eastrobot.converter.service.ImageService;
 import com.eastrobot.converter.service.YouTuService;
-import com.eastrobot.converter.util.ResourceUtil;
-import com.eastrobot.converter.util.ffmpeg.FFmpeg;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.io.File;
 
 /**
  * ImageServiceImpl
@@ -31,7 +28,7 @@ public class ImageServiceImpl implements ImageService {
     private YouTuService youTuService;
 
     @Override
-    public Boolean runFfmpegParseImagesCmd(final String videoPath) {
+    public Boolean runFfmpegParseImagesCmd(final String videoPath) {/*
         String folder = ResourceUtil.getFolder(videoPath, "");
 
         FFmpeg fFmpeg = new FFmpeg("D:\\ffmpeg\\bin");
@@ -47,7 +44,7 @@ public class ImageServiceImpl implements ImageService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+*/
         return true;
     }
 
@@ -59,6 +56,10 @@ public class ImageServiceImpl implements ImageService {
             try {
                 String result = youTuService.ocr(imageFilePath);
 
+                if (StringUtils.isBlank(result)) {
+                    return new OcrParseResult(ResultCode.PARSE_EMPTY.getCode(), "");
+                }
+
                 return new OcrParseResult(ResultCode.SUCCESS.getCode(), result);
             } catch (Exception e) {
                 log.error("ocr {} failed : {}", imageFilePath, e.getMessage());
@@ -66,7 +67,8 @@ public class ImageServiceImpl implements ImageService {
                 return new OcrParseResult(ResultCode.OCR_FAILURE.getCode(), e.getMessage());
             }
         } else {
-            return new OcrParseResult(ResultCode.PARSE_EMPTY.getCode(), "");
+            return new OcrParseResult(ResultCode.CFG_ERROR.getCode(), "");
         }
+        // TODO by Yogurt_lei : 后续添加别的解析工具如tesseract
     }
 }

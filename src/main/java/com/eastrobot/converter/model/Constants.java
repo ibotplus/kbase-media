@@ -30,11 +30,6 @@ public interface Constants {
     // ocr-converter supplier param
     //------------------------------------
     String YOUTU = "youtu";
-    String YOUTU_APP_ID = "appId";
-    String YOUTU_SECRET_ID = "secretId";
-    String YOUTU_SECRET_KEY = "secretKey";
-    String YOUTU_USER_ID = "userId";
-    String YOUTU_TIME = "time";
 
     /**
      * @see ConvertConfig#getDefaultAudioConfig()
@@ -44,15 +39,14 @@ public interface Constants {
     // asr-converter supplier param
     //------------------------------------
     String BAIDU = "baidu";
-    String BAIDU_APP_ID = "appId";
-    String BAIDU_APIKEY = "apiKey";
-    String BAIDU_SECRET_KEY = "secretKey";
-    String BAIDU_SEGMENT_TIME = "segmentTime";
 
     //------------------------------------
     // String Blank result
     //------------------------------------
-    String BLANK = "";
+    /**
+     * EMPTY_RESULT
+     */
+    String EMPTY = "";
 
     //------------------------------------
     // support file type

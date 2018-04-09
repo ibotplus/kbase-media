@@ -1,15 +1,13 @@
 package com.eastrobot.converter.web.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.eastrobot.converter.model.Constants;
 import com.eastrobot.converter.model.ResponseEntity;
 import com.eastrobot.converter.model.ResponseMessage;
 import com.eastrobot.converter.model.ResultCode;
 import com.eastrobot.converter.service.ConvertService;
-import com.eastrobot.converter.util.JsonMapper;
 import com.eastrobot.converter.util.ResourceUtil;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hankcs.hanlp.HanLP;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -53,25 +51,22 @@ public class ConvertController {
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
-    public JSONObject driver(@RequestParam(value = "file") MultipartFile file,
+    public String driver(@RequestParam(value = "file") MultipartFile file,
                              @RequestParam(value = "type", required = false, defaultValue = "fulltext") String type) {
 
         String sn = UUID.randomUUID().toString();
         String inputFile = converterService.getDefaultOutputFolderPath(sn) + File.separator + file
                 .getOriginalFilename();
-        JSONObject resultJson = new JSONObject();
         if (!file.isEmpty()) {
             try {
                 File tmpFile = new File(inputFile);
                 tmpFile.mkdirs();
                 file.transferTo(tmpFile);
             } catch (Exception e) {
-                ResponseMessage responseMessage = new ResponseMessage(ResultCode.FILE_UPLOAD_FAILED);
-                String json = new JsonMapper(JsonInclude.Include.NON_NULL).toJson(responseMessage);
-
                 log.error("file upload error!", e);
+                ResponseMessage responseMessage = new ResponseMessage(ResultCode.FILE_UPLOAD_FAILED);
 
-                return JSON.parseObject(json);
+                return JSON.toJSONString(responseMessage);
             }
 
             ResponseMessage responseMessage = converterService.driver(inputFile);
@@ -96,14 +91,23 @@ public class ConvertController {
                         });
             }
             // responseMessage.updateResponseEntity(entity);
-            String json = new JsonMapper(JsonInclude.Include.NON_NULL).toJson(responseMessage);
 
-            return JSON.parseObject(json);
+            return JSON.toJSONString(responseMessage);
         } else {
             ResponseMessage responseMessage = new ResponseMessage(ResultCode.PARAM_ERROR);
-            String json = new JsonMapper(JsonInclude.Include.NON_NULL).toJson(responseMessage);
 
-            return JSON.parseObject(json);
+            return JSON.toJSONString(responseMessage);
         }
+    }
+
+    public static void main(String[] args) {
+        ResponseMessage responseMessage = new ResponseMessage(ResultCode.PARAM_ERROR);
+        responseMessage.setSn(UUID.randomUUID().toString());
+        ResponseEntity entity = new ResponseEntity();
+        entity.setFileType("audio");
+        responseMessage.setResponseEntity(entity);
+
+        System.out.println(JSON.toJSONString(responseMessage, SerializerFeature.PrettyFormat,
+                SerializerFeature.WriteNullStringAsEmpty));
     }
 }

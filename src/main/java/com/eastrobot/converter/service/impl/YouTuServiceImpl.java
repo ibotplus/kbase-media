@@ -39,9 +39,9 @@ public class YouTuServiceImpl implements YouTuService {
                 sb.append(json.getString("itemstring"));
             }
 
-            return sb.toString();
+            return sb.toString().trim();
         } else {
-            throw new Exception("parse image failed: " + ocrJson);
+            throw new Exception("parse image failed: " + ocrJson.get("errormsg"));
         }
     }
 

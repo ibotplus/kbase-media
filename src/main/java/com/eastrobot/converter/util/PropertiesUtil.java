@@ -1,13 +1,11 @@
 package com.eastrobot.converter.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -18,9 +16,8 @@ import java.util.Properties;
  * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
  * @version v1.0 , 2018-04-02 18:01
  */
+@Slf4j
 public class PropertiesUtil {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesUtil.class);
-
     private static Map<String, String> propertiesMap = new HashMap<>();
 
     private static void processProperties(Properties props) throws BeansException {
@@ -30,9 +27,7 @@ public class PropertiesUtil {
             try {
                 // PropertiesLoaderUtils的默认编码是ISO-8859-1,在这里转码一下
                 propertiesMap.put(keyStr, new String(props.getProperty(keyStr).getBytes("ISO-8859-1"), "utf-8"));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (java.lang.Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -41,7 +36,7 @@ public class PropertiesUtil {
     public static void loadAllProperties(String propertyFileName) {
         try {
             Properties properties = PropertiesLoaderUtils.loadAllProperties(propertyFileName);
-            LOGGER.info(properties.toString());
+            log.info(properties.toString());
             processProperties(properties);
         } catch (IOException e) {
             e.printStackTrace();
