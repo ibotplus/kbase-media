@@ -6,7 +6,6 @@ import com.eastrobot.converter.service.ImageService;
 import com.eastrobot.converter.service.VideoService;
 import com.eastrobot.converter.util.ResourceUtil;
 import com.eastrobot.converter.util.baidu.BaiduSpeechUtils;
-import com.hankcs.hanlp.HanLP;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
@@ -17,8 +16,6 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.*;
 
 /**
@@ -95,9 +92,9 @@ public class VideoServiceImpl implements VideoService {
         // 总任务数门阀
         final CountDownLatch latch = new CountDownLatch(allFiles.size());
         // 存储音轨解析段-内容
-        final ConcurrentHashMap<String, String> audioContentMap = new ConcurrentHashMap<String, String>();
+        final ConcurrentHashMap<String, String> audioContentMap = new ConcurrentHashMap<>();
         // 存储图片解析段-内容
-        final ConcurrentHashMap<String, String> imageContentMap = new ConcurrentHashMap<String, String>();
+        final ConcurrentHashMap<String, String> imageContentMap = new ConcurrentHashMap<>();
 
         for (final File file : allFiles) {
             final String filepath = file.getAbsolutePath();
@@ -151,20 +148,20 @@ public class VideoServiceImpl implements VideoService {
         if (true) {
             StringBuilder segmentContent = new StringBuilder();
             //分段提取
-            TreeMap<String, String> treeMap = ResourceUtil.map2SortByKey(imageContentMap);
-            for (Map.Entry<String, String> entry : treeMap.entrySet()) {
-                segmentContent.append(ResourceUtil.list2String(HanLP.extractKeyword(entry.getValue(), 10), "")).append(",");
-            }
+            // TreeMap<String, String> treeMap = ResourceUtil.map2SortByKey(imageContentMap);
+            // for (Map.Entry<String, String> entry : treeMap.entrySet()) {
+            //     segmentContent.append(ResourceUtil.list2String(HanLP.extractKeyword(entry.getValue(), 10), "")).append(",");
+            // }
             imgContentResult = segmentContent.toString();
         } else {
-            String imageContent = ResourceUtil.map2SortStringByKey(imageContentMap, "");
+            // String imageContent = ResourceUtil.map2SortStringByKey(imageContentMap, "");
             //整文提取
-            List<String> phraseList = HanLP.extractKeyword(imageContent, 200);
-            imgContentResult = ResourceUtil.list2String(phraseList, "");
+            // List<String> phraseList = HanLP.extractKeyword(imageContent, 200);
+            // imgContentResult = ResourceUtil.list2String(phraseList, "");
         }
 
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("audios", ResourceUtil.map2SortStringByKey(audioContentMap, ""));
+        // jsonObject.put("audios", ResourceUtil.map2SortStringByKey(audioContentMap, ""));
         jsonObject.put("images", imgContentResult);
 
         logger.info("parse video result Json: [%s]", jsonObject);

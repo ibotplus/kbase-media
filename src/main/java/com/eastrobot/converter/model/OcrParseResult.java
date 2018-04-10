@@ -12,7 +12,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class OcrParseResult {
-    private int code;
+    private ResultCode code;
 
     private String result;
 }

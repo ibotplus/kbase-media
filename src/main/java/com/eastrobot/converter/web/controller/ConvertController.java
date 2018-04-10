@@ -1,7 +1,6 @@
 package com.eastrobot.converter.web.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.eastrobot.converter.model.Constants;
 import com.eastrobot.converter.model.ResponseEntity;
 import com.eastrobot.converter.model.ResponseMessage;
@@ -71,7 +70,7 @@ public class ConvertController {
 
             ResponseMessage responseMessage = converterService.driver(inputFile);
             responseMessage.setSn(sn);
-            if (responseMessage.getCode() == ResultCode.SUCCESS.getCode() && Constants.KEYWORD.equals(type)) {
+            if (Constants.KEYWORD.equals(type)) {
                 // extract keyword
                 Optional.of(responseMessage)
                         .map((ResponseMessage::getResponseEntity))
@@ -90,7 +89,6 @@ public class ConvertController {
                             responseMessage.getResponseEntity().setAudioKeyword(keyword);
                         });
             }
-            // responseMessage.updateResponseEntity(entity);
 
             return JSON.toJSONString(responseMessage);
         } else {
@@ -98,16 +96,5 @@ public class ConvertController {
 
             return JSON.toJSONString(responseMessage);
         }
-    }
-
-    public static void main(String[] args) {
-        ResponseMessage responseMessage = new ResponseMessage(ResultCode.PARAM_ERROR);
-        responseMessage.setSn(UUID.randomUUID().toString());
-        ResponseEntity entity = new ResponseEntity();
-        entity.setFileType("audio");
-        responseMessage.setResponseEntity(entity);
-
-        System.out.println(JSON.toJSONString(responseMessage, SerializerFeature.PrettyFormat,
-                SerializerFeature.WriteNullStringAsEmpty));
     }
 }

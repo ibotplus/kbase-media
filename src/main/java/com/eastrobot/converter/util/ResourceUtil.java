@@ -222,7 +222,6 @@ public class ResourceUtil {
     public static Boolean isImage(String filename){
         return ArrayUtils.contains(imageArray, FilenameUtils.getExtension(filename).toLowerCase());
     }
-
     /**
      * 是否是声音文件
      */
@@ -232,16 +231,16 @@ public class ResourceUtil {
 
     /**
      *
-     * 根据key排序 value拼接split字符串返回
+     * 根据key正序 value拼接split字符串返回
      *
      * @author Yogurt_lei
      * @date 2018-03-29 20:20
      */
-    public static String map2SortStringByKey(Map map, String split) {
-        TreeMap<String, String> sortMap = map2SortByKey(map);
+    public static String map2SortByKey(Map map, String split) {
+        TreeMap<Comparable, String> sortMap = map2SortByKey(map);
 
         StringBuilder result = new StringBuilder();
-        for (Map.Entry<String, String> entry : sortMap.entrySet()) {
+        for (Map.Entry<Comparable, String> entry : sortMap.entrySet()) {
             result.append(entry.getValue()).append(split);
         }
 
@@ -251,13 +250,13 @@ public class ResourceUtil {
 
     /**
      *
-     * 根据key排序 返回有序TreeMap
+     * 根据key正序 返回有序TreeMap
      *
      * @author Yogurt_lei
      * @date 2018-03-29 20:20
      */
-    public static TreeMap map2SortByKey(Map<String, String> map) {
-        TreeMap sortMap = new TreeMap<>(String::compareTo);
+    public static TreeMap map2SortByKey(Map<Comparable, String> map) {
+        TreeMap sortMap = new TreeMap<>((Comparator<Comparable>) Comparable::compareTo);
         sortMap.putAll(map);
 
         return sortMap;

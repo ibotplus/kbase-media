@@ -12,7 +12,16 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class AsrParseResult {
-    private int code;
-
+    /**
+     * 错误码
+     */
+    private ResultCode code;
+    /**
+     * 错误信息
+     */
+    private String message;
+    /**
+     * 分段部分的正常结果
+     */
     private String result;
 }

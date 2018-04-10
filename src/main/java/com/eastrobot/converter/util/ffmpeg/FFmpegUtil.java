@@ -70,6 +70,10 @@ public class FFmpegUtil {
      * 切割百度asr可用音频 长度59s
      * ffmpeg -y -i {input.wav|.mp3} -ss {startOffset} -t {duration} -acodec pcm_s16le -f s16le -ac 1 -ar 16000 {output.pcm}
      *
+     * @param audioPath 音频文件路径
+     * @param startOffset 截取开始时刻
+     * @param outputFileFullPath 输出文件路径
+     *
      * @author Yogurt_lei
      * @date 2018-04-09 18:49
      */

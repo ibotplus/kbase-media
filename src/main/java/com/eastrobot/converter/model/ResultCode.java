@@ -13,7 +13,8 @@ public enum ResultCode {
     UPDATE_CACHE_ERROR(6, "更新缓存失败"),
     ILLEGAL_TYPE(7, "文件类型不支持"),
     PARSE_EMPTY(8, "解析内容为空"),
-    OCR_FAILURE(9, "OCR解析错误"),;
+    OCR_FAILURE(9, "OCR解析错误"),
+    BAIDU_ASR_SEG_FAILURE(10, "百度ASR分段解析发生异常.");
 
     private int code;
     private String msg;

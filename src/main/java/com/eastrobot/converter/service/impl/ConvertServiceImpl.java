@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.util.Date;
 
+import static com.eastrobot.converter.model.ResultCode.*;
+
 /**
  * MultiMediaConverterServiceImpl
  *
@@ -49,8 +51,25 @@ public class ConvertServiceImpl implements ConvertService {
         ResponseMessage responseMessage = new ResponseMessage();
 
         if (ResourceUtil.isAudio(resPath)) {
-            AsrParseResult handle = audioService.handle(resPath);
+            AsrParseResult asrResult = audioService.handle(resPath);
 
+            if (SUCCESS.equals(asrResult.getCode())) {
+                ResponseEntity entity = new ResponseEntity();
+                entity.setFileType(Constants.AUDIO);
+                entity.setAudioContent(asrResult.getResult());
+                responseMessage.setResponseEntity(entity);
+            } else if (BAIDU_ASR_SEG_FAILURE.equals(asrResult.getCode())) {
+                if (StringUtils.isBlank(asrResult.getResult())) {
+                    responseMessage.setResultCode(PARSE_EMPTY);
+                    responseMessage.setMessage(asrResult.getMessage());
+                } else {
+                    responseMessage.setResultCode(BAIDU_ASR_SEG_FAILURE);
+                    ResponseEntity entity = new ResponseEntity();
+                    entity.setFileType(Constants.AUDIO);
+                    entity.setAudioContent(asrResult.getResult());
+                    responseMessage.setResponseEntity(entity);
+                }
+            }
         } else if (ResourceUtil.isVideo(resPath)) {
             JSONObject videoJSON = videoService.parseVideo(resPath);
             String audioContent = videoJSON.getString(Constants.AUDIO_CONTENT);
@@ -76,21 +95,21 @@ public class ConvertServiceImpl implements ConvertService {
         } else if (ResourceUtil.isImage(resPath)) {
             OcrParseResult ocrResult = imageService.handle(resPath);
 
-            if (ocrResult.getCode() == ResultCode.SUCCESS.getCode()) {
+            if (SUCCESS.equals(ocrResult.getCode())) {
                 ResponseEntity entity = new ResponseEntity();
                 entity.setFileType(Constants.IMAGE);
                 entity.setImageContent(ocrResult.getResult());
                 responseMessage.setResponseEntity(entity);
             } else {
-                if (ocrResult.getCode() == ResultCode.PARSE_EMPTY.getCode()) {
-                    responseMessage.setResultCode(ResultCode.PARSE_EMPTY);
+                if (ocrResult.getCode().equals(PARSE_EMPTY)) {
+                    responseMessage.setResultCode(PARSE_EMPTY);
                 } else {
-                    responseMessage.setResultCode(ResultCode.OCR_FAILURE);
+                    responseMessage.setResultCode(OCR_FAILURE);
                     responseMessage.setMessage(ocrResult.getResult());
                 }
             }
         } else {
-            responseMessage.setResultCode(ResultCode.ILLEGAL_TYPE);
+            responseMessage.setResultCode(ILLEGAL_TYPE);
         }
 
         return responseMessage;

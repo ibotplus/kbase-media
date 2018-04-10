@@ -1,31 +1,25 @@
 package com.eastrobot.converter.service.impl;
 
-import com.eastrobot.converter.config.ConvertConfig;
 import com.eastrobot.converter.model.AsrParseResult;
 import com.eastrobot.converter.model.Constants;
-import com.eastrobot.converter.model.ResultCode;
 import com.eastrobot.converter.service.AudioService;
 import com.eastrobot.converter.util.ResourceUtil;
-import com.eastrobot.converter.util.baidu.BaiduAsrConstants;
 import com.eastrobot.converter.util.baidu.BaiduSpeechUtils;
 import com.eastrobot.converter.util.ffmpeg.FFmpegUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static com.eastrobot.converter.model.ResultCode.*;
+import static com.eastrobot.converter.util.baidu.BaiduAsrConstants.*;
 
 
 /**
@@ -38,61 +32,69 @@ import java.util.concurrent.Executors;
 @Service
 public class AudioServiceImpl implements AudioService {
 
-    @Autowired
-    private ConvertConfig convertConfig;
+    @Value("${convert.audio.asr.default}")
+    private String audioTool;
 
     @Override
     public AsrParseResult handle(String audioFilePath) {
-        String audioTool = (String) convertConfig.getDefaultAudioConfig().get(Constants.DEFAULT_TOOL);
-
         if (Constants.BAIDU.equals(audioTool)) {
-            String result = this.baiduHandler(audioFilePath);
+           return this.baiduHandler(audioFilePath);
         } else {
-            return new AsrParseResult(ResultCode.CFG_ERROR.getCode(), "");
+            return new AsrParseResult(CFG_ERROR, "","");
         }
-
-        return null;
     }
 
-    public String baiduHandler(String audioFilePath) {
+    /**
+     * @author Yogurt_lei
+     * @date 2018-04-10 10:21
+     */
+    private AsrParseResult baiduHandler(String audioFilePath) {
         double duration = FFmpegUtil.getDuration(audioFilePath);
-        if (duration > BaiduAsrConstants.MAX_DURATION) {
+        if (duration > MAX_DURATION) {
             // 1. 切割文件 59s 每段
             String folder = ResourceUtil.getFolder(audioFilePath, "");
-            int totalSegment = (int) (duration / BaiduAsrConstants.MAX_DURATION + ((duration % BaiduAsrConstants.MAX_DURATION) > 0 ? 1 : 0));
+            int totalSegment = (int) (duration / MAX_DURATION + ((duration % MAX_DURATION) > 0 ? 1 : 0));
             log.debug("total segment :[%s], total second: [%s]", totalSegment, duration);
             for (int i = 1; i <= totalSegment; i++) {
-                FFmpegUtil.splitBaiduAsrAudio(audioFilePath,(i - 1) * BaiduAsrConstants.MAX_DURATION,
+                FFmpegUtil.splitBaiduAsrAudio(audioFilePath,
+                        (i - 1) * MAX_DURATION,
                         folder + FilenameUtils.getBaseName(audioFilePath) + "-" + i + ".pcm");
             }
 
-            // 排序生成的文件
-            File dir = new File(ResourceUtil.getFolder(audioFilePath, ""));
-            List<File> allFiles = Arrays.asList(Objects.requireNonNull(dir.listFiles()));
+            // 2. 遍历pcm文件 解析每段文本
+            File dir = new File(folder);
+            File[] allPcmFiles = dir.listFiles(filename -> "pcm".equals(FilenameUtils.getExtension(filename.getName())));
 
-            ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1);
+            // also like Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1);
+            int corePoolSize = Runtime.getRuntime().availableProcessors() + 1;
+            ExecutorService executor = new ThreadPoolExecutor(corePoolSize, corePoolSize, 0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<>(), Executors.defaultThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
             // 总任务数门阀
-            final CountDownLatch latch = new CountDownLatch(allFiles.size());
+            final CountDownLatch latch = new CountDownLatch(allPcmFiles.length);
             // 存储音轨解析段-内容
             final ConcurrentHashMap<Integer, String> audioContentMap = new ConcurrentHashMap<>();
+            AtomicBoolean hasOccuredException = new AtomicBoolean(false);
+            // 存储音轨解析异常信息 [seg:message]
+            StringBuffer exceptionBuffer = new StringBuffer();
 
-            for (final File file : allFiles) {
+            for (final File file : allPcmFiles) {
                 final String filepath = file.getAbsolutePath();
                 //提交音轨转文字任务
                 executor.submit(()->{
+                    String baseName = FilenameUtils.getBaseName(filepath);
+                    String currentSegIndex = StringUtils.substringAfterLast(baseName, "-");
                     try {
                         String content = doBaiduHandler(filepath);
-                        log.debug("audioService parse [%s] result : [%s]", filepath, content);
-                        Optional.ofNullable(content).ifPresent((Value)->{
+                        log.debug("baiduHandler parse {} result : {}", filepath, content);
+                        Optional.ofNullable(content).ifPresent((Value) -> {
                             if (StringUtils.isNotBlank(Value)) {
-                                String baseName = FilenameUtils.getBaseName(filepath);
-                                String index = StringUtils.substringAfterLast(baseName, "-");
-                                audioContentMap.put(Integer.parseInt(index), Value);
+                                audioContentMap.put(Integer.parseInt(currentSegIndex), Value);
                             }
                         });
-
-                        // 语音文件转写完删除
-                        FileUtils.deleteQuietly(file);
+                    } catch (Exception e) {
+                        log.warn("baiduHandler parse seg audio occured exception: {}", e.getMessage());
+                        hasOccuredException.set(true);
+                        exceptionBuffer.append("[").append(currentSegIndex).append(":").append(e.getMessage()).append("]");
                     } finally {
                         latch.countDown();
                     }
@@ -103,31 +105,42 @@ public class AudioServiceImpl implements AudioService {
                 // 阻塞等待结束
                 latch.await();
             } catch (Exception e) {
-                log.warn("handle parse image or video thread occured exception : [%s]", e.getMessage());
+                hasOccuredException.set(true);
+                exceptionBuffer.append("[").append(e.getMessage()).append("]");
+                log.error("baiduHandler parse audio thread occured exception : {}", e.getMessage());
             } finally {
-                FileUtils.deleteQuietly(dir);
+                // 语音文件转写完删除 测试不打开
+                // FileUtils.deleteQuietly(dir);
                 executor.shutdownNow();
             }
 
-            //FIXME 此处排序有问题 待改动
-            return ResourceUtil.map2SortStringByKey(audioContentMap, "");
+            // 2. 解析结束后 合并内容
+            if (hasOccuredException.get()) {
+                return new AsrParseResult(BAIDU_ASR_SEG_FAILURE, exceptionBuffer.toString(), ResourceUtil.map2SortByKey(audioContentMap, ""));
+            } else {
+                return new AsrParseResult(SUCCESS, "", ResourceUtil.map2SortByKey(audioContentMap, ""));
+            }
         } else { // 音频长度小于60 不分段直解处理
-            return this.doBaiduHandler(audioFilePath);
+            try {
+                String text = this.doBaiduHandler(audioFilePath);
+                return new AsrParseResult(SUCCESS, "", text);
+            } catch (Exception e) {
+                log.warn("baiduHandler parse seg audio occured exception: {}", e.getMessage());
+                return new AsrParseResult(BAIDU_ASR_SEG_FAILURE, e.getMessage(), "");
+            }
         }
     }
 
-
-    private String doBaiduHandler(String audioFilePath) {
-        JSONObject asr = BaiduSpeechUtils.asr(audioFilePath, BaiduAsrConstants.PCM, BaiduAsrConstants.RATE);
+    private String doBaiduHandler(String audioFilePath) throws Exception {
+        JSONObject asr = BaiduSpeechUtils.asr(audioFilePath, PCM, RATE);
         if (asr.optInt("err_no", -1) == 0) {
             //数组字符串
             String result = asr.optString("result");
             result = StringUtils.substringBetween(result, "[\"", "\"]");
 
             return result;
+        } else {
+            throw new Exception(asr.getString("err_msg"));
         }
-        // TODO by Yogurt_lei :  百度 asr 错误码
-
-        return null;
     }
 }
