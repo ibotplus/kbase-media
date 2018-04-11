@@ -2,6 +2,7 @@ package com.eastrobot.converter.service;
 
 
 import com.eastrobot.converter.model.ResponseMessage;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * ConvertService
@@ -10,14 +11,15 @@ import com.eastrobot.converter.model.ResponseMessage;
  * @version v1.0 , 2018-03-29 14:39
  */
 public interface ConvertService {
+
     /**
      *
-     * 获得当天默认转换的输出文件夹
+     * 上传文件
      *
      * @author Yogurt_lei
-     * @date 2018-03-29 14:41
+     * @date 2018-04-11 15:05
      */
-    String getDefaultOutputFolderPath(String sn);
+    String doUpload(MultipartFile file, String sn) throws Exception;
 
     /**
      *

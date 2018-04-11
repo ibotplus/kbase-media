@@ -1,10 +1,6 @@
 package com.eastrobot.converter.web.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.eastrobot.converter.model.Constants;
-import com.eastrobot.converter.model.ResponseEntity;
-import com.eastrobot.converter.model.ResponseMessage;
-import com.eastrobot.converter.model.ResultCode;
+import com.eastrobot.converter.model.*;
 import com.eastrobot.converter.service.ConvertService;
 import com.eastrobot.converter.util.ResourceUtil;
 import com.hankcs.hanlp.HanLP;
@@ -15,12 +11,9 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -42,33 +35,29 @@ public class ConvertController {
     @ApiOperation(value = "上传视频,音频,图片,转换为文本.", response = ResponseMessage.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "file", value = "待转换文件", dataType = "__file", required = true, paramType = "form"),
-            @ApiImplicitParam(name = "type", value = "转换类型(可选:keyword:关键字(10个);fulltext:全文)", defaultValue = "fulltext",
+            @ApiImplicitParam(name = "type", value = "转换类型(可选:keyword:关键字(10个);fulltext:全文)",
+                    defaultValue = "fulltext",
                     paramType = "form", allowableValues = "keyword, fulltext")
     })
     @PostMapping(
-            value = "/driver",
+            value = "/convert",
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
-    public String driver(@RequestParam(value = "file") MultipartFile file,
-                             @RequestParam(value = "type", required = false, defaultValue = "fulltext") String type) {
-
-        String sn = UUID.randomUUID().toString();
-        String inputFile = converterService.getDefaultOutputFolderPath(sn) + File.separator + file
-                .getOriginalFilename();
+    public ResponseMessage convert(@RequestParam(value = "file") MultipartFile file,
+                                   @RequestParam(value = "type", required = false, defaultValue = "fulltext") String type) {
         if (!file.isEmpty()) {
+            String sn = UUID.randomUUID().toString();
+            String targetFile;
             try {
-                File tmpFile = new File(inputFile);
-                tmpFile.mkdirs();
-                file.transferTo(tmpFile);
+                targetFile = converterService.doUpload(file, sn);
             } catch (Exception e) {
                 log.error("file upload error!", e);
-                ResponseMessage responseMessage = new ResponseMessage(ResultCode.FILE_UPLOAD_FAILED);
 
-                return JSON.toJSONString(responseMessage);
+                return new ResponseMessage(ResultCode.FILE_UPLOAD_FAILED);
             }
 
-            ResponseMessage responseMessage = converterService.driver(inputFile);
+            ResponseMessage responseMessage = converterService.driver(targetFile);
             responseMessage.setSn(sn);
             if (Constants.KEYWORD.equals(type)) {
                 // extract keyword
@@ -90,11 +79,50 @@ public class ConvertController {
                         });
             }
 
-            return JSON.toJSONString(responseMessage);
+            return responseMessage;
         } else {
-            ResponseMessage responseMessage = new ResponseMessage(ResultCode.PARAM_ERROR);
-
-            return JSON.toJSONString(responseMessage);
+            return new ResponseMessage(ResultCode.PARAM_ERROR);
         }
     }
+
+    @ApiOperation(value = "上传视频,音频,图片,转换为文本.(异步)", response = ResponseMessageAsync.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "file", value = "待转换文件", dataType = "__file", required = true, paramType = "form")
+    })
+    @PostMapping(
+            value = "/convertAsync",
+            produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
+            consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
+    )
+    public ResponseMessageAsync convertAsync(@RequestParam(value = "file") MultipartFile file) {
+        String sn = UUID.randomUUID().toString();
+        if (!file.isEmpty()) {
+            String targetFile = "";
+            try {
+                converterService.doUpload(file, sn);
+            } catch (Exception e) {
+                log.error("file upload error!", e);
+
+                return new ResponseMessageAsync(ResultCode.FILE_UPLOAD_FAILED, sn);
+            }
+
+            return new ResponseMessageAsync(ResultCode.FILE_UPLOAD_SUCCESS, sn);
+        } else {
+            return new ResponseMessageAsync(ResultCode.PARAM_ERROR, sn);
+        }
+    }
+
+    @ApiOperation(value = "通过sn来获得解析结果.(异步)", response = ResponseMessage.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "sn", value = "异步上传返回的sn", dataType = "string", required = true, paramType = "path")
+    })
+    @GetMapping(
+            value = "/convertAsync/{sn}",
+            produces = {MediaType.APPLICATION_JSON_UTF8_VALUE}
+    )
+    public ResponseMessage convertAsync(@PathVariable String sn) {
+        System.out.println(sn);
+        return new ResponseMessage(ResultCode.FILE_UPLOAD_SUCCESS);
+    }
+
 }
