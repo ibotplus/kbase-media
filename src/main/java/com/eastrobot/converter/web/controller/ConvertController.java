@@ -1,9 +1,9 @@
 package com.eastrobot.converter.web.controller;
 
-import com.eastrobot.converter.model.*;
+import com.eastrobot.converter.model.ResponseMessage;
+import com.eastrobot.converter.model.ResponseMessageAsync;
+import com.eastrobot.converter.model.ResultCode;
 import com.eastrobot.converter.service.ConvertService;
-import com.eastrobot.converter.util.ResourceUtil;
-import com.hankcs.hanlp.HanLP;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -14,8 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -34,18 +32,14 @@ public class ConvertController {
 
     @ApiOperation(value = "上传视频,音频,图片,转换为文本.", response = ResponseMessage.class)
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "file", value = "待转换文件", dataType = "__file", required = true, paramType = "form"),
-            @ApiImplicitParam(name = "type", value = "转换类型(可选:keyword:关键字(10个);fulltext:全文)",
-                    defaultValue = "fulltext",
-                    paramType = "form", allowableValues = "keyword, fulltext")
+            @ApiImplicitParam(name = "file", value = "待转换文件", dataType = "__file", required = true, paramType = "form")
     })
     @PostMapping(
             value = "/convert",
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
-    public ResponseMessage convert(@RequestParam(value = "file") MultipartFile file,
-                                   @RequestParam(value = "type", required = false, defaultValue = "fulltext") String type) {
+    public ResponseMessage convert(@RequestParam(value = "file") MultipartFile file) {
         if (!file.isEmpty()) {
             String sn = UUID.randomUUID().toString();
             String targetFile;
@@ -57,29 +51,7 @@ public class ConvertController {
                 return new ResponseMessage(ResultCode.FILE_UPLOAD_FAILED);
             }
 
-            ResponseMessage responseMessage = converterService.driver(targetFile);
-            responseMessage.setSn(sn);
-            if (Constants.KEYWORD.equals(type)) {
-                // extract keyword
-                Optional.of(responseMessage)
-                        .map(ResponseMessage::getResponseEntity)
-                        .map(ResponseEntity::getImageContent)
-                        .ifPresent((value) -> {
-                            List<String> imagekeyword = HanLP.extractKeyword(value, 10);
-                            String keyword = ResourceUtil.list2String(imagekeyword, "");
-                            responseMessage.getResponseEntity().setImageKeyword(keyword);
-                        });
-                Optional.of(responseMessage)
-                        .map(ResponseMessage::getResponseEntity)
-                        .map(ResponseEntity::getAudioContent)
-                        .ifPresent((value) -> {
-                            List<String> audioKeyword = HanLP.extractKeyword(value, 10);
-                            String keyword = ResourceUtil.list2String(audioKeyword, "");
-                            responseMessage.getResponseEntity().setAudioKeyword(keyword);
-                        });
-            }
-
-            return responseMessage;
+            return converterService.driver(targetFile);
         } else {
             return new ResponseMessage(ResultCode.PARAM_ERROR);
         }

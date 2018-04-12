@@ -26,7 +26,7 @@ server:
 # default user converter config
 convert:
   # default output-folder
-  outputFolder: E:\\converter-output
+  outputFolder: E:\\converter-output\\
   video:
     vca:
       default: ffmpeg

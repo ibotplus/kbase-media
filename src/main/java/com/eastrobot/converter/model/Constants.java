@@ -62,4 +62,5 @@ public interface Constants {
     String IMAGE_CONTENT = "IMAGE_CONTENT";
     String AUDIO_KEYWORD = "AUDIO_KEYWORD";
     String IMAGE_KEYWORD = "IMAGE_KEYWORD";
+    String ERROR_MSG = "ERROR_MSG";
 }

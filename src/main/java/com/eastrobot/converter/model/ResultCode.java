@@ -14,8 +14,9 @@ public enum ResultCode {
     ILLEGAL_TYPE(7, "文件类型不支持"),
     PARSE_EMPTY(8, "解析内容为空"),
     OCR_FAILURE(9, "OCR解析错误"),
-    BAIDU_ASR_SEG_FAILURE(10, "百度ASR分段解析发生异常."),
-    FILE_UPLOAD_SUCCESS(11, "文件上传成功,通过sn来获取解析结果.");
+    FILE_UPLOAD_SUCCESS(10, "文件上传成功,通过sn来获取解析结果."),
+    ASR_PART_PARSE_FAILED(11, "语音解析部分失败."),
+    OCR_PART_PARSE_FAILED(12, "图片解析部分失败.");
 
     private int code;
     private String msg;
