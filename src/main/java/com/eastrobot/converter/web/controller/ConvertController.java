@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -44,14 +45,14 @@ public class ConvertController {
             String sn = UUID.randomUUID().toString();
             String targetFile;
             try {
-                targetFile = converterService.doUpload(file, sn);
+                targetFile = converterService.doUpload(file, sn, false);
             } catch (Exception e) {
                 log.error("file upload error!", e);
 
                 return new ResponseMessage(ResultCode.FILE_UPLOAD_FAILED);
             }
 
-            return converterService.driver(targetFile);
+            return converterService.driver(targetFile, false);
         } else {
             return new ResponseMessage(ResultCode.PARAM_ERROR);
         }
@@ -71,14 +72,14 @@ public class ConvertController {
         if (!file.isEmpty()) {
             String targetFile = "";
             try {
-                converterService.doUpload(file, sn);
+                converterService.doUpload(file, sn, true);
             } catch (Exception e) {
                 log.error("file upload error!", e);
 
                 return new ResponseMessageAsync(ResultCode.FILE_UPLOAD_FAILED, sn);
             }
 
-            return new ResponseMessageAsync(ResultCode.FILE_UPLOAD_SUCCESS, sn);
+            return new ResponseMessageAsync(ResultCode.ASYNC_FILE_UPLOAD_SUCCESS, sn);
         } else {
             return new ResponseMessageAsync(ResultCode.PARAM_ERROR, sn);
         }
@@ -93,8 +94,11 @@ public class ConvertController {
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE}
     )
     public ResponseMessage convertAsync(@PathVariable String sn) {
-        // TODO by Yogurt_lei : 异步获取解析结果
-        return new ResponseMessage(ResultCode.FILE_UPLOAD_SUCCESS);
+        if (StringUtils.isNotBlank(sn)) {
+            return converterService.findAsyncParseResult(sn);
+        } else {
+            return new ResponseMessage(ResultCode.PARAM_ERROR);
+        }
     }
 
 }

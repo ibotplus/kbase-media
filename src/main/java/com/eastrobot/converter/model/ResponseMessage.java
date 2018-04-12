@@ -52,15 +52,4 @@ public class ResponseMessage implements Serializable {
         this.code = result.getCode();
         this.message = result.getMsg();
     }
-
-    /**
-     * 更新entity
-     */
-    public void updateResponseEntity(ResponseEntity newEntity) {
-        this.responseEntity.setFileType(newEntity.getFileType());
-        this.responseEntity.setImageContent(newEntity.getImageContent());
-        this.responseEntity.setAudioContent(newEntity.getAudioContent());
-        this.responseEntity.setImageKeyword(newEntity.getImageKeyword());
-        this.responseEntity.setAudioKeyword(newEntity.getAudioKeyword());
-    }
 }

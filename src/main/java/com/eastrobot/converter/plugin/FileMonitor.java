@@ -1,7 +1,10 @@
-package com.eastrobot.converter.service;
+package com.eastrobot.converter.plugin;
 
+import com.alibaba.fastjson.JSON;
 import com.eastrobot.converter.model.ResponseMessage;
+import com.eastrobot.converter.service.ConvertService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
@@ -15,6 +18,8 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
+import static com.eastrobot.converter.model.Constants.RESULT_FILE_EXTENSION;
+
 /**
  * FileListener
  *
@@ -25,8 +30,8 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class FileMonitor {
 
-    @Value("${convert.outputFolder}") //文件路径:${convert.outputFolder}/sn.extension
-    private String OUTPUT_FOLDER;
+    @Value("${convert.outputFolder-async}") //文件路径:${convert.outputFolder-async}/sn.extension
+    private String OUTPUT_FOLDER_ASYNC;
 
     @Autowired
     private ConvertService convertService;
@@ -37,7 +42,7 @@ public class FileMonitor {
         // 默认轮询5s
         long interval = TimeUnit.SECONDS.toMillis(5);
         IOFileFilter filter = FileFilterUtils.and(FileFilterUtils.fileFileFilter());
-        FileAlterationObserver observer = new FileAlterationObserver(OUTPUT_FOLDER, filter);
+        FileAlterationObserver observer = new FileAlterationObserver(OUTPUT_FOLDER_ASYNC, filter);
         observer.addListener(new FileListener());
         // 开始监控
         FileAlterationMonitor monitor = new FileAlterationMonitor(interval, observer);
@@ -48,9 +53,14 @@ public class FileMonitor {
     private class FileListener extends FileAlterationListenerAdaptor {
         @Override
         public void onFileCreate(File file) {
-            log.info("onFileCreate >>>>>" + file.getAbsolutePath());
             String absolutePath = file.getAbsolutePath();
-            ResponseMessage responseMessage = convertService.driver("", absolutePath);
+            // 后缀是存放结果的文件
+            if (RESULT_FILE_EXTENSION.equals(FilenameUtils.getExtension(absolutePath))) {
+                return;
+            }
+            log.info("onFileCreate start parse >>>>>" + file.getAbsolutePath());
+            ResponseMessage responseMessage = convertService.driver(absolutePath, true);
+            log.info(">>>>>{} parse result: {}", file.getAbsolutePath(), JSON.toJSONString(responseMessage));
         }
     }
 }

@@ -49,13 +49,6 @@ public interface Constants {
     String EMPTY = "";
 
     //------------------------------------
-    // support file type
-    //------------------------------------
-    String VIDEO = "VIDEO";
-    String AUDIO = "AUDIO";
-    String IMAGE = "IMAGE";
-
-    //------------------------------------
     // parse result json key definition
     //------------------------------------
     String AUDIO_CONTENT = "AUDIO_CONTENT";
@@ -63,4 +56,10 @@ public interface Constants {
     String AUDIO_KEYWORD = "AUDIO_KEYWORD";
     String IMAGE_KEYWORD = "IMAGE_KEYWORD";
     String ERROR_MSG = "ERROR_MSG";
+
+    //------------------------------------
+    // parse result file extension
+    //------------------------------------
+    String RESULT_FILE_EXTENSION = "rs";
+    String RESULT_FILE_EXTENSION_WITH_POINT = ".rs";
 }

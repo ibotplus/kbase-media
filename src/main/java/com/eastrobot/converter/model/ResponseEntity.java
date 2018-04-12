@@ -16,11 +16,6 @@ import lombok.Setter;
 @ApiModel(description = "结果封装")
 public class ResponseEntity {
     /**
-     * 解析文件类型
-     */
-    @ApiModelProperty("解析文件类型")
-    private String fileType;
-    /**
      * 图片内容
      */
     @ApiModelProperty("图片内容")

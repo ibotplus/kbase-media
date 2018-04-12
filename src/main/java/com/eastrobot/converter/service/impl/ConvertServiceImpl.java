@@ -16,9 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.Optional;
 
 import static com.eastrobot.converter.model.ResultCode.*;
@@ -35,6 +33,8 @@ public class ConvertServiceImpl implements ConvertService {
 
     @Value("${convert.outputFolder}")
     private String OUTPUT_FOLDER;
+    @Value("${convert.outputFolder-async}")
+    private String OUTPUT_FOLDER_ASYNC;
 
     @Autowired
     private VideoService videoService;
@@ -46,7 +46,8 @@ public class ConvertServiceImpl implements ConvertService {
     private ImageService imageService;
 
     @Override
-    public ResponseMessage driver(String resPath) {
+    public ResponseMessage driver(String resPath, boolean asyncParse) {
+
         File resFile = new File(resPath);
         ResponseMessage responseMessage = new ResponseMessage();
 
@@ -55,7 +56,6 @@ public class ConvertServiceImpl implements ConvertService {
 
             if (SUCCESS.equals(asrResult.getCode())) {
                 ResponseEntity entity = new ResponseEntity();
-                entity.setFileType(Constants.AUDIO);
                 entity.setAudioContent(asrResult.getResult());
                 responseMessage.setResponseEntity(entity);
             } else if (ASR_PART_PARSE_FAILED.equals(asrResult.getCode())) {
@@ -65,7 +65,6 @@ public class ConvertServiceImpl implements ConvertService {
                 } else {
                     responseMessage.setResultCode(ASR_PART_PARSE_FAILED);
                     ResponseEntity entity = new ResponseEntity();
-                    entity.setFileType(Constants.AUDIO);
                     entity.setAudioContent(asrResult.getResult());
                     responseMessage.setResponseEntity(entity);
                 }
@@ -97,7 +96,6 @@ public class ConvertServiceImpl implements ConvertService {
 
             if (SUCCESS.equals(ocrResult.getCode())) {
                 ResponseEntity entity = new ResponseEntity();
-                entity.setFileType(Constants.IMAGE);
                 entity.setImageContent(ocrResult.getResult());
                 responseMessage.setResponseEntity(entity);
             } else {
@@ -112,14 +110,55 @@ public class ConvertServiceImpl implements ConvertService {
             responseMessage.setResultCode(ILLEGAL_TYPE);
         }
 
-        this.doWriteResultToFile(resPath, responseMessage);
+        this.doWriteResultToFile(resPath, responseMessage, asyncParse);
 
         return responseMessage;
     }
 
+    @Override
+    public ResponseMessage findAsyncParseResult(String sn) {
+        String filePath = OUTPUT_FOLDER_ASYNC + sn + Constants.RESULT_FILE_EXTENSION_WITH_POINT;
+        File resultFile = new File(filePath);
+        ResponseMessage responseMessage = new ResponseMessage(ResultCode.SUCCESS);
+        responseMessage.setSn(sn);
+        try (FileReader fr = new FileReader(resultFile);
+             BufferedReader br = new BufferedReader(fr);
+        ) {
+            String line;
+            ResponseEntity entity = new ResponseEntity();
+            if ((line = br.readLine()) != null) {
+                if (line.startsWith(Constants.ERROR_MSG)) {
+                    responseMessage.setMessage(line);
+                } else if (line.startsWith(Constants.IMAGE_KEYWORD)) {
+                    entity.setImageKeyword(line);
+                } else if (line.startsWith(Constants.AUDIO_KEYWORD)) {
+                    entity.setAudioKeyword(line);
+                } else if (line.startsWith(Constants.IMAGE_CONTENT)) {
+                    entity.setImageContent(line);
+                } else if (line.startsWith(Constants.AUDIO_CONTENT)) {
+                    entity.setAudioContent(line);
+                }
+            }
+            responseMessage.setResponseEntity(entity);
+        } catch (FileNotFoundException e) {
+            log.warn("parse is not complete.");
+            responseMessage.setResultCode(ResultCode.NOT_COMPLETED);
+        } catch (IOException e) {
+            log.warn("read result file occurred exception.");
+            responseMessage.setResultCode(ResultCode.ASYNC_READ_RESULT_FILE_FAILED);
+        }
+        return responseMessage;
+    }
+
     // 文件路径:${convert.outputFolder}/sn.extension
-    public String doUpload(MultipartFile file, String sn) throws Exception {
-        String targetFile = OUTPUT_FOLDER + sn + FilenameUtils.getExtension(file.getOriginalFilename());
+    @Override
+    public String doUpload(MultipartFile file, String sn, boolean asyncParse) throws Exception {
+        String targetFile;
+        if (asyncParse) {
+            targetFile = OUTPUT_FOLDER_ASYNC + sn + FilenameUtils.getExtension(file.getOriginalFilename());
+        } else {
+            targetFile = OUTPUT_FOLDER + sn + FilenameUtils.getExtension(file.getOriginalFilename());
+        }
         File tmpFile = new File(targetFile);
         tmpFile.mkdirs();
         file.transferTo(tmpFile);
@@ -128,16 +167,22 @@ public class ConvertServiceImpl implements ConvertService {
     }
 
     /**
-     * 解析结果写入文件:${convert.outputFolder}/sn
+     * 解析结果写入文件:${convert.outputFolder}/sn.rs
      */
-    private void doWriteResultToFile(String resPath, final ResponseMessage responseMessage) {
-        File resultFile = new File(OUTPUT_FOLDER + FilenameUtils.getBaseName(resPath));
+    private void doWriteResultToFile(String resPath, final ResponseMessage responseMessage, boolean asyncParse) {
+        String resultFilePath;
+        if (asyncParse) {
+            resultFilePath = OUTPUT_FOLDER + FilenameUtils.getBaseName(resPath) + Constants.RESULT_FILE_EXTENSION_WITH_POINT;
+        } else {
+            resultFilePath = OUTPUT_FOLDER_ASYNC + FilenameUtils.getBaseName(resPath) + Constants.RESULT_FILE_EXTENSION_WITH_POINT;
+        }
+        File resultFile = new File(resultFilePath);
 
         // write error message
         if (!responseMessage.getCode().equals(SUCCESS.getCode())) {
             String errorMessage = responseMessage.getMessage();
             if (StringUtils.isNotBlank(errorMessage)) {
-                try (FileWriter fw = new FileWriter(resultFile, true)) {
+                try (FileWriter fw = new FileWriter(resultFile, true);) {
                     fw.write(Constants.ERROR_MSG + errorMessage + "\r\n");
                 } catch (IOException e) {
                     log.error("write errorMessage to file occurred exception.");
