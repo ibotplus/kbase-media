@@ -62,7 +62,7 @@ public class ConvertController {
             if (Constants.KEYWORD.equals(type)) {
                 // extract keyword
                 Optional.of(responseMessage)
-                        .map((ResponseMessage::getResponseEntity))
+                        .map(ResponseMessage::getResponseEntity)
                         .map(ResponseEntity::getImageContent)
                         .ifPresent((value) -> {
                             List<String> imagekeyword = HanLP.extractKeyword(value, 10);
@@ -70,7 +70,7 @@ public class ConvertController {
                             responseMessage.getResponseEntity().setImageKeyword(keyword);
                         });
                 Optional.of(responseMessage)
-                        .map((ResponseMessage::getResponseEntity))
+                        .map(ResponseMessage::getResponseEntity)
                         .map(ResponseEntity::getAudioContent)
                         .ifPresent((value) -> {
                             List<String> audioKeyword = HanLP.extractKeyword(value, 10);
@@ -121,7 +121,7 @@ public class ConvertController {
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE}
     )
     public ResponseMessage convertAsync(@PathVariable String sn) {
-        System.out.println(sn);
+        // TODO by Yogurt_lei : 异步获取解析结果
         return new ResponseMessage(ResultCode.FILE_UPLOAD_SUCCESS);
     }
 

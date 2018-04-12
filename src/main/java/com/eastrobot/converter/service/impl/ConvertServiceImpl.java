@@ -9,14 +9,12 @@ import com.eastrobot.converter.service.VideoService;
 import com.eastrobot.converter.util.ResourceUtil;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.util.Date;
 
 import static com.eastrobot.converter.model.ResultCode.*;
 
@@ -41,11 +39,9 @@ public class ConvertServiceImpl implements ConvertService {
     @Autowired
     private ImageService imageService;
 
-    // 文件路径:${convert.outputFolder}/yyyyMMDD/sn.extension
+    // 文件路径:${convert.outputFolder}/sn.extension
     public String doUpload(MultipartFile file, String sn) throws Exception {
-        String targetFile = OUTPUT_FOLDER + File.separator
-                + DateFormatUtils.format(new Date(), "yyyyMMdd") + File.separator
-                + sn + FilenameUtils.getExtension(file.getOriginalFilename());
+        String targetFile = OUTPUT_FOLDER + File.separator + sn + FilenameUtils.getExtension(file.getOriginalFilename());
         File tmpFile = new File(targetFile);
         tmpFile.mkdirs();
         file.transferTo(tmpFile);

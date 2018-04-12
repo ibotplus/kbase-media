@@ -1,10 +1,17 @@
 package com.eastrobot.converter.web.listener;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.monitor.FileAlterationListener;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
+import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 /**
  * FileListener
@@ -13,45 +20,42 @@ import java.io.File;
  * @version v1.0 , 2018-04-11 14:25
  */
 @Slf4j
-public class FileListener implements FileAlterationListener {
+@Component
+public class FileListener {
 
-    @Override
-    public void onStart(FileAlterationObserver observer) {
-        // log.warn("onStart >>>>>");
-    }
+    @Value("${convert.outputFolder}")
+    private String OUTPUT_FOLDER;
 
-    @Override
-    public void onDirectoryCreate(File directory) {
-        log.warn("onDirectoryCreate >>>>>" + directory.getAbsolutePath());
-    }
+    @PostConstruct
+    public void init() {
+        log.warn("*********************************启动成功*********************************");
+        // 默认轮询5s
+        long interval = TimeUnit.SECONDS.toMillis(5);
+        IOFileFilter filter = FileFilterUtils.and(FileFilterUtils.fileFileFilter());
+        FileAlterationObserver observer = new FileAlterationObserver(OUTPUT_FOLDER, filter);
+        observer.addListener(new FileAlterationListenerAdaptor() {
+            @Override
+            public void onFileCreate(File file) {
+                log.warn("onFileCreate >>>>>" + file.getAbsolutePath());
+            }
 
-    @Override
-    public void onDirectoryChange(File directory) {
-        log.warn("onDirectoryChange >>>>>" + directory.getAbsolutePath());
-    }
+            @Override
+            public void onFileChange(File file) {
+                log.warn("onFileChange >>>>>" + file.getAbsolutePath());
+            }
 
-    @Override
-    public void onDirectoryDelete(File directory) {
-        log.warn("onDirectoryDelete >>>>>" + directory.getAbsolutePath());
-    }
-
-    @Override
-    public void onFileCreate(File file) {
-        log.warn("onFileCreate >>>>>" + file.getAbsolutePath());
-    }
-
-    @Override
-    public void onFileChange(File file) {
-        log.warn("onFileChange >>>>>" + file.getAbsolutePath());
-    }
-
-    @Override
-    public void onFileDelete(File file) {
-        log.warn("onFileDelete >>>>>" + file.getAbsolutePath());
-    }
-
-    @Override
-    public void onStop(FileAlterationObserver observer) {
-        // log.warn("onStop >>>>>");
+            @Override
+            public void onFileDelete(File file) {
+                log.warn("onFileDelete >>>>>" + file.getAbsolutePath());
+            }
+        });
+        // 开始监控
+        FileAlterationMonitor monitor = new FileAlterationMonitor(interval, observer);
+        try {
+            monitor.start();
+            log.warn("*********************************监控中*********************************");
+        } catch (Exception e) {
+            log.error("FileAlterationMonitor occured error.", e);
+        }
     }
 }
