@@ -14,12 +14,14 @@ public enum ResultCode {
     ILLEGAL_TYPE(7, "文件类型不支持"),
     PARSE_EMPTY(8, "解析内容为空"),
     OCR_FAILURE(9, "OCR解析错误"),
+    ASR_FAILURE(16, "ASR解析失败"),
     ASYNC_FILE_UPLOAD_SUCCESS(10, "文件上传成功,通过sn来获取解析结果."),
     ASR_PART_PARSE_FAILED(11, "语音解析部分失败."),
     OCR_PART_PARSE_FAILED(12, "图片解析部分失败."),
     NOT_COMPLETED(13, "解析还在进行中,请稍后尝试读取结果."),
     ASYNC_READ_RESULT_FILE_FAILED(14, "读取解析结果文件失败."),
-    FFMPEG_LOCATION_ERROR(15, "FFMPEG安装路径不正确,检查配置文件路径");
+    FFMPEG_LOCATION_ERROR(15, "FFMPEG安装路径不正确,检查配置文件路径"),
+    PART_PARSE_FAILED(17,"图片或视频部分解析失败");
 
     private int code;
     private String msg;

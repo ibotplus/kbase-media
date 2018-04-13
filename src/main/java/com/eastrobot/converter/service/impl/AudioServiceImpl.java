@@ -1,14 +1,13 @@
 package com.eastrobot.converter.service.impl;
 
-import com.eastrobot.converter.model.AsrParseResult;
 import com.eastrobot.converter.model.Constants;
-import com.eastrobot.converter.model.FFmpegFileType;
+import com.eastrobot.converter.model.FileType;
+import com.eastrobot.converter.model.ParseResult;
 import com.eastrobot.converter.service.AudioService;
 import com.eastrobot.converter.util.ResourceUtil;
 import com.eastrobot.converter.util.baidu.BaiduSpeechUtils;
 import com.eastrobot.converter.util.ffmpeg.FFmpegUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
@@ -25,7 +24,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.eastrobot.converter.model.ResultCode.*;
-import static com.eastrobot.converter.util.baidu.BaiduAsrConstants.*;
+import static com.eastrobot.converter.util.baidu.BaiduAsrConstants.PCM;
+import static com.eastrobot.converter.util.baidu.BaiduAsrConstants.RATE;
 
 
 /**
@@ -42,11 +42,11 @@ public class AudioServiceImpl implements AudioService {
     private String audioTool;
 
     @Override
-    public AsrParseResult handle(String audioFilePath) {
+    public ParseResult handle(File audioFile) {
         if (Constants.BAIDU.equals(audioTool)) {
-           return this.baiduAsrHandler(audioFilePath);
+           return this.baiduAsrHandler(audioFile);
         } else {
-            return new AsrParseResult(CFG_ERROR, "","");
+            return new ParseResult(CFG_ERROR, "","");
         }
     }
 
@@ -54,42 +54,33 @@ public class AudioServiceImpl implements AudioService {
      * @author Yogurt_lei
      * @date 2018-04-10 10:21
      */
-    private AsrParseResult baiduAsrHandler(String audioFilePath) {
-        double duration = 0;
+    private ParseResult baiduAsrHandler(File audioFile) {
+        String audioFilePath = audioFile.getAbsolutePath();
         try {
-            duration = FFmpegUtil.getDuration(audioFilePath);
+            // 1. 是否切割文件 59s 每段 文件放入当前文件夹下当前文件名命名的文件夹下
+            FFmpegUtil.baiduSplitSegToPcm(audioFilePath);
         } catch (IOException e) {
-            log.error("getDuration occurred exception, check the ffmpeg location is right.");
-            return new AsrParseResult(FFMPEG_LOCATION_ERROR, "", "");
+            log.error("baiduSplitSegToPcm occurred exception, check the ffmpeg location is right.");
+            return new ParseResult(FFMPEG_LOCATION_ERROR, "", "");
         }
-        if (duration > MAX_DURATION) {
-            // 1. 切割文件 59s 每段
-            String folder = ResourceUtil.getFolder(audioFilePath, "");
-            int totalSegment = (int) (duration / MAX_DURATION + ((duration % MAX_DURATION) > 0 ? 1 : 0));
-            log.debug("total segment :[%s], total second: [%s]", totalSegment, duration);
-            for (int i = 1; i <= totalSegment; i++) {
-                FFmpegUtil.splitBaiduAsrAudio(audioFilePath, (i - 1) * MAX_DURATION,
-                        folder + FilenameUtils.getBaseName(audioFilePath) + "-" + i + ".pcm");
-            }
-
+        File folder = new File(ResourceUtil.getFolder(audioFilePath, ""));
+        File[] allPcmFiles = folder.listFiles(filename -> FileType.PCM.getExtension().equals(FilenameUtils.getExtension(filename.getName())));
+        if (allPcmFiles.length > 1) {
             // 2. 遍历pcm文件 解析每段文本
-            File dir = new File(folder);
-            File[] allPcmFiles = dir.listFiles(filename -> "pcm".equals(FilenameUtils.getExtension(filename.getName())));
-
             int corePoolSize = Runtime.getRuntime().availableProcessors() + 1;
             ExecutorService executor = Executors.newFixedThreadPool(corePoolSize);
             // 总任务数门阀
             final CountDownLatch latch = new CountDownLatch(allPcmFiles.length);
             // 存储音轨解析段-内容
             final ConcurrentHashMap<Integer, String> audioContentMap = new ConcurrentHashMap<>();
-            AtomicBoolean hasOccuredException = new AtomicBoolean(false);
+            AtomicBoolean hasOccurredException = new AtomicBoolean(false);
             // 存储音轨解析异常信息 [seg:message]
             StringBuffer exceptionBuffer = new StringBuffer();
 
             for (final File file : allPcmFiles) {
                 final String filepath = file.getAbsolutePath();
                 //提交音轨转文字任务
-                executor.submit(()->{
+                executor.submit(() -> {
                     String baseName = FilenameUtils.getBaseName(filepath);
                     String currentSegIndex = StringUtils.substringAfterLast(baseName, "-");
                     try {
@@ -101,9 +92,10 @@ public class AudioServiceImpl implements AudioService {
                             }
                         });
                     } catch (Exception e) {
-                        log.warn("baiduHandler parse seg audio occured exception: {}", e.getMessage());
-                        hasOccuredException.set(true);
-                        exceptionBuffer.append("[").append(currentSegIndex).append(":").append(e.getMessage()).append("]");
+                        log.warn("baiduHandler parse seg audio occurred exception: {}", e.getMessage());
+                        hasOccurredException.set(true);
+                        exceptionBuffer.append("[").append(currentSegIndex).append(":").append(e.getMessage()).append
+                                ("]");
                     } finally {
                         latch.countDown();
                     }
@@ -114,40 +106,32 @@ public class AudioServiceImpl implements AudioService {
                 // 阻塞等待结束
                 latch.await();
             } catch (Exception e) {
-                hasOccuredException.set(true);
+                hasOccurredException.set(true);
                 exceptionBuffer.append("[").append(e.getMessage()).append("]");
-                log.error("baiduHandler parse audio thread occured exception : {}", e.getMessage());
+                log.error("baiduHandler parse audio thread occurred exception : {}", e.getMessage());
             } finally {
-                // 语音文件转写完删除 测试不打开
-                // FileUtils.deleteQuietly(dir);
                 executor.shutdownNow();
             }
 
             // 2. 解析结束后 合并内容
-            if (hasOccuredException.get()) {
-                return new AsrParseResult(ASR_PART_PARSE_FAILED, exceptionBuffer.toString(), ResourceUtil.map2SortByKey(audioContentMap, ""));
+            if (hasOccurredException.get()) {
+                return new ParseResult(ASR_PART_PARSE_FAILED, exceptionBuffer.toString(), ResourceUtil.map2SortByKey(audioContentMap, ""));
             } else {
-                return new AsrParseResult(SUCCESS, "", ResourceUtil.map2SortByKey(audioContentMap, ""));
+                return new ParseResult(SUCCESS, "", ResourceUtil.map2SortByKey(audioContentMap, ""));
             }
         } else { // 音频长度小于60 不分段直解处理
             try {
-                String text = this.doBaiduAsrHandler(audioFilePath);
-                return new AsrParseResult(SUCCESS, "", text);
+                String text = this.doBaiduAsrHandler(allPcmFiles[0].getAbsolutePath());
+                return new ParseResult(SUCCESS, "", text);
             } catch (Exception e) {
-                log.warn("baiduHandler parse seg audio occured exception: {}", e.getMessage());
-                return new AsrParseResult(ASR_PART_PARSE_FAILED, e.getMessage(), "");
+                log.warn("baiduHandler parse audio occurred exception: {}", e.getMessage());
+                return new ParseResult(ASR_FAILURE, e.getMessage(), "");
             }
         }
     }
 
     private String doBaiduAsrHandler(String audioFilePath) throws Exception {
-        String pcmAudioFile = audioFilePath;
-        // 不是pcm格式转成pcm格式
-        if (!"pcm".equalsIgnoreCase(FilenameUtils.getExtension(audioFilePath))) {
-            pcmAudioFile = FFmpegUtil.transformAudio(audioFilePath, FFmpegFileType.PCM);
-            FileUtils.deleteQuietly(new File(audioFilePath));
-        }
-        JSONObject asr = BaiduSpeechUtils.asr(pcmAudioFile, PCM, RATE);
+        JSONObject asr = BaiduSpeechUtils.asr(audioFilePath, PCM, RATE);
         if (asr.optInt("err_no", -1) == 0) {
             //数组字符串
             String result = asr.optString("result");

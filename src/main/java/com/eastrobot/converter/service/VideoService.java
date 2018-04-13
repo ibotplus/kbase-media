@@ -1,8 +1,6 @@
 package com.eastrobot.converter.service;
 
-
-import com.alibaba.fastjson.JSONObject;
-import com.eastrobot.converter.model.AsrParseResult;
+import com.eastrobot.converter.model.VacParseResult;
 
 /**
  * VideoService
@@ -12,16 +10,12 @@ import com.eastrobot.converter.model.AsrParseResult;
  */
 public interface VideoService {
 
-    AsrParseResult handle(String videoFilePath);
-
     /**
      *
-     * 解析视频
-     * @param videoPath 视频绝对路径
-     * @return 视频解析结果
+     * 解析视频 生成文本
      *
      * @author Yogurt_lei
-     * @date 2018-03-26 10:16
+     * @date 2018-03-27 11:55
      */
-    JSONObject parseVideo(String videoPath);
+    VacParseResult handle(String videoFilePath);
 }

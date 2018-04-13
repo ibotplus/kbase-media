@@ -25,6 +25,8 @@ server:
 
 # default user converter config
 convert:
+  # Whether to enable the asynchronous interface
+  enable-async: true
   # default output-folder
   outputFolder: E:\\converter-output\\
   outputFolder-async: E:\\converter-output\\async\\

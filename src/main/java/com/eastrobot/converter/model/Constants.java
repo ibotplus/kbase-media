@@ -47,9 +47,14 @@ public interface Constants {
      * EMPTY_RESULT
      */
     String EMPTY = "";
-
     //------------------------------------
-    // parse result json key definition
+    // parse file type key definition
+    //------------------------------------
+    String AUDIO = "AUDIO";
+    String IMAGE = "IMAGE";
+    String VIDEO = "VIDEO";
+    //------------------------------------
+    // parse result key definition
     //------------------------------------
     String AUDIO_CONTENT = "AUDIO_CONTENT";
     String IMAGE_CONTENT = "IMAGE_CONTENT";

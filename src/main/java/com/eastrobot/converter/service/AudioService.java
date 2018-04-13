@@ -1,7 +1,9 @@
 package com.eastrobot.converter.service;
 
 
-import com.eastrobot.converter.model.AsrParseResult;
+import com.eastrobot.converter.model.ParseResult;
+
+import java.io.File;
 
 /**
  * AudioService
@@ -18,5 +20,5 @@ public interface AudioService {
      * @author Yogurt_lei
      * @date 2018-03-27 11:54
      */
-    AsrParseResult handle(String audioFilePath);
+    ParseResult handle(File audioFile);
 }

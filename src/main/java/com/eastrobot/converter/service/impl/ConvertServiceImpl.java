@@ -1,6 +1,5 @@
 package com.eastrobot.converter.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.eastrobot.converter.model.*;
 import com.eastrobot.converter.service.AudioService;
 import com.eastrobot.converter.service.ConvertService;
@@ -31,8 +30,14 @@ import static com.eastrobot.converter.model.ResultCode.*;
 @Service
 public class ConvertServiceImpl implements ConvertService {
 
+    /**
+     * 同步上传的文件夹
+     */
     @Value("${convert.outputFolder}")
     private String OUTPUT_FOLDER;
+    /**
+     * 异步上传的文件夹
+     */
     @Value("${convert.outputFolder-async}")
     private String OUTPUT_FOLDER_ASYNC;
 
@@ -49,66 +54,22 @@ public class ConvertServiceImpl implements ConvertService {
     public ResponseMessage driver(String resPath, boolean asyncParse) {
 
         File resFile = new File(resPath);
-        ResponseMessage responseMessage = new ResponseMessage();
-        responseMessage.setSn(FilenameUtils.getBaseName(resPath));
+        ResponseMessage responseMessage;
+        String sn = FilenameUtils.getBaseName(resPath);
 
         if (ResourceUtil.isAudio(resPath)) {
-            AsrParseResult asrResult = audioService.handle(resPath);
-
-            if (SUCCESS.equals(asrResult.getCode())) {
-                ResponseEntity entity = new ResponseEntity();
-                entity.setAudioContent(asrResult.getResult());
-                responseMessage.setResponseEntity(entity);
-            } else if (ASR_PART_PARSE_FAILED.equals(asrResult.getCode())) {
-                if (StringUtils.isBlank(asrResult.getResult())) {
-                    responseMessage.setResultCode(PARSE_EMPTY);
-                    responseMessage.setMessage(asrResult.getMessage());
-                } else {
-                    responseMessage.setResultCode(ASR_PART_PARSE_FAILED);
-                    ResponseEntity entity = new ResponseEntity();
-                    entity.setAudioContent(asrResult.getResult());
-                    responseMessage.setResponseEntity(entity);
-                }
-            }
+            ParseResult asrResult = audioService.handle(new File(resPath));
+            responseMessage = this.doResultToResponseMessage(sn, asrResult, Constants.AUDIO);
         } else if (ResourceUtil.isVideo(resPath)) {
-            JSONObject videoJSON = videoService.parseVideo(resPath);
-            String audioContent = videoJSON.getString(Constants.AUDIO_CONTENT);
-            String imageKeyWord = videoJSON.getString(Constants.IMAGE_KEYWORD);
-            String imageContent = videoJSON.getString(Constants.IMAGE_CONTENT);
-/*
-            json.put("flag", "success");
-            json.put("file_type", Constants.VIDEO);
-            if (StringUtils.isNotBlank(audioContent)) {
-                json.put("content", audioContent);
-            }
-            if (StringUtils.isNotBlank(imageKeyWord)) {
-                json.put("keyword", imageKeyWord);
-            }
-            if (StringUtils.isNotBlank(imageContent)) {
-                json.put("imageContent", imageContent);
-            }
-            if (StringUtils.isBlank(audioContent) && StringUtils.isBlank(imageKeyWord)) {
-                json.put("flag", "failed");
-                json.put("err_code", "1001");
-                json.put("err_msg", "empty result");
-            }*/
-        } else if (ResourceUtil.isImage(resPath)) {
-            OcrParseResult ocrResult = imageService.handle(resPath);
+            VacParseResult vacParseResult = videoService.handle(resPath);
+            responseMessage = this.doResultToResponseMessage(sn, vacParseResult, Constants.VIDEO);
 
-            if (SUCCESS.equals(ocrResult.getCode())) {
-                ResponseEntity entity = new ResponseEntity();
-                entity.setImageContent(ocrResult.getResult());
-                responseMessage.setResponseEntity(entity);
-            } else {
-                if (ocrResult.getCode().equals(PARSE_EMPTY)) {
-                    responseMessage.setResultCode(PARSE_EMPTY);
-                } else {
-                    responseMessage.setResultCode(OCR_FAILURE);
-                    responseMessage.setMessage(ocrResult.getResult());
-                }
-            }
+
+        } else if (ResourceUtil.isImage(resPath)) {
+            ParseResult ocrResult = imageService.handle(new File(resPath));
+            responseMessage = this.doResultToResponseMessage(sn, ocrResult, Constants.IMAGE);
         } else {
-            responseMessage.setResultCode(ILLEGAL_TYPE);
+            responseMessage = new ResponseMessage(ILLEGAL_TYPE);
         }
 
         this.doWriteResultToFile(resPath, responseMessage, asyncParse);
@@ -168,6 +129,57 @@ public class ConvertServiceImpl implements ConvertService {
     }
 
     /**
+     * 解析结果封装到ResponseMessage
+     */
+    private ResponseMessage doResultToResponseMessage(String sn, AbstractParseResult parseResult, String type) {
+        ResponseMessage message = new ResponseMessage();
+        message.setSn(sn);
+        switch (type) {
+            case Constants.IMAGE: {
+                ParseResult ocrResult = (ParseResult) parseResult;
+                message.setResultCode(ocrResult.getCode());
+                message.setMessage(ocrResult.getMessage());
+
+                ResponseEntity entity = new ResponseEntity();
+                entity.setImageContent(ocrResult.getResult());
+                message.setResponseEntity(entity);
+            }
+            break;
+            case Constants.AUDIO: {
+                ParseResult asrResult = (ParseResult) parseResult;
+                message.setResultCode(asrResult.getCode());
+                message.setMessage(asrResult.getMessage());
+
+                ResponseEntity entity = new ResponseEntity();
+                entity.setAudioContent(asrResult.getResult());
+                message.setResponseEntity(entity);
+            }
+            break;
+            case Constants.VIDEO: {
+                VacParseResult vacParseResult = (VacParseResult) parseResult;
+                ParseResult ocrResult = vacParseResult.getOcrParseResult();
+                ParseResult asrResult = vacParseResult.getAsrParseResult();
+
+                if (ocrResult.getCode().equals(OCR_PART_PARSE_FAILED) || asrResult.getCode().equals(ASR_PART_PARSE_FAILED)) {
+                    message.setResultCode(PART_PARSE_FAILED);
+                } else {
+                    message.setResultCode(ocrResult.getCode());
+                }
+                message.setMessage(ocrResult.getMessage());
+
+                ResponseEntity entity = new ResponseEntity();
+                entity.setImageContent(ocrResult.getResult());
+                entity.setAudioContent(asrResult.getResult());
+                message.setResponseEntity(entity);
+            }
+            break;
+            default:
+                break;
+        }
+        return message;
+    }
+
+    /**
      * 解析结果写入文件:${convert.outputFolder}/sn.rs
      */
     private void doWriteResultToFile(String resPath, final ResponseMessage responseMessage, boolean asyncParse) {
@@ -224,5 +236,4 @@ public class ConvertServiceImpl implements ConvertService {
                     }
                 });
     }
-
 }

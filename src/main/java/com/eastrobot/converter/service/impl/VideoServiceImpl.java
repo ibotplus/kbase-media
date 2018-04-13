@@ -1,21 +1,20 @@
 package com.eastrobot.converter.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
+import com.eastrobot.converter.model.FileType;
+import com.eastrobot.converter.model.ParseResult;
+import com.eastrobot.converter.model.VacParseResult;
 import com.eastrobot.converter.service.AudioService;
 import com.eastrobot.converter.service.ImageService;
 import com.eastrobot.converter.service.VideoService;
 import com.eastrobot.converter.util.ResourceUtil;
-import com.eastrobot.converter.util.baidu.BaiduSpeechUtils;
-import org.apache.commons.io.FileUtils;
+import com.eastrobot.converter.util.ffmpeg.FFmpegUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.*;
 
 /**
@@ -24,9 +23,9 @@ import java.util.concurrent.*;
  * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
  * @version v1.0 , 2018-03-26 10:18
  */
+@Slf4j
 @Service
 public class VideoServiceImpl implements VideoService {
-    private static final Logger logger = LoggerFactory.getLogger(VideoServiceImpl.class);
 
     @Autowired
     private ImageService imageService;
@@ -34,138 +33,85 @@ public class VideoServiceImpl implements VideoService {
     @Autowired
     private AudioService audioService;
 
+    @Value("{video.vca.ffmpeg.toImage.fps}")
+    private Double fps;
+
     /**
      * <pre>
-     *     视频分段抽取音轨(*.pcm),
-     *     原始视频抽图片(see {@link com.eastrobot.converter.util.ffmpeg.FFmpeg}),遍历分段音轨解析文字,遍历图片解析文字提取关键字.
-     *     图片识别调用腾讯Youtu-API (see {@link com.eastrobot.converter.service.YouTuService#ocr}),
-     *     语音识别调用百度Speech-API (see {@link BaiduSpeechUtils#asr})
+     *     视频抽取音轨(*.pcm),
+     *     视频抽图片(*.jpg),音轨解析文字,图片解析文字.
      * </pre>
      *
      * @author Yogurt_lei
      * @date 2018-03-26 18:06
      */
     @Override
-    public JSONObject parseVideo(final String videoPath) {
+    public VacParseResult handle(String videoFilePath) {
         boolean handleFlag = false;
-        try {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            //提交视频分段抽取音轨任务 视频提取图片
-            Future<Boolean> handleFuture = executor.submit(new Callable() {
-                @Override
-                public Object call() throws Exception {
-                    // audioService.runFfmpegParseAudiosCmd(videoPath);
-                    imageService.runFfmpegParseImagesCmd(videoPath);
-
-                    return true;
-                }
-            });
-
-            try {
-                handleFlag = handleFuture.get();
-            } catch (Exception e) {
-                logger.warn("parse video thread occured exception : [%s]", e.getMessage());
-            } finally {
-                executor.shutdownNow();
-            }
-        } catch (Exception e) {
-            logger.warn("parse video [%s] failed ", videoPath);
-            e.printStackTrace();
-        }
-
-        return this.doParseVideo(videoPath);
-    }
-
-    private JSONObject doParseVideo(final String videoPath) {
-        // 排序生成的文件
-        File dir = new File(ResourceUtil.getFolder(videoPath, ""));
-        List<File> allFiles = Arrays.asList(dir.listFiles());
-        allFiles.sort((o1, o2) -> {
-            if (o1.isDirectory() && o2.isFile())
-                return -1;
-            if (o1.isFile() && o2.isDirectory())
-                return 1;
-            return o1.getName().compareTo(o2.getName());
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        //提交视频分段抽取音轨任务 视频抽取图片
+        Future handleFuture = executor.submit(() -> {
+            FFmpegUtil.transformAudio(videoFilePath, FileType.PCM);
+            FFmpegUtil.extractFrameImage(videoFilePath, fps);
         });
 
-        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1);
+        try {
+            handleFuture.get();
+        } catch (Exception e) {
+            log.warn("parse video thread occurred exception : {}", e.getMessage());
+        } finally {
+            executor.shutdownNow();
+        }
+
+        return this.doParseVideo(videoFilePath);
+    }
+
+    private VacParseResult doParseVideo(final String videoPath) {
+        // 生成的文件 只要jpg和pcm(一个)
+        String folderPath = ResourceUtil.getFolder(videoPath, "");
+        File dir = new File(folderPath);
+        File[] allFiles = dir.listFiles(pathname -> FilenameUtils.getExtension(pathname.getName()).equals(FileType.JPG.getExtension()));
+        ExecutorService executor = Executors.newFixedThreadPool(2);
         // 总任务数门阀
-        final CountDownLatch latch = new CountDownLatch(allFiles.size());
-        // 存储音轨解析段-内容
-        final ConcurrentHashMap<String, String> audioContentMap = new ConcurrentHashMap<>();
+        final CountDownLatch latch = new CountDownLatch(2);
         // 存储图片解析段-内容
         final ConcurrentHashMap<String, String> imageContentMap = new ConcurrentHashMap<>();
+        // asr 解析结果
+        final ParseResult asrParseResult = new ParseResult();
+        // ocr 解析结果
+        final ParseResult ocrParseResult = new ParseResult();
+        // pcm 文件路径
+        final File pcmFile = new File(folderPath + FilenameUtils.getBaseName(videoPath) + FileType.PCM.getExtensionWithPoint());
 
-        for (final File file : allFiles) {
-            final String filepath = file.getAbsolutePath();
-            if (FilenameUtils.getExtension(file.getName()).equalsIgnoreCase("pcm")) {
-                //提交音轨转文字任务
-                executor.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            String content = "";
-                            // String content = audioService.handle(filepath);
-                            logger.debug("audioService parse [%s] result : [%s]", filepath, content);
-                            audioContentMap.put(FilenameUtils.getBaseName(filepath), content);
-                            // 语音文件转写完删除
-                            FileUtils.deleteQuietly(file);
-                        } finally {
-                            latch.countDown();
-                        }
-                    }
-                });
+        //提交音轨转文字任务
+        executor.submit(() -> {
+            try {
+                asrParseResult.updateResult(audioService.handle(pcmFile));
+                log.info("audioService parse is complete");
+            } finally {
+                latch.countDown();
             }
-            if (FilenameUtils.getExtension(file.getName()).equalsIgnoreCase("jpg")) {
-                //提交图片转文字任务
-                executor.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            // String content = imageService.handle(filepath);
-                            String content = "";
-                            logger.debug("imageService parse [%s] result : [%s]", filepath, content);
-                            imageContentMap.put(FilenameUtils.getBaseName(filepath), content);
-                        } finally {
-                            latch.countDown();
-                        }
-                    }
-                });
+        });
+
+        //提交图片转文字任务
+        executor.submit(() -> {
+            try {
+                ocrParseResult.updateResult(imageService.handle(allFiles));
+                log.info("imageService parse is complete");
+            } finally {
+                latch.countDown();
             }
-        }
+        });
 
         try {
             // 阻塞等待结束
             latch.await();
         } catch (Exception e) {
-            logger.warn("handle parse image or video thread occured exception : [%s]", e.getMessage());
+            log.warn("handle parse image or video thread occured exception : [%s]", e.getMessage());
         } finally {
             executor.shutdownNow();
         }
 
-        String imgContentResult = null;
-        // 如果是 分段提取关键字
-        if (true) {
-            StringBuilder segmentContent = new StringBuilder();
-            //分段提取
-            // TreeMap<String, String> treeMap = ResourceUtil.map2SortByKey(imageContentMap);
-            // for (Map.Entry<String, String> entry : treeMap.entrySet()) {
-            //     segmentContent.append(ResourceUtil.list2String(HanLP.extractKeyword(entry.getValue(), 10), "")).append(",");
-            // }
-            imgContentResult = segmentContent.toString();
-        } else {
-            // String imageContent = ResourceUtil.map2SortStringByKey(imageContentMap, "");
-            //整文提取
-            // List<String> phraseList = HanLP.extractKeyword(imageContent, 200);
-            // imgContentResult = ResourceUtil.list2String(phraseList, "");
-        }
-
-        JSONObject jsonObject = new JSONObject();
-        // jsonObject.put("audios", ResourceUtil.map2SortStringByKey(audioContentMap, ""));
-        jsonObject.put("images", imgContentResult);
-
-        logger.info("parse video result Json: [%s]", jsonObject);
-
-        return jsonObject;
+        return new VacParseResult(asrParseResult, ocrParseResult);
     }
 }

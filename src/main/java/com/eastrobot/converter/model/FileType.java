@@ -1,12 +1,13 @@
 package com.eastrobot.converter.model;
 
-public enum FFmpegFileType {
-    PCM("pcm", ".pcm");
+public enum FileType {
+    PCM("pcm", ".pcm"),
+    JPG("jpg", ".jpg");
 
     String extension;
     String extensionWithPoint;
 
-    FFmpegFileType(String extension, String extensionWithPoint) {
+    FileType(String extension, String extensionWithPoint) {
         this.extension = extension;
         this.extensionWithPoint = extensionWithPoint;
     }
