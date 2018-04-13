@@ -3,7 +3,7 @@ There is [api-desc](http://localhost:8080/converter-api/swagger-ui.html) use Swa
 
 
 ### Restful Apis
-[http://localhost:8080/kbase-doc/swagger-ui.html](http://localhost:8080/kbase-doc/swagger-ui.html)
+[http://localhost:8080/converter-api/swagger-ui.html](http://localhost:8080/converter-api/swagger-ui.html)
 
 ### Thanks For
 [Tencent-YouTu](https://github.com/Tencent-YouTu/java_sdk)
