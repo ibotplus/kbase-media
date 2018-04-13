@@ -2,6 +2,7 @@ package com.eastrobot.converter.service;
 
 
 import com.alibaba.fastjson.JSONObject;
+import com.eastrobot.converter.model.AsrParseResult;
 
 /**
  * VideoService
@@ -10,6 +11,8 @@ import com.alibaba.fastjson.JSONObject;
  * @version v1.0 , 2018-03-26 10:15
  */
 public interface VideoService {
+
+    AsrParseResult handle(String videoFilePath);
 
     /**
      *

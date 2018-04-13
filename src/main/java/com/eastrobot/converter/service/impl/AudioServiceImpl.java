@@ -2,11 +2,13 @@ package com.eastrobot.converter.service.impl;
 
 import com.eastrobot.converter.model.AsrParseResult;
 import com.eastrobot.converter.model.Constants;
+import com.eastrobot.converter.model.FFmpegFileType;
 import com.eastrobot.converter.service.AudioService;
 import com.eastrobot.converter.util.ResourceUtil;
 import com.eastrobot.converter.util.baidu.BaiduSpeechUtils;
 import com.eastrobot.converter.util.ffmpeg.FFmpegUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -52,7 +55,13 @@ public class AudioServiceImpl implements AudioService {
      * @date 2018-04-10 10:21
      */
     private AsrParseResult baiduAsrHandler(String audioFilePath) {
-        double duration = FFmpegUtil.getDuration(audioFilePath);
+        double duration = 0;
+        try {
+            duration = FFmpegUtil.getDuration(audioFilePath);
+        } catch (IOException e) {
+            log.error("getDuration occurred exception, check the ffmpeg location is right.");
+            return new AsrParseResult(FFMPEG_LOCATION_ERROR, "", "");
+        }
         if (duration > MAX_DURATION) {
             // 1. 切割文件 59s 每段
             String folder = ResourceUtil.getFolder(audioFilePath, "");
@@ -132,7 +141,13 @@ public class AudioServiceImpl implements AudioService {
     }
 
     private String doBaiduAsrHandler(String audioFilePath) throws Exception {
-        JSONObject asr = BaiduSpeechUtils.asr(audioFilePath, PCM, RATE);
+        String pcmAudioFile = audioFilePath;
+        // 不是pcm格式转成pcm格式
+        if (!"pcm".equalsIgnoreCase(FilenameUtils.getExtension(audioFilePath))) {
+            pcmAudioFile = FFmpegUtil.transformAudio(audioFilePath, FFmpegFileType.PCM);
+            FileUtils.deleteQuietly(new File(audioFilePath));
+        }
+        JSONObject asr = BaiduSpeechUtils.asr(pcmAudioFile, PCM, RATE);
         if (asr.optInt("err_no", -1) == 0) {
             //数组字符串
             String result = asr.optString("result");

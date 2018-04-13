@@ -50,6 +50,7 @@ public class ConvertServiceImpl implements ConvertService {
 
         File resFile = new File(resPath);
         ResponseMessage responseMessage = new ResponseMessage();
+        responseMessage.setSn(FilenameUtils.getBaseName(resPath));
 
         if (ResourceUtil.isAudio(resPath)) {
             AsrParseResult asrResult = audioService.handle(resPath);
@@ -155,9 +156,9 @@ public class ConvertServiceImpl implements ConvertService {
     public String doUpload(MultipartFile file, String sn, boolean asyncParse) throws Exception {
         String targetFile;
         if (asyncParse) {
-            targetFile = OUTPUT_FOLDER_ASYNC + sn + FilenameUtils.getExtension(file.getOriginalFilename());
+            targetFile = OUTPUT_FOLDER_ASYNC + sn + "." + FilenameUtils.getExtension(file.getOriginalFilename());
         } else {
-            targetFile = OUTPUT_FOLDER + sn + FilenameUtils.getExtension(file.getOriginalFilename());
+            targetFile = OUTPUT_FOLDER + sn + "." + FilenameUtils.getExtension(file.getOriginalFilename());
         }
         File tmpFile = new File(targetFile);
         tmpFile.mkdirs();
@@ -172,9 +173,9 @@ public class ConvertServiceImpl implements ConvertService {
     private void doWriteResultToFile(String resPath, final ResponseMessage responseMessage, boolean asyncParse) {
         String resultFilePath;
         if (asyncParse) {
-            resultFilePath = OUTPUT_FOLDER + FilenameUtils.getBaseName(resPath) + Constants.RESULT_FILE_EXTENSION_WITH_POINT;
-        } else {
             resultFilePath = OUTPUT_FOLDER_ASYNC + FilenameUtils.getBaseName(resPath) + Constants.RESULT_FILE_EXTENSION_WITH_POINT;
+        } else {
+            resultFilePath = OUTPUT_FOLDER + FilenameUtils.getBaseName(resPath) + Constants.RESULT_FILE_EXTENSION_WITH_POINT;
         }
         File resultFile = new File(resultFilePath);
 

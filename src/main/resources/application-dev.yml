@@ -27,7 +27,7 @@ server:
 convert:
   # default output-folder
   outputFolder: E:\\converter-output\\
-  outputFolder-async: E:\\converter-output-async\\
+  outputFolder-async: E:\\converter-output\\async\\
   video:
     vca:
       default: ffmpeg

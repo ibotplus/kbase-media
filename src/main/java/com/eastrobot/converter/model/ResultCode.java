@@ -18,7 +18,8 @@ public enum ResultCode {
     ASR_PART_PARSE_FAILED(11, "语音解析部分失败."),
     OCR_PART_PARSE_FAILED(12, "图片解析部分失败."),
     NOT_COMPLETED(13, "解析还在进行中,请稍后尝试读取结果."),
-    ASYNC_READ_RESULT_FILE_FAILED(14, "读取解析结果文件失败.");
+    ASYNC_READ_RESULT_FILE_FAILED(14, "读取解析结果文件失败."),
+    FFMPEG_LOCATION_ERROR(15, "FFMPEG安装路径不正确,检查配置文件路径");
 
     private int code;
     private String msg;
