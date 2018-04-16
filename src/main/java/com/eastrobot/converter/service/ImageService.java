@@ -2,6 +2,8 @@ package com.eastrobot.converter.service;
 
 import com.eastrobot.converter.model.ParseResult;
 
+import java.io.File;
+
 /**
  * ImageService
  *
@@ -12,5 +14,5 @@ public interface ImageService {
     /**
      * 解析图片 生成文本
      */
-    ParseResult handle(String... imageFilePaths);
+    ParseResult handle(File... imageFile);
 }

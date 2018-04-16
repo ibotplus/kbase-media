@@ -80,7 +80,7 @@ public class VideoServiceImpl implements VideoService {
         // ocr 解析结果
         final ParseResult ocrParseResult = new ParseResult();
         // pcm 文件路径
-        final File pcmFile = new File(folderPath + FilenameUtils.getBaseName(videoPath) + FileType.PCM.getExtensionWithPoint());
+        final String pcmFile =folderPath + FilenameUtils.getBaseName(videoPath) + FileType.PCM.getExtensionWithPoint();
 
         //提交音轨转文字任务
         executor.submit(() -> {
