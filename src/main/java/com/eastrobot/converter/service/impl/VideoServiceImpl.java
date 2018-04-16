@@ -47,7 +47,6 @@ public class VideoServiceImpl implements VideoService {
      */
     @Override
     public VacParseResult handle(String videoFilePath) {
-        boolean handleFlag = false;
         ExecutorService executor = Executors.newSingleThreadExecutor();
         //提交视频分段抽取音轨任务 视频抽取图片
         Future handleFuture = executor.submit(() -> {

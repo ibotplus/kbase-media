@@ -20,8 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import static com.eastrobot.converter.util.baidu.BaiduAsrConstants.MAX_DURATION;
-
 /**
  * FFmpegUtil
  *
@@ -70,20 +68,22 @@ public class FFmpegUtil {
 
     /**
      *
-     * 是否切割百度asr可用音频pcm 长度59s
+     * 切割音频为pcm 长度segmentFileMaxDuration
      * ffmpeg -y -i {input.wav|.mp3} -ss {startOffset} -t {duration} -acodec pcm_s16le -f s16le -ac 1 -ar 16000 {output.pcm}
      *
+     * pcm文件 or 存放切割pcm文件夹 (当前文件名的文件夹下)
+     *
      * @param filePath 文件路径 audio|video 通用
-     * @return pcm文件 or 存放切割pcm文件夹 (当前文件名的文件夹下)
+     * @param segDuration 分段文件持续时间
      *
      * @author Yogurt_lei
      * @date 2018-04-09 18:49
      */
-    public static void baiduSplitSegToPcm(String filePath) throws IOException {
+    public static void splitSegFileToPcm(String filePath, long segDuration) throws IOException {
         double duration = FFmpegUtil.getDuration(filePath);
         String folder = ResourceUtil.getFolder(filePath, "");
-        if (duration > MAX_DURATION) {
-            int totalSegment = (int) (duration / MAX_DURATION + ((duration % MAX_DURATION) > 0 ? 1 : 0));
+        if (duration >= segDuration) {
+            int totalSegment = (int) (duration / segDuration + ((duration % segDuration) > 0 ? 1 : 0));
             log.debug("total segment :[%s], total second: [%s]", totalSegment, duration);
             for (int i = 1; i <= totalSegment; i++) {
                 FFmpegBuilder builder = new FFmpegBuilder();
@@ -92,7 +92,7 @@ public class FFmpegUtil {
                         .addOutput(folder + FilenameUtils.getBaseName(filePath) + "-" + i + ".pcm")
                         .disableVideo()
                         .disableSubtitle()
-                        .setStartOffset((i - 1) * MAX_DURATION, TimeUnit.SECONDS)
+                        .setStartOffset((i - 1) * segDuration, TimeUnit.SECONDS)
                         .setDuration(59, TimeUnit.SECONDS)
                         .setAudioCodec("pcm_s16le")
                         .setFormat("s16le")

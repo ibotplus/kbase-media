@@ -44,11 +44,6 @@ public interface BaiduAsrConstants {
      * 默认音频采样率
      */
     int RATE = 16000;
-    /**
-     * 音频最大长度 (单位:s)
-     */
-    int MAX_DURATION = 60;
-
     //------------------------------------
     // asr return errorCode
     //------------------------------------

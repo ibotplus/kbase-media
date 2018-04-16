@@ -34,7 +34,7 @@ convert:
     vca:
       default: ffmpeg
       ffmpeg:
-        # in windows os, it's Necessary, if you use baidu asr api it's necessary too. (use it to cut audio as 60s/seg.)
+        # in windows os, it's Necessary, in unix os, it will load by system enviroment(it's also used to cut video or audio file)
         path: D:\\ffmpeg\\bin\\
         toImage:
           fps: 0.2
@@ -47,6 +47,8 @@ convert:
         appId: 11067243
         apiKey: iDEvPvY4zT9CzFgYKMQY6eAi
         secretKey: Wkeh8gIbB2LrNBtGwuechG8TUkLlB2TY
+      shhan:
+        base-url: http://172.16.8.103:8177/shRecBase/
   image:
     #default ocr tool
     ocr:

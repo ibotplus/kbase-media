@@ -39,6 +39,7 @@ public interface Constants {
     // asr-converter supplier param
     //------------------------------------
     String BAIDU = "baidu";
+    String SHHAN = "shhan";
 
     //------------------------------------
     // String Blank result

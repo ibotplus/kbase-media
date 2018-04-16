@@ -2,9 +2,7 @@ package com.eastrobot.converter.util.baidu;
 
 
 import com.baidu.aip.speech.AipSpeech;
-import com.eastrobot.converter.config.ConvertConfig;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -24,9 +22,6 @@ public class BaiduSpeechUtils {
     private String SECRET_KEY;
 
     private static AipSpeech client;
-
-    @Autowired
-    private ConvertConfig convertConfig;
 
     @PostConstruct
     public void init() {
