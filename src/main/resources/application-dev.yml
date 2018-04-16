@@ -42,6 +42,7 @@ convert:
     # default asr tool
     asr:
       default: baidu
+      seg-duration: 60
       #baidu asr config
       baidu:
         appId: 11067243

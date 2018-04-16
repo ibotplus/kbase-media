@@ -93,7 +93,7 @@ public class FFmpegUtil {
                         .disableVideo()
                         .disableSubtitle()
                         .setStartOffset((i - 1) * segDuration, TimeUnit.SECONDS)
-                        .setDuration(59, TimeUnit.SECONDS)
+                        .setDuration(segDuration - 1, TimeUnit.SECONDS)
                         .setAudioCodec("pcm_s16le")
                         .setFormat("s16le")
                         .setAudioChannels(1)
