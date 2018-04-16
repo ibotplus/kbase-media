@@ -1,18 +1,24 @@
 package com.eastrobot.converter.util.shhan;
 
 
+import com.eastrobot.converter.util.HttpClientUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
-import static org.apache.commons.io.IOUtils.copy;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 
 @Slf4j
 @Component
@@ -28,37 +34,38 @@ public class ShhanUtil {
         shhanUtil = this;
     }
 
-	public static String asr(String filePath) {
-        String result;
+    public static String asr(String filePath) {
+        byte[] data;
         try {
-            byte[] data = FileUtils.readFileToByteArray(new File(filePath));
-            result = rec(data, shhanUtil.shhanBaseUrl + "recogBatch");
+            data = FileUtils.readFileToByteArray(new File(filePath));
+        } catch (IOException e) {
+            return "";
+        }
 
-            result = StringUtils.substringAfter(result, "<s>");
-            return result.replaceAll("\\s*|\t|\n", "");
+        HttpClient client = HttpClientUtil.getHttpClient();
+        HttpPost httpPost = new HttpPost(shhanUtil.shhanBaseUrl + "recogBatch"); // 离线 支持多
+
+        // httpPost.setHeader("requestId", "");
+        httpPost.setHeader("contextCode", "CHN-CMN");
+        httpPost.setHeader("sampleRate", "16000");
+        httpPost.setHeader("length", String.valueOf(data.length));
+        ByteArrayEntity entity = new ByteArrayEntity(data, ContentType.create("audio/basic"));
+        httpPost.setEntity(entity);
+        try {
+            HttpResponse response = client.execute(httpPost);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode == HttpStatus.SC_OK) {
+                String result = EntityUtils.toString(response.getEntity(), Charset.forName("utf-8"));
+                result = StringUtils.substringAfter(result, "<s>");
+
+                return result.replaceAll("\\s*|\t|\n", "");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         return "";
     }
 
-    private static String rec(byte[] data, String url) throws IOException {
-        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-        conn.setDoInput(true);
-        conn.setDoOutput(true);
-        conn.addRequestProperty("Content-Type", "audio/pcm");
-        conn.setRequestProperty("length", String.valueOf(data.length));
-        conn.setRequestProperty("sampleRate", "16000");
-         OutputStream out = conn.getOutputStream();
-        out.write(data);
-        out.flush();
-        out.close();
-        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-        InputStream in = conn.getInputStream();
-        copy(in, bytesOut);
-        in.close();
-        byte[] txtBytes = bytesOut.toByteArray();
-        return new String(txtBytes, "utf-8");
-    }
 }
  

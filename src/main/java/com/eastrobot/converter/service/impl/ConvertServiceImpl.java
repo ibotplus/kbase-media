@@ -65,7 +65,7 @@ public class ConvertServiceImpl implements ConvertService {
 
 
         } else if (ResourceUtil.isImage(resPath)) {
-            ParseResult ocrResult = imageService.handle(resPath);
+            ParseResult ocrResult = imageService.handle(new File(resPath));
             responseMessage = this.doResultToResponseMessage(sn, ocrResult, Constants.IMAGE);
         } else {
             responseMessage = new ResponseMessage(ILLEGAL_TYPE);

@@ -34,7 +34,7 @@ convert:
     vca:
       default: ffmpeg
       ffmpeg:
-        # in windows os, it's Necessary, in unix os, it will load by system enviroment(it's also used to cut video or audio file)
+        # in windows os, it's Necessary, in unix os, it will load by system enviroment
         path: D:\\ffmpeg\\bin\\
         toImage:
           fps: 0.2

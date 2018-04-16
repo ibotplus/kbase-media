@@ -33,7 +33,7 @@ public class VideoServiceImpl implements VideoService {
     @Autowired
     private AudioService audioService;
 
-    @Value("{video.vca.ffmpeg.toImage.fps}")
+    @Value("${convert.video.vca.ffmpeg.toImage.fps}")
     private Double fps;
 
     /**

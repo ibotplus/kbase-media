@@ -59,6 +59,8 @@ public class FileMonitor {
                 return;
             }
             log.info("onFileCreate start parse >>>>>" + file.getAbsolutePath());
+
+            // TODO by Yogurt_lei :  引入MQ
             ResponseMessage responseMessage = convertService.driver(absolutePath, true);
             log.info(">>>>>{} parse result: {}", file.getAbsolutePath(), JSON.toJSONString(responseMessage));
         }
