@@ -3,8 +3,6 @@ package com.eastrobot.converter.service;
 
 import com.eastrobot.converter.model.ParseResult;
 
-import java.io.File;
-
 /**
  * AudioService
  *
@@ -20,5 +18,5 @@ public interface AudioService {
      * @author Yogurt_lei
      * @date 2018-03-27 11:54
      */
-    ParseResult handle(File audioFile);
+    ParseResult handle(String audioFilePath);
 }

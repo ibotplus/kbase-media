@@ -53,12 +53,11 @@ public class ConvertServiceImpl implements ConvertService {
     @Override
     public ResponseMessage driver(String resPath, boolean asyncParse) {
 
-        File resFile = new File(resPath);
         ResponseMessage responseMessage;
         String sn = FilenameUtils.getBaseName(resPath);
 
         if (ResourceUtil.isAudio(resPath)) {
-            ParseResult asrResult = audioService.handle(new File(resPath));
+            ParseResult asrResult = audioService.handle(resPath);
             responseMessage = this.doResultToResponseMessage(sn, asrResult, Constants.AUDIO);
         } else if (ResourceUtil.isVideo(resPath)) {
             VacParseResult vacParseResult = videoService.handle(resPath);
@@ -66,7 +65,7 @@ public class ConvertServiceImpl implements ConvertService {
 
 
         } else if (ResourceUtil.isImage(resPath)) {
-            ParseResult ocrResult = imageService.handle(new File(resPath));
+            ParseResult ocrResult = imageService.handle(resPath);
             responseMessage = this.doResultToResponseMessage(sn, ocrResult, Constants.IMAGE);
         } else {
             responseMessage = new ResponseMessage(ILLEGAL_TYPE);

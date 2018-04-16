@@ -42,19 +42,17 @@ public class AudioServiceImpl implements AudioService {
     private String audioTool;
 
     @Override
-    public ParseResult handle(File audioFile) {
+    public ParseResult handle(String audioFilePath) {
         if (Constants.BAIDU.equals(audioTool)) {
-           return this.baiduAsrHandler(audioFile);
+           return this.baiduAsrHandler(audioFilePath);
         } else if (Constants.SHHAN.equals(audioTool)) {
-            return this.shhanAsrHandler(audioFile);
+            return this.shhanAsrHandler(audioFilePath);
         } else {
             return new ParseResult(CFG_ERROR, "","");
         }
     }
 
-    private ParseResult shhanAsrHandler(File audioFile) {
-
-        String audioFilePath = audioFile.getAbsolutePath();
+    private ParseResult shhanAsrHandler(String audioFilePath) {
         try {
             // 1. 是否切割文件 20s 每段 文件放入当前文件夹下当前文件名命名的文件夹下
             FFmpegUtil.splitSegFileToPcm(audioFilePath, 20);
@@ -137,8 +135,7 @@ public class AudioServiceImpl implements AudioService {
      * @author Yogurt_lei
      * @date 2018-04-10 10:21
      */
-    private ParseResult baiduAsrHandler(File audioFile) {
-        String audioFilePath = audioFile.getAbsolutePath();
+    private ParseResult baiduAsrHandler(String audioFilePath) {
         try {
             // 1. 是否切割文件 59s 每段 文件放入当前文件夹下当前文件名命名的文件夹下
             FFmpegUtil.splitSegFileToPcm(audioFilePath, 60);

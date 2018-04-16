@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -39,34 +38,33 @@ public class ImageServiceImpl implements ImageService {
     private String imageTool;
 
     @Override
-    public ParseResult handle(File... imageFiles) {
+    public ParseResult handle(String... imageFilePaths) {
         if (Constants.YOUTU.equals(imageTool)) {
-            return this.imageHandler(imageFiles);
+            return this.imageHandler(imageFilePaths);
         } else {
             return new ParseResult(CFG_ERROR, "","");
         }
     }
 
-    private ParseResult imageHandler(File... imageFiles) {
-        if (imageFiles.length > 1) {
+    private ParseResult imageHandler(String... imageFilePaths) {
+        if (imageFilePaths.length > 1) {
             int corePoolSize = Runtime.getRuntime().availableProcessors() + 1;
             ExecutorService executor = Executors.newFixedThreadPool(corePoolSize);
             // 总任务数门阀
-            final CountDownLatch latch = new CountDownLatch(imageFiles.length);
+            final CountDownLatch latch = new CountDownLatch(imageFilePaths.length);
             // 存储图片解析段-内容
             final ConcurrentHashMap<Integer, String> imageContentMap = new ConcurrentHashMap<>();
             AtomicBoolean hasOccurredException = new AtomicBoolean(false);
             // 存储图片解析异常信息 [seg:message]
             StringBuffer exceptionBuffer = new StringBuffer();
 
-            for (final File file : imageFiles) {
-                final String filepath = file.getAbsolutePath();
+            for (String imageFile : imageFilePaths) {
                 //提交图片转文字任务
                 executor.submit(() -> {
-                    String currentSegIndex = FilenameUtils.getBaseName(filepath);
+                    String currentSegIndex = FilenameUtils.getBaseName(imageFile);
                     try {
-                        String content = doYoutuHandler(filepath);
-                        log.debug("youtuHandler parse {} result : {}", filepath, content);
+                        String content = doYoutuHandler(imageFile);
+                        log.debug("youtuHandler parse {} result : {}", imageFilePaths, content);
                         Optional.ofNullable(content).ifPresent((Value) -> {
                             if (StringUtils.isNotBlank(Value)) {
                                 imageContentMap.put(Integer.parseInt(currentSegIndex), Value);
@@ -102,7 +100,7 @@ public class ImageServiceImpl implements ImageService {
             }
         } else {// 一张图片
             try {
-                String result = this.doYoutuHandler(imageFiles[0].getAbsolutePath());
+                String result = this.doYoutuHandler(imageFilePaths[0]);
                 return new ParseResult(SUCCESS, "", result);
             } catch (Exception e) {
                 log.warn("handler parse image occurred exception: {}", e.getMessage());
