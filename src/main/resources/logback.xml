@@ -62,13 +62,15 @@
     <logger name="org.hibernate" level="warn"/>
     <logger name="org.jboss" level="warn"/>
     <logger name="org.apache.http" level="warn"/>
+    <logger name="org.apache.tomcat" level="warn"/>
+    <logger name="org.apache.catalina" level="warn"/>
     <logger name="org.zbus" level="warn"/>
     <logger name="net.sf.ehcache" level="warn"/>
     <logger name="org.thymeleaf" level="warn"/>
     <logger name="io.swagger" level="warn"/>
     <logger name="springfox.documentation" level="warn"/>
 
-    <root level="info">
+    <root level="debug">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="debug"/>
         <appender-ref ref="warn"/>

@@ -23,6 +23,18 @@ server:
   servlet:
     context-path: /converter-api
 
+# default rocketmq config
+apache:
+  rocketmq:
+    consumer:
+      # consumer group
+      PushConsumer: yogurt-consumer
+    producer:
+      # producer group
+      producerGroup: yogurt-producer
+    # nameserver address
+    namesrvAddr: 192.168.255.129:9876
+
 # default user converter config
 convert:
   # Whether to enable the asynchronous interface
