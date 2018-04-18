@@ -1,8 +1,6 @@
 package com.eastrobot.converter.plugin;
 
-import com.alibaba.fastjson.JSON;
-import com.eastrobot.converter.model.ResponseMessage;
-import com.eastrobot.converter.service.ConvertService;
+import com.eastrobot.converter.model.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
@@ -10,7 +8,6 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -32,9 +29,6 @@ public class FileMonitor {
 
     @Value("${convert.outputFolder-async}") //文件路径:${convert.outputFolder-async}/sn.extension
     private String OUTPUT_FOLDER_ASYNC;
-
-    @Autowired
-    private ConvertService convertService;
 
     @PostConstruct
     public void init() throws Exception {
@@ -58,11 +52,7 @@ public class FileMonitor {
             if (RESULT_FILE_EXTENSION.equals(FilenameUtils.getExtension(absolutePath))) {
                 return;
             }
-            log.info("onFileCreate start parse >>>>>" + file.getAbsolutePath());
-
-            // TODO by Yogurt_lei :  引入MQ
-            ResponseMessage responseMessage = convertService.driver(absolutePath, true);
-            log.info(">>>>>{} parse result: {}", file.getAbsolutePath(), JSON.toJSONString(responseMessage));
+            RocketMQProducer.sendMessage(Constants.MQ_CREATE_FILE_TOPIC, Constants.MQ_CREATE_FILE_TAG, file.getAbsolutePath());
         }
     }
 }

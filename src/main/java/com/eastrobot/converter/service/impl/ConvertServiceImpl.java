@@ -52,7 +52,6 @@ public class ConvertServiceImpl implements ConvertService {
 
     @Override
     public ResponseMessage driver(String resPath, boolean asyncParse) {
-
         ResponseMessage responseMessage;
         String sn = FilenameUtils.getBaseName(resPath);
 

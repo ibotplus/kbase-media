@@ -11,3 +11,7 @@ There is [api-docs](http://localhost:8080/converter-api/swagger-ui.html) use Swa
 [Baidu-AIP](https://ai.baidu.com/docs#/ASR-Online-Java-SDK/top)
 
 [bramp/ffmpeg-cli-wrapper](https://github.com/bramp/ffmpeg-cli-wrapper)
+
+[apache/rocketmq](https://github.com/apache/rocketmq)
+
+[ekoz/ocr-api](https://github.com/ekoz/ocr-api)

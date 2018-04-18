@@ -68,4 +68,12 @@ public interface Constants {
     //------------------------------------
     String RESULT_FILE_EXTENSION = "rs";
     String RESULT_FILE_EXTENSION_WITH_POINT = ".rs";
+
+    //------------------------------------
+    // RocketMQ default constants
+    //------------------------------------
+    String MQ_CREATE_FILE_TOPIC = "MQ_CREATE_FILE_TOPIC";
+    String MQ_CREATE_FILE_TAG = "MQ_CREATE_FILE_TAG";
+    Integer MQ_RETRY_CONSUME = 5;
+    Integer MQ_RETRY_PRODUCT = 5;
 }

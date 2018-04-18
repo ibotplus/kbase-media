@@ -1,0 +1,11 @@
+不区分优先级
+
+1.逻辑进行消息去重:
+https://blog.csdn.net/lovesomnus/article/details/51776942
+利用一张日志表来记录已经处理成功的消息的ID，如果新到的消息ID已经在日志表中，那么就不再处理这条消息。
+
+2.配置项中enable-async: true的开启关闭 控制是否启动 异步的相关的一切
+
+3.RocketMQ 配置的提取
+
+4.new branch 不合并到develop的kbase-media. 引入abbyy

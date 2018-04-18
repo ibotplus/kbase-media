@@ -33,7 +33,7 @@ apache:
       # producer group
       producerGroup: yogurt-producer
     # nameserver address
-    namesrvAddr: 192.168.255.129:9876
+    namesrvAddr: 192.168.255.130:9876
 
 # default user converter config
 convert:

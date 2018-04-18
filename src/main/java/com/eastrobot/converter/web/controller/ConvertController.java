@@ -3,6 +3,7 @@ package com.eastrobot.converter.web.controller;
 import com.eastrobot.converter.model.ResponseMessage;
 import com.eastrobot.converter.model.ResponseMessageAsync;
 import com.eastrobot.converter.model.ResultCode;
+import com.eastrobot.converter.plugin.RocketMQProducer;
 import com.eastrobot.converter.service.ConvertService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -99,6 +100,22 @@ public class ConvertController {
         } else {
             return new ResponseMessage(ResultCode.PARAM_ERROR);
         }
+    }
+
+    @Autowired
+    private RocketMQProducer producer;
+
+    @ApiOperation(value = "测试发送消息.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "topic", value = "topic", dataType = "string", required = true, paramType = "query"),
+            @ApiImplicitParam(name = "tag", value = "tag", dataType = "string", required = true, paramType = "query"),
+            @ApiImplicitParam(name = "message", value = "message", dataType = "string", required = true, paramType = "query")
+    })
+    @GetMapping("/pushMessage")
+    public void pushMessage(@RequestParam(name = "topic") String topic,
+                            @RequestParam(name = "tag") String tag,
+                            @RequestParam(name = "message") String message) {
+        producer.sendMessage(topic, tag, message);
     }
 
 }

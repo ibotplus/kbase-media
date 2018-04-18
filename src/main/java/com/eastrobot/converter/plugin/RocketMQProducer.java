@@ -1,7 +1,9 @@
 package com.eastrobot.converter.plugin;
 
+import com.eastrobot.converter.model.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.remoting.common.RemotingHelper;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 /**
  * RocketMQProducer
@@ -32,38 +35,66 @@ public class RocketMQProducer {
     @Value("${apache.rocketmq.namesrvAddr}")
     private String namesrvAddr;
 
+    private static DefaultMQProducer producer;
+
+    /**
+     * Initialized required param for RocketMQ Producer
+     *
+     * @author Yogurt_lei
+     * @date 2018-04-18 15:31
+     */
     @PostConstruct
-    public void defaultMQProducer() {
-        //生产者的组名
-        DefaultMQProducer producer = new DefaultMQProducer(producerGroup);
-        //指定NameServer地址，多个地址以 ; 隔开
+    public void init() {
+        producer = new DefaultMQProducer(producerGroup);
         producer.setNamesrvAddr(namesrvAddr);
-
+        // 设置重试次数
+        producer.setRetryTimesWhenSendFailed(Constants.MQ_RETRY_PRODUCT);
+        producer.setRetryTimesWhenSendAsyncFailed(Constants.MQ_RETRY_PRODUCT);
         try {
-            /**
-             * Producer对象在使用之前必须要调用start初始化，初始化一次即可
-             * 注意：切记不可以在每次发送消息时，都调用start方法
-             */
             producer.start();
-
-            //创建一个消息实例，包含 topic、tag 和 消息体
-            //如下：topic 为 "TopicTest"，tag 为 "push"
-            Message message = new Message("TopicTest", "push", "发送消息----zhisheng-----".getBytes(RemotingHelper
-                    .DEFAULT_CHARSET));
-
-            StopWatch stop = new StopWatch();
-            stop.start();
-
-            for (int i = 0; i < 10000; i++) {
-                SendResult result = producer.send(message);
-                System.out.println("发送响应：MsgId:" + result.getMsgId() + "，发送状态:" + result.getSendStatus());
-            }
-            stop.stop();
-            System.out.println("----------------发送一万条消息耗时：" + stop.getTotalTimeMillis());
+            log.warn("RocketMQProducer has been started. {}", producer);
         } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            producer.shutdown();
+            log.error("RocketMQProducer init occurred exception", e);
+        }
+    }
+
+    @PreDestroy
+    public void destroy() {
+        producer.shutdown();
+        log.warn("RocketMQProducer has been destroyed. {}", producer);
+    }
+
+    /**
+     * 发送消息 异步 内部有重试机制 可能会有重复问题
+     * @param topic topic
+     * @param tag tag
+     * @param msg 消息主体
+     *
+     * @author Yogurt_lei
+     * @date 2018-04-18 11:00
+     */
+    public static void sendMessage(String topic, String tag, String msg) {
+        try {
+            StopWatch sw = new StopWatch();
+            Message message = new Message(topic, tag, msg.getBytes(RemotingHelper.DEFAULT_CHARSET));
+            sw.start();
+            SendResult result = producer.send(message);
+            producer.send(message, new SendCallback() {
+                @Override
+                public void onSuccess(SendResult sendResult) {
+                    log.warn("SEND-MSG >>> msgId: {}, msg: {}, status: {}", result.getMsgId(), msg, result.getSendStatus());
+                    log.info(sw.prettyPrint());
+                }
+
+                @Override
+                public void onException(Throwable e) {
+                    log.error("SEND-MSG occurred exception.", e);
+                }
+            });
+            sw.stop();
+
+        } catch (Exception e) {
+            log.error("SEND-MSG occurred exception.", e);
         }
     }
 }
