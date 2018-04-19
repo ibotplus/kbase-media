@@ -86,7 +86,7 @@ public class VideoServiceImpl implements VideoService {
         executor.submit(() -> {
             try {
                 asrParseResult.updateResult(audioService.handle(pcmFile));
-                log.info("audioService parse is complete");
+                log.info("audioService convert is complete");
             } finally {
                 latch.countDown();
             }
@@ -96,7 +96,7 @@ public class VideoServiceImpl implements VideoService {
         executor.submit(() -> {
             try {
                 ocrParseResult.updateResult(imageService.handle(allFiles));
-                log.info("imageService parse is complete");
+                log.info("imageService convert is complete");
             } finally {
                 latch.countDown();
             }
@@ -106,7 +106,7 @@ public class VideoServiceImpl implements VideoService {
             // 阻塞等待结束
             latch.await();
         } catch (Exception e) {
-            log.warn("handle parse image or video thread occured exception : [%s]", e.getMessage());
+            log.warn("handle convert image or video thread occurred exception : [%s]", e.getMessage());
         } finally {
             executor.shutdownNow();
         }

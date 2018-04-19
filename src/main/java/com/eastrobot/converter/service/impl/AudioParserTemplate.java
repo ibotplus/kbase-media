@@ -2,7 +2,7 @@ package com.eastrobot.converter.service.impl;
 
 import com.eastrobot.converter.model.FileType;
 import com.eastrobot.converter.model.ParseResult;
-import com.eastrobot.converter.service.AudioParserCallBack;
+import com.eastrobot.converter.service.ParserCallBack;
 import com.eastrobot.converter.util.ResourceUtil;
 import com.eastrobot.converter.util.ffmpeg.FFmpegUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +34,7 @@ public class AudioParserTemplate {
     @Value("${convert.audio.asr.seg-duration}")
     private Long segmentDuration;
 
-    ParseResult handle(String audioFilePath, AudioParserCallBack callBack) {
+    ParseResult handle(String audioFilePath, ParserCallBack callBack) {
         try {
             // 1. 是否切割文件 {segmentDuration} 每段 文件放入当前文件夹下当前文件名命名的文件夹下
             FFmpegUtil.splitSegFileToPcm(audioFilePath, segmentDuration);
@@ -64,7 +64,7 @@ public class AudioParserTemplate {
                     String baseName = FilenameUtils.getBaseName(filepath);
                     String currentSegIndex = StringUtils.substringAfterLast(baseName, "-");
                     try {
-                        String content = callBack.doInAudioParser(filepath);
+                        String content = callBack.doInParser(filepath);
                         log.debug("asrHandler parse {} result : {}", filepath, content);
                         audioContentMap.put(Integer.parseInt(currentSegIndex), content);
                     } catch (Exception e) {
@@ -89,15 +89,24 @@ public class AudioParserTemplate {
             }
 
             // 2. 解析结束后 合并内容
-            if (hasOccurredException.get()) {
-                return new ParseResult(ASR_PART_PARSE_FAILED, exceptionBuffer.toString(), ResourceUtil.map2SortByKey(audioContentMap, ""));
+            String resultText = ResourceUtil.map2SortByKey(audioContentMap, "");
+            if (StringUtils.isNotBlank(resultText)){
+                if (hasOccurredException.get()) {
+                    return new ParseResult(ASR_PART_PARSE_FAILED, exceptionBuffer.toString(), resultText);
+                } else {
+                    return new ParseResult(SUCCESS, "", ResourceUtil.map2SortByKey(audioContentMap, ""));
+                }
             } else {
-                return new ParseResult(SUCCESS, "", ResourceUtil.map2SortByKey(audioContentMap, ""));
+                return new ParseResult(PARSE_EMPTY, "", "");
             }
         } else { // 音频只有一段 不分段直解处理
             try {
-                String text = callBack.doInAudioParser(allPcmFiles[0].getAbsolutePath());
-                return new ParseResult(SUCCESS, "", text);
+                String text = callBack.doInParser(allPcmFiles[0].getAbsolutePath());
+                if (StringUtils.isNotBlank(text)){
+                    return new ParseResult(SUCCESS, "", text);
+                }
+
+                return new ParseResult(PARSE_EMPTY, "", "");
             } catch (Exception e) {
                 log.warn("asrHandler parse audio occurred exception: {}", e.getMessage());
                 return new ParseResult(ASR_FAILURE, e.getMessage(), "");

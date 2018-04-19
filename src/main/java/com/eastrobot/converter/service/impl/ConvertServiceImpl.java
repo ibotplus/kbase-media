@@ -64,7 +64,7 @@ public class ConvertServiceImpl implements ConvertService {
 
 
         } else if (ResourceUtil.isImage(resPath)) {
-            ParseResult ocrResult = imageService.handle(new File(resPath));
+            ParseResult ocrResult = imageService.handle(resPath);
             responseMessage = this.doResultToResponseMessage(sn, ocrResult, Constants.IMAGE);
         } else {
             responseMessage = new ResponseMessage(ILLEGAL_TYPE);
@@ -128,6 +128,9 @@ public class ConvertServiceImpl implements ConvertService {
 
     /**
      * 解析结果封装到ResponseMessage
+     * @param sn 序列号
+     * @param parseResult 解析结果
+     * @param type 文件类型 {@link Constants}
      */
     private ResponseMessage doResultToResponseMessage(String sn, AbstractParseResult parseResult, String type) {
         ResponseMessage message = new ResponseMessage();

@@ -1,6 +1,7 @@
 package com.eastrobot.converter.util.shhan;
 
 
+import com.eastrobot.converter.model.Constants;
 import com.eastrobot.converter.util.HttpClientUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -13,6 +14,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -22,12 +24,13 @@ import java.nio.charset.Charset;
 
 @Slf4j
 @Component
-public class ShhanUtil {
+@ConditionalOnProperty(prefix = "convert", name = "video.asr.default", havingValue = Constants.SHHAN)
+public class ShhanAsrUtil {
 
     @Value("${convert.audio.asr.shhan.base-url}")
     private String shhanBaseUrl;
 
-    private static ShhanUtil shhanUtil;
+    private static ShhanAsrUtil shhanUtil;
 
     @PostConstruct
     public void init() {

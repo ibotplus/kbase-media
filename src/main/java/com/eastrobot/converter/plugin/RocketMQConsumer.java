@@ -32,7 +32,7 @@ public class RocketMQConsumer {
     /**
      * 消费者的组名
      */
-    @Value("${apache.rocketmq.consumer.PushConsumer}")
+    @Value("${apache.rocketmq.consumer.push-consumer}")
     private String consumerGroup;
 
     /**

@@ -28,7 +28,7 @@ public class RocketMQProducer {
     /**
      * 生产者的组名
      */
-    @Value("${apache.rocketmq.producer.producerGroup}")
+    @Value("${apache.rocketmq.producer.producer-group}")
     private String producerGroup;
 
     /**

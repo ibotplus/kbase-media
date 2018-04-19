@@ -14,5 +14,10 @@ public interface ImageService {
     /**
      * 解析图片 生成文本
      */
-    ParseResult handle(File... imageFile);
+    ParseResult handle(String imageFilePath);
+
+    /**
+     * 解析图片 生成文本
+     */
+    ParseResult handle(File... imageFiles);
 }

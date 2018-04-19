@@ -11,6 +11,6 @@ public class ShhanUtilTest {
 
     @Test
     public void asr() {
-        ShhanUtil.asr("D:\\ffmpeg\\bin\\baidu\\16k.pcm");
+        ShhanAsrUtil.asr("D:\\ffmpeg\\bin\\baidu\\16k.pcm");
     }
 }
