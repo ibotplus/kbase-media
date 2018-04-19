@@ -34,7 +34,7 @@ public class AudioParserTemplate {
     @Value("${convert.audio.asr.seg-duration}")
     private Long segmentDuration;
 
-    ParseResult handle(AudioParserCallBack callBack, String audioFilePath) {
+    ParseResult handle(String audioFilePath, AudioParserCallBack callBack) {
         try {
             // 1. 是否切割文件 {segmentDuration} 每段 文件放入当前文件夹下当前文件名命名的文件夹下
             FFmpegUtil.splitSegFileToPcm(audioFilePath, segmentDuration);

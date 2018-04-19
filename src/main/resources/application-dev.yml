@@ -60,3 +60,7 @@ convert:
         secretId: AKIDVs45xejwtvmW5SpdkjYGpDUZTIwOp0Hn
         secretKey: a0EHCwgHhgnogMCvUr33uhKl195qSwip
         userId: 1071552744
+      # abbyy fineReader engine config
+      abbyy:
+        path: /opt/ABBYY/FREngine11/Bin
+        license: SWTT-1101-1006-4491-7660-4166

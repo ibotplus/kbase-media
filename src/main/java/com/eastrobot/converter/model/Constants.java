@@ -30,6 +30,7 @@ public interface Constants {
     // ocr-converter supplier param
     //------------------------------------
     String YOUTU = "youtu";
+    String ABBYY = "abbyy";
 
     /**
      * @see ConvertConfig#getDefaultAudioConfig()

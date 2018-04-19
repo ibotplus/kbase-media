@@ -42,6 +42,8 @@ public class ImageServiceImpl implements ImageService {
     public ParseResult handle(File... imageFile) {
         if (Constants.YOUTU.equals(imageTool)) {
             return this.imageHandler(imageFile);
+        } else if (Constants.ABBYY.equals(imageTool)){
+            return new ParseResult(CFG_ERROR, "","");
         } else {
             return new ParseResult(CFG_ERROR, "","");
         }
