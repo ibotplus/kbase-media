@@ -1,16 +1,19 @@
-package com.eastrobot.converter.service.impl;
+package com.eastrobot.converter.util.youtu;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.eastrobot.converter.service.YouTuService;
-import com.eastrobot.converter.util.youtu.YouTu;
+import com.eastrobot.converter.model.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 
 @Slf4j
-@Service
-public class YouTuServiceImpl implements YouTuService {
+@Component
+@ConditionalOnProperty(prefix = "convert", name = "image.ocr.default", havingValue = Constants.YOUTU)
+public class YouTuOcrUtil {
 
     @Value("${convert.image.ocr.youtu.appId}")
     private String appId;
@@ -24,12 +27,16 @@ public class YouTuServiceImpl implements YouTuService {
     @Value("${convert.image.ocr.youtu.userId}")
     private String appUserId;
 
-    @Override
-    public String ocr(String imagePath) throws Exception {
-        YouTu faceYoutu = new YouTu(appId, appSecretId, appSecretKey, YouTu.API_YOUTU_END_POINT, appUserId);
-        JSONObject ocrJson = faceYoutu.generalOcr(imagePath);
+    private static YouTu faceYoutu;
 
-        StringBuffer sb = new StringBuffer();
+    @PostConstruct
+    private void init() {
+        faceYoutu = new YouTu(appId, appSecretId, appSecretKey, YouTu.API_YOUTU_END_POINT, appUserId);
+    }
+
+    public static String ocr(String imagePath) throws Exception {
+        JSONObject ocrJson = faceYoutu.generalOcr(imagePath);
+        StringBuilder sb = new StringBuilder();
         if ("0".equals(ocrJson.getString("errorcode"))) {
             JSONArray items = ocrJson.getJSONArray("items");
             for (int i = 0; i < items.size(); i++) {

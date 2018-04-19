@@ -3,8 +3,10 @@ package com.eastrobot.converter.service.impl;
 import com.eastrobot.converter.model.Constants;
 import com.eastrobot.converter.model.ParseResult;
 import com.eastrobot.converter.service.AudioService;
-import com.eastrobot.converter.util.baidu.BaiduSpeechUtils;
-import com.eastrobot.converter.util.shhan.ShhanUtil;
+import com.eastrobot.converter.util.baidu.BaiduAsrUtils;
+import com.eastrobot.converter.util.shhan.ShhanAsrUtil;
+import com.eastrobot.converter.util.xfyun.XfyunAsrConstants;
+import com.eastrobot.converter.util.xfyun.XfyunAsrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
@@ -39,34 +41,39 @@ public class AudioServiceImpl implements AudioService {
             return audioParserTemplate.handle(audioFilePath, this::baiduAsrHandler);
         } else if (Constants.SHHAN.equals(audioTool)) {
             return audioParserTemplate.handle(audioFilePath, this::shhanAsrHandler);
+        } else if (Constants.XFYUN.equals(audioTool)) {
+            return audioParserTemplate.handle(audioFilePath, this::xfyunAsrHandler);
         } else {
             return new ParseResult(CFG_ERROR, "", "");
         }
     }
 
     private String baiduAsrHandler(String audioFilePath) throws Exception {
-        JSONObject asr = BaiduSpeechUtils.asr(audioFilePath, PCM, RATE);
+        JSONObject asr = BaiduAsrUtils.asr(audioFilePath, PCM, RATE);
         if (asr.optInt("err_no", -1) == 0) {
             //数组字符串
             String result = asr.optString("result");
-            result = StringUtils.substringBetween(result, "[\"", "\"]");
-
-            if (StringUtils.isBlank(result)) {
-                throw new Exception("empty result");
-            }
-
-            return result;
+            return StringUtils.substringBetween(result, "[\"", "\"]").trim();
         } else {
             throw new Exception(asr.getString("err_msg"));
         }
     }
 
     private String shhanAsrHandler(String audioFilePath) throws Exception {
-        String asr = ShhanUtil.asr(audioFilePath);
+        String asr = ShhanAsrUtil.asr(audioFilePath);
         if (StringUtils.isNotBlank(asr)) {
             return asr;
         } else {
             throw new Exception("empty result");
+        }
+    }
+
+    private String xfyunAsrHandler(String audioFilePath) throws Exception {
+        com.alibaba.fastjson.JSONObject asr = XfyunAsrUtil.asr(audioFilePath);
+        if (asr.getString(XfyunAsrConstants.ERROR_CODE).equals(XfyunAsrConstants.SUCCESS)) {
+            return asr.getString(XfyunAsrConstants.MESSAGE);
+        } else {
+            throw new Exception(asr.toString());
         }
     }
 }

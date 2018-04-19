@@ -41,6 +41,7 @@ public interface Constants {
     //------------------------------------
     String BAIDU = "baidu";
     String SHHAN = "shhan";
+    String XFYUN = "xfyun";
 
     //------------------------------------
     // String Blank result

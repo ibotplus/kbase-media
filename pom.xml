@@ -185,38 +185,6 @@
             <version>2.2</version>
         </dependency> -->
 
-        <!-- lombok-->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.16.20</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!--baidu asr-->
-        <dependency>
-            <groupId>com.baidu.aip</groupId>
-            <artifactId>java-sdk</artifactId>
-            <version>4.1.1</version>
-        </dependency>
-        <!-- 汉语言处理包 -->
-        <dependency>
-            <groupId>com.hankcs</groupId>
-            <artifactId>hanlp</artifactId>
-            <version>portable-1.6.2</version>
-        </dependency>
-        <!--ffmpeg 处理包-->
-        <dependency>
-            <groupId>net.bramp.ffmpeg</groupId>
-            <artifactId>ffmpeg</artifactId>
-            <version>0.6.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>20.0</version>
-        </dependency>
-
         <!--RocketMQ-->
         <dependency>
             <groupId>org.apache.rocketmq</groupId>
@@ -229,12 +197,55 @@
             <version>4.2.0</version>
         </dependency>
 
+        <!-- lombok-->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.20</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- 汉语言处理包 -->
+        <dependency>
+            <groupId>com.hankcs</groupId>
+            <artifactId>hanlp</artifactId>
+            <version>portable-1.6.2</version>
+        </dependency>
+
+        <!--baidu asr-->
+        <dependency>
+            <groupId>com.baidu.aip</groupId>
+            <artifactId>java-sdk</artifactId>
+            <version>4.1.1</version>
+        </dependency>
+
+        <!--ffmpeg 处理包-->
+        <dependency>
+            <groupId>net.bramp.ffmpeg</groupId>
+            <artifactId>ffmpeg</artifactId>
+            <version>0.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>20.0</version>
+        </dependency>
+
         <!--Abbyy-->
         <dependency>
             <groupId>com.abbyy</groupId>
             <artifactId>FREngine</artifactId>
             <scope>system</scope>
+            <version>1.0</version>
             <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.abbyy.FREngine.jar</systemPath>
+        </dependency>
+        <!--xfyun-->
+        <dependency>
+            <groupId>com.iflytek</groupId>
+            <artifactId>lfas</artifactId>
+            <scope>system</scope>
+            <version>1.0</version>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/lfasr-sdk-client-2.0.0.1005-jar-with-dependencies.jar</systemPath>
         </dependency>
     </dependencies>
 

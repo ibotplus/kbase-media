@@ -2,8 +2,10 @@ package com.eastrobot.converter.util.baidu;
 
 
 import com.baidu.aip.speech.AipSpeech;
+import com.eastrobot.converter.model.Constants;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -12,7 +14,8 @@ import javax.annotation.PostConstruct;
  * see http://ai.baidu.com/docs#/ASR-Online-Java-SDK/top
  */
 @Component
-public class BaiduSpeechUtils {
+@ConditionalOnProperty(prefix = "convert", name = "video.asr.default", havingValue = Constants.BAIDU)
+public class BaiduAsrUtils {
 
     @Value("${convert.audio.asr.baidu.appId}")
     private String APP_ID;
