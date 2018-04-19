@@ -2,7 +2,6 @@ package com.eastrobot.converter.util.ffmpeg;
 
 import com.eastrobot.converter.model.FileType;
 import com.eastrobot.converter.util.ResourceUtil;
-import com.eastrobot.converter.util.SystemUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFmpegExecutor;
@@ -37,18 +36,11 @@ public class FFmpegUtil {
 
     private static FFprobe ffprobe;
 
-    public static final String PCM = "pcm";
-
     @PostConstruct
     private void init() {
         try {
-            if (SystemUtils.isLinux()) {
-                ffmpeg = new FFmpeg();
-                ffprobe = new FFprobe();
-            } else {
-                ffmpeg = new FFmpeg(path + "ffmpeg");
-                ffprobe = new FFprobe(path + "ffprobe");
-            }
+            ffmpeg = new FFmpeg(path + "ffmpeg");
+            ffprobe = new FFprobe(path + "ffprobe");
         } catch (IOException e) {
             log.error("initialize ffmpeg tools occured error !", e);
         }

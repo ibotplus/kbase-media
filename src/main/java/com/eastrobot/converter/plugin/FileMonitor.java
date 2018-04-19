@@ -9,6 +9,7 @@ import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -25,6 +26,7 @@ import static com.eastrobot.converter.model.Constants.RESULT_FILE_EXTENSION;
  */
 @Slf4j
 @Component
+@ConditionalOnBean(AsyncMode.class)
 public class FileMonitor {
 
     @Value("${convert.outputFolder-async}") //文件路径:${convert.outputFolder-async}/sn.extension

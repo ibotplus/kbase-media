@@ -10,6 +10,7 @@ import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.remoting.common.RemotingHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
@@ -26,6 +27,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
+@ConditionalOnBean(AsyncMode.class)
 public class RocketMQConsumer {
     /**
      * 消费者的组名

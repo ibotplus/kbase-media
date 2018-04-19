@@ -101,7 +101,7 @@ public class ConvertServiceImpl implements ConvertService {
             }
             responseMessage.setResponseEntity(entity);
         } catch (FileNotFoundException e) {
-            log.warn("parse is not complete.");
+            log.warn("convert is not complete.");
             responseMessage.setResultCode(ResultCode.NOT_COMPLETED);
         } catch (IOException e) {
             log.warn("read result file occurred exception.");

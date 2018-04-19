@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.remoting.common.RemotingHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,7 @@ import java.io.UnsupportedEncodingException;
  */
 @Slf4j
 @Component
+@ConditionalOnBean(AsyncMode.class)
 public class RocketMQEventListener {
 
     @Autowired

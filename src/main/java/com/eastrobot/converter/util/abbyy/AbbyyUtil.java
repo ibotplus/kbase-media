@@ -19,7 +19,7 @@ import javax.annotation.PreDestroy;
  */
 @Slf4j
 @Component
-@ConditionalOnProperty(prefix = "convert.image.ocr", name = "default", havingValue = "abbyy")
+@ConditionalOnProperty(prefix = "convert", name = "image.ocr.default", havingValue = "abbyy")
 public class AbbyyUtil {
 
     @Value("${convert.image.ocr.abbyy.path}")

@@ -8,6 +8,7 @@ import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.remoting.common.RemotingHelper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 
@@ -22,6 +23,7 @@ import javax.annotation.PreDestroy;
  */
 @Slf4j
 @Component
+@ConditionalOnBean(AsyncMode.class)
 public class RocketMQProducer {
     /**
      * 生产者的组名
