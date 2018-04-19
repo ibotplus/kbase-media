@@ -1,8 +1,15 @@
 package com.eastrobot.converter.model;
 
+/**
+ * 文件类型
+ *
+ * @author Yogurt_lei
+ * @date 2018-04-18 17:57
+ */
 public enum FileType {
     PCM("pcm", ".pcm"),
-    JPG("jpg", ".jpg");
+    JPG("jpg", ".jpg"),
+    TXT("txt", ".txt");
 
     String extension;
     String extensionWithPoint;

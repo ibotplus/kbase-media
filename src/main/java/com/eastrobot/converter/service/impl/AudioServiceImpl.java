@@ -36,9 +36,9 @@ public class AudioServiceImpl implements AudioService {
     @Override
     public ParseResult handle(String audioFilePath) {
         if (Constants.BAIDU.equals(audioTool)) {
-            return audioParserTemplate.handle(this::baiduAsrHandler, audioFilePath);
+            return audioParserTemplate.handle(audioFilePath, this::baiduAsrHandler);
         } else if (Constants.SHHAN.equals(audioTool)) {
-            return audioParserTemplate.handle(this::shhanAsrHandler, audioFilePath);
+            return audioParserTemplate.handle(audioFilePath, this::shhanAsrHandler);
         } else {
             return new ParseResult(CFG_ERROR, "", "");
         }

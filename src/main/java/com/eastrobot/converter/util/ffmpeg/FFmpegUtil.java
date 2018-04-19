@@ -40,7 +40,7 @@ public class FFmpegUtil {
     public static final String PCM = "pcm";
 
     @PostConstruct
-    public void init() {
+    private void init() {
         try {
             if (SystemUtils.isLinux()) {
                 ffmpeg = new FFmpeg();
@@ -50,7 +50,7 @@ public class FFmpegUtil {
                 ffprobe = new FFprobe(path + "ffprobe");
             }
         } catch (IOException e) {
-            log.error("initialize ffmpeg tools occured error:{}!", e);
+            log.error("initialize ffmpeg tools occured error !", e);
         }
     }
 

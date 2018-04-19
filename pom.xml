@@ -228,6 +228,14 @@
             <artifactId>rocketmq-client</artifactId>
             <version>4.2.0</version>
         </dependency>
+
+        <!--Abbyy-->
+        <dependency>
+            <groupId>com.abbyy</groupId>
+            <artifactId>FREngine</artifactId>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.abbyy.FREngine.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <build>

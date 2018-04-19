@@ -29,8 +29,6 @@ public class YouTuServiceImpl implements YouTuService {
         YouTu faceYoutu = new YouTu(appId, appSecretId, appSecretKey, YouTu.API_YOUTU_END_POINT, appUserId);
         JSONObject ocrJson = faceYoutu.generalOcr(imagePath);
 
-        log.debug("ocr {} result: {}", imagePath, ocrJson);
-
         StringBuffer sb = new StringBuffer();
         if ("0".equals(ocrJson.getString("errorcode"))) {
             JSONArray items = ocrJson.getJSONArray("items");
