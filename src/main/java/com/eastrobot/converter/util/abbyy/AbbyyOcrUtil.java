@@ -50,8 +50,9 @@ public class AbbyyOcrUtil {
             // imageMode.setDiscardColorImage(true);   //5丢弃色彩
             imageMode.setEnhanceLocalContrast(true); // 增强局部对比度
             imageMode.setCreatePreview(false);
+            log.info("initialize abbyy ocr complete.");
         } catch (Exception e) {
-            log.error("initialize abbyy Engine occurred exception.", e);
+            log.error("initialize abbyy ocr occurred exception.", e);
         }
     }
 
@@ -103,7 +104,7 @@ public class AbbyyOcrUtil {
             textParams.setExportParagraphsAsOneLine(false);
             textParams.setWriteBomCharacter(false);
             textParams.setWriteRunningTitles(false);
-            document.Export(outputFile, FileExportFormatEnum.FEF_TextVersion10Defaults, textParams);
+            document.Export(outputFile, FileExportFormatEnum.FEF_TextUnicodeDefaults, textParams);
         } finally {
             document.Close();
         }

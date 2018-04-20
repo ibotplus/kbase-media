@@ -51,9 +51,9 @@ public class ResourceUtil {
      * @author eko.zhan at 2017年12月21日 下午1:18:51
      */
     public static String list2String(Collection<String> list, String split) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (String s : list) {
-            sb.append(s + split);
+            sb.append(s).append(split);
         }
         return sb.toString();
     }

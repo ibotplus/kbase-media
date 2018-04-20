@@ -5,11 +5,6 @@ spring:
       max-request-size: 50MB
       max-file-size: 50MB
       enabled: true
-      # if not config the upload file is null.....
-      location: E:\\converter-output\\tmp
-  # redeploy thymeleaf
-  thymeleaf:
-    cache: false
 
 #default logger config
 logging:
@@ -17,35 +12,23 @@ logging:
 
 # default server config
 server:
-  port: 8080
+  port: 80
   servlet:
-    context-path: /converter-api
-
-# default rocketmq config
-apache:
-  rocketmq:
-    consumer:
-      # consumer group
-      push-consumer: yogurt-consumer
-    producer:
-      # producer group
-      producer-group: yogurt-producer
-    # nameserver address
-    namesrvAddr: 192.168.255.130:9876
+    context-path: /kbase-media
 
 # default user converter config
 convert:
   # Whether to enable the asynchronous interface
   enable-async: false
   # default output-folder
-  outputFolder: E:\\converter-output\\
-  outputFolder-async: E:\\converter-output\\async\\
+  outputFolder: /tmp/convert/
+  outputFolder-async: /tmp/convert/async/
   video:
     vca:
       default: ffmpeg
       ffmpeg:
-        # in windows os, it's Necessary, in unix os, it will load by system environment
-        path: D:\\ffmpeg\\bin\\
+        # ffmpeg bin path
+        path: /opt/ffmpeg/ffmpeg-3.0/
         toImage:
           fps: 0.2
   audio:
@@ -58,15 +41,12 @@ convert:
         appId: 11067243
         apiKey: iDEvPvY4zT9CzFgYKMQY6eAi
         secretKey: Wkeh8gIbB2LrNBtGwuechG8TUkLlB2TY
-      xfyun:
-        appId: 5ab9e7d5
-        secretKey: fea13a3145f35c56bd602fb2c3a817cc
       shhan:
         base-url: http://172.16.8.103:8177/shRecBase/
   image:
     #default ocr tool
     ocr:
-      default: youtu
+      default: abbyy
       #tencent youtu ocr tool config
       youtu:
         appId: 10125304

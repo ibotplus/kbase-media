@@ -175,7 +175,7 @@ public class HttpClientUtil {
         return null;
     }
 
-    public static String doPost(String url, List<NameValuePair> params, String encode) throws Exception {
+    public static String doPost(String url, List<NameValuePair> params, String encode) {
         byte[] is = doPost(url, params);
         if (is != null) {
             try {
@@ -236,6 +236,7 @@ public class HttpClientUtil {
                     return EntityUtils.toByteArray(response.getEntity());
                 }
             } else {
+                log.error(EntityUtils.toString(response.getEntity()));
                 post.abort();
             }
         } catch (Exception e) {

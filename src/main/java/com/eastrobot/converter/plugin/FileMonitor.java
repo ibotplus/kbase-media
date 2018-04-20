@@ -1,6 +1,7 @@
 package com.eastrobot.converter.plugin;
 
 import com.eastrobot.converter.model.Constants;
+import com.eastrobot.converter.model.FileType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
@@ -16,8 +17,6 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
-import static com.eastrobot.converter.model.Constants.RESULT_FILE_EXTENSION;
-
 /**
  * FileListener
  *
@@ -29,7 +28,7 @@ import static com.eastrobot.converter.model.Constants.RESULT_FILE_EXTENSION;
 @ConditionalOnBean(AsyncMode.class)
 public class FileMonitor {
 
-    @Value("${convert.outputFolder-async}") //文件路径:${convert.outputFolder-async}/sn.extension
+    @Value("${convert.outputFolder-async}")
     private String OUTPUT_FOLDER_ASYNC;
 
     @PostConstruct
@@ -51,7 +50,7 @@ public class FileMonitor {
         public void onFileCreate(File file) {
             String absolutePath = file.getAbsolutePath();
             // 后缀是存放结果的文件
-            if (RESULT_FILE_EXTENSION.equals(FilenameUtils.getExtension(absolutePath))) {
+            if (FileType.RS.getExtension().equals(FilenameUtils.getExtension(absolutePath))) {
                 return;
             }
             RocketMQProducer.sendMessage(Constants.MQ_CREATE_FILE_TOPIC, Constants.MQ_CREATE_FILE_TAG, file.getAbsolutePath());

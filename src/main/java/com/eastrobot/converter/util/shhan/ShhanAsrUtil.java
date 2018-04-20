@@ -24,7 +24,7 @@ import java.nio.charset.Charset;
 
 @Slf4j
 @Component
-@ConditionalOnProperty(prefix = "convert", name = "video.asr.default", havingValue = Constants.SHHAN)
+@ConditionalOnProperty(prefix = "convert", name = "audio.asr.default", havingValue = Constants.SHHAN)
 public class ShhanAsrUtil {
 
     @Value("${convert.audio.asr.shhan.base-url}")
@@ -35,6 +35,7 @@ public class ShhanAsrUtil {
     @PostConstruct
     public void init() {
         shhanUtil = this;
+        log.info("initialize shhan asr tools complete.");
     }
 
     public static String asr(String filePath) {

@@ -38,7 +38,7 @@ public class VideoServiceImpl implements VideoService {
 
     /**
      * <pre>
-     *     视频抽取音轨(*.pcm),
+     *     视频抽取音轨(*.mp3), 不能一步到位,ffmpeg无法获得pcm的时长
      *     视频抽图片(*.jpg),音轨解析文字,图片解析文字.
      * </pre>
      *
@@ -50,7 +50,7 @@ public class VideoServiceImpl implements VideoService {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         //提交视频分段抽取音轨任务 视频抽取图片
         Future handleFuture = executor.submit(() -> {
-            FFmpegUtil.transformAudio(videoFilePath, FileType.PCM);
+            FFmpegUtil.transformAudio(videoFilePath, FileType.AAC);
             FFmpegUtil.extractFrameImage(videoFilePath, fps);
         });
 
@@ -79,13 +79,13 @@ public class VideoServiceImpl implements VideoService {
         final ParseResult asrParseResult = new ParseResult();
         // ocr 解析结果
         final ParseResult ocrParseResult = new ParseResult();
-        // pcm 文件路径
-        final String pcmFile = folderPath + FilenameUtils.getBaseName(videoPath) + FileType.PCM.getExtensionWithPoint();
+        // 声音 AAC文件
+        final String audioFile = folderPath + FilenameUtils.getBaseName(videoPath) + FileType.AAC.getExtensionWithPoint();
 
         //提交音轨转文字任务
         executor.submit(() -> {
             try {
-                asrParseResult.updateResult(audioService.handle(pcmFile));
+                asrParseResult.updateResult(audioService.handle(audioFile));
                 log.info("audioService convert is complete");
             } finally {
                 latch.countDown();

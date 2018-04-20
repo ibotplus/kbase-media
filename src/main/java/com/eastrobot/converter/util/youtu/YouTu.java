@@ -3,10 +3,13 @@ package com.eastrobot.converter.util.youtu;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.eastrobot.converter.util.HttpClientUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.apache.http.HttpResponse;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
@@ -22,6 +25,7 @@ import java.nio.charset.Charset;
  * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
  * @version v1.0 , 2018-04-08 15:00
  */
+@Slf4j
 public class YouTu {
     public final static String API_YOUTU_END_POINT = "https://api.youtu.qq.com/youtu/";
 
@@ -78,14 +82,18 @@ public class YouTu {
         httpPost.setHeader("Content-Type", "text/json");
         httpPost.setEntity(new StringEntity(postData.toString(), Charset.forName("utf-8")));
 
-        HttpResponse response = httpClient.execute(httpPost);
-        if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
-            String result = EntityUtils.toString(response.getEntity(), Charset.forName("utf-8"));
+        ResponseHandler<String> responseHandler = response -> {
+            int status = response.getStatusLine().getStatusCode();
+            if (status >= HttpStatus.SC_OK && status < HttpStatus.SC_MULTIPLE_CHOICES) {
+                HttpEntity entity = response.getEntity();
+                return entity != null ? EntityUtils.toString(entity, Charset.forName("utf-8")) : null;
+            } else {
+                throw new ClientProtocolException("Unexpected response status: " + status);
+            }
+        };
 
-            return JSON.parseObject(result);
-        } else {
+        String result = httpClient.execute(httpPost, responseHandler);
 
-            return new JSONObject();
-        }
+        return JSON.parseObject(result);
     }
 }

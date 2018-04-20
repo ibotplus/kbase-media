@@ -1,57 +1,26 @@
 package com.eastrobot.converter.model;
 
-import com.eastrobot.converter.config.ConvertConfig;
 
 /**
- * Constants
+ * Global Constants
  *
  * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
  * @version v1.0 , 2018-04-08 12:47
  */
 public interface Constants {
     //------------------------------------
-    //result support type
-    //------------------------------------
-    String KEYWORD = "keyword";
-    String FULLTEXT = "fulltext";
-    
-    /**
-     * @see ConvertConfig#getDefaultVideoConfig()
-     */
-    String VCA = "vca";
-
-    String DEFAULT_TOOL = "default";
-
-    /**
-     * @see ConvertConfig#getDefaultImageConfig()
-     */
-    String OCR = "ocr";
-    //------------------------------------
     // ocr-converter supplier param
     //------------------------------------
     String YOUTU = "youtu";
     String ABBYY = "abbyy";
-
-    /**
-     * @see ConvertConfig#getDefaultAudioConfig()
-     */
-    String ASR = "asr";
     //------------------------------------
     // asr-converter supplier param
     //------------------------------------
     String BAIDU = "baidu";
     String SHHAN = "shhan";
     String XFYUN = "xfyun";
-
     //------------------------------------
-    // String Blank result
-    //------------------------------------
-    /**
-     * EMPTY_RESULT
-     */
-    String EMPTY = "";
-    //------------------------------------
-    // parse file type key definition
+    // parse file type definition
     //------------------------------------
     String AUDIO = "AUDIO";
     String IMAGE = "IMAGE";
@@ -64,13 +33,6 @@ public interface Constants {
     String AUDIO_KEYWORD = "AUDIO_KEYWORD";
     String IMAGE_KEYWORD = "IMAGE_KEYWORD";
     String ERROR_MSG = "ERROR_MSG";
-
-    //------------------------------------
-    // parse result file extension
-    //------------------------------------
-    String RESULT_FILE_EXTENSION = "rs";
-    String RESULT_FILE_EXTENSION_WITH_POINT = ".rs";
-
     //------------------------------------
     // RocketMQ default constants
     //------------------------------------

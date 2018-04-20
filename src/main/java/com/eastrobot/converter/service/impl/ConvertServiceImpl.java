@@ -61,8 +61,6 @@ public class ConvertServiceImpl implements ConvertService {
         } else if (ResourceUtil.isVideo(resPath)) {
             VacParseResult vacParseResult = videoService.handle(resPath);
             responseMessage = this.doResultToResponseMessage(sn, vacParseResult, Constants.VIDEO);
-
-
         } else if (ResourceUtil.isImage(resPath)) {
             ParseResult ocrResult = imageService.handle(resPath);
             responseMessage = this.doResultToResponseMessage(sn, ocrResult, Constants.IMAGE);
@@ -77,12 +75,12 @@ public class ConvertServiceImpl implements ConvertService {
 
     @Override
     public ResponseMessage findAsyncParseResult(String sn) {
-        String filePath = OUTPUT_FOLDER_ASYNC + sn + Constants.RESULT_FILE_EXTENSION_WITH_POINT;
+        String filePath = OUTPUT_FOLDER_ASYNC + sn + FileType.RS.getExtensionWithPoint();
         File resultFile = new File(filePath);
         ResponseMessage responseMessage = new ResponseMessage(ResultCode.SUCCESS);
         responseMessage.setSn(sn);
         try (FileReader fr = new FileReader(resultFile);
-             BufferedReader br = new BufferedReader(fr);
+             BufferedReader br = new BufferedReader(fr)
         ) {
             String line;
             ResponseEntity entity = new ResponseEntity();
@@ -107,18 +105,21 @@ public class ConvertServiceImpl implements ConvertService {
             log.warn("read result file occurred exception.");
             responseMessage.setResultCode(ResultCode.ASYNC_READ_RESULT_FILE_FAILED);
         }
+
         return responseMessage;
     }
 
-    // 文件路径:${convert.outputFolder}/sn.extension
+    /**
+     *
+     * 上传文件 同步异步是不同的文件夹
+     *
+     * @author Yogurt_lei
+     * @date 2018-04-20 16:05
+     */
     @Override
     public String doUpload(MultipartFile file, String sn, boolean asyncParse) throws Exception {
-        String targetFile;
-        if (asyncParse) {
-            targetFile = OUTPUT_FOLDER_ASYNC + sn + "." + FilenameUtils.getExtension(file.getOriginalFilename());
-        } else {
-            targetFile = OUTPUT_FOLDER + sn + "." + FilenameUtils.getExtension(file.getOriginalFilename());
-        }
+        String targetFile = asyncParse ? OUTPUT_FOLDER_ASYNC : OUTPUT_FOLDER;
+        targetFile = targetFile + sn + "." + FilenameUtils.getExtension(file.getOriginalFilename());
         File tmpFile = new File(targetFile);
         tmpFile.mkdirs();
         file.transferTo(tmpFile);
@@ -139,7 +140,6 @@ public class ConvertServiceImpl implements ConvertService {
             case Constants.IMAGE: {
                 ParseResult ocrResult = (ParseResult) parseResult;
                 message.setResultCode(ocrResult.getCode());
-                message.setMessage(ocrResult.getMessage());
 
                 ResponseEntity entity = new ResponseEntity();
                 entity.setImageContent(ocrResult.getResult());
@@ -149,7 +149,6 @@ public class ConvertServiceImpl implements ConvertService {
             case Constants.AUDIO: {
                 ParseResult asrResult = (ParseResult) parseResult;
                 message.setResultCode(asrResult.getCode());
-                message.setMessage(asrResult.getMessage());
 
                 ResponseEntity entity = new ResponseEntity();
                 entity.setAudioContent(asrResult.getResult());
@@ -163,10 +162,11 @@ public class ConvertServiceImpl implements ConvertService {
 
                 if (ocrResult.getCode().equals(OCR_PART_PARSE_FAILED) || asrResult.getCode().equals(ASR_PART_PARSE_FAILED)) {
                     message.setResultCode(PART_PARSE_FAILED);
+                    Optional.ofNullable(ocrResult.getMessage()).ifPresent(s ->  message.setMessage(ocrResult.getMessage()));
+                    Optional.ofNullable(asrResult.getMessage()).ifPresent(s ->  message.setMessage(message.getMessage()+""+asrResult.getMessage()));
                 } else {
-                    message.setResultCode(ocrResult.getCode());
+                    message.setResultCode(ResultCode.SUCCESS);
                 }
-                message.setMessage(ocrResult.getMessage());
 
                 ResponseEntity entity = new ResponseEntity();
                 entity.setImageContent(ocrResult.getResult());
@@ -184,19 +184,16 @@ public class ConvertServiceImpl implements ConvertService {
      * 解析结果写入文件:${convert.outputFolder}/sn.rs
      */
     private void doWriteResultToFile(String resPath, final ResponseMessage responseMessage, boolean asyncParse) {
-        String resultFilePath;
-        if (asyncParse) {
-            resultFilePath = OUTPUT_FOLDER_ASYNC + FilenameUtils.getBaseName(resPath) + Constants.RESULT_FILE_EXTENSION_WITH_POINT;
-        } else {
-            resultFilePath = OUTPUT_FOLDER + FilenameUtils.getBaseName(resPath) + Constants.RESULT_FILE_EXTENSION_WITH_POINT;
-        }
+        // 写到正确的文件夹下
+        String resultFilePath = asyncParse ? OUTPUT_FOLDER_ASYNC : OUTPUT_FOLDER;
+        resultFilePath = resultFilePath + FilenameUtils.getBaseName(resPath) + FileType.RS.getExtensionWithPoint();
         File resultFile = new File(resultFilePath);
 
         // write error message
         if (!responseMessage.getCode().equals(SUCCESS.getCode())) {
             String errorMessage = responseMessage.getMessage();
             if (StringUtils.isNotBlank(errorMessage)) {
-                try (FileWriter fw = new FileWriter(resultFile, true);) {
+                try (FileWriter fw = new FileWriter(resultFile, true)) {
                     fw.write(Constants.ERROR_MSG + errorMessage + "\r\n");
                 } catch (IOException e) {
                     log.error("write errorMessage to file occurred exception.");

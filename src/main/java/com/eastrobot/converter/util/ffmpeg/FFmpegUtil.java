@@ -41,8 +41,9 @@ public class FFmpegUtil {
         try {
             ffmpeg = new FFmpeg(path + "ffmpeg");
             ffprobe = new FFprobe(path + "ffprobe");
+            log.info("initialize ffmpeg tools complete.");
         } catch (IOException e) {
-            log.error("initialize ffmpeg tools occured error !", e);
+            log.error("initialize ffmpeg occurred error !", e);
         }
     }
 
@@ -108,6 +109,7 @@ public class FFmpegUtil {
 
     /**
      * 音频转格式 or 视频提取音频
+     * pcm 要特殊转码  其他的直接复制音轨
      *
      * @param filePath 输入文件路径
      * @param fileType 文件类型 {@link FileType}
@@ -129,6 +131,8 @@ public class FFmpegUtil {
                     .setFormat("s16le")
                     .setAudioChannels(1)
                     .setAudioSampleRate(16000);
+        } else {
+            outputBuilder.setAudioCodec("copy");
         }
         builder = outputBuilder.setStrict(FFmpegBuilder.Strict.EXPERIMENTAL).done();
         FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);

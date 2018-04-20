@@ -9,7 +9,12 @@ package com.eastrobot.converter.model;
 public enum FileType {
     PCM("pcm", ".pcm"),
     JPG("jpg", ".jpg"),
-    TXT("txt", ".txt");
+    TXT("txt", ".txt"),
+    AAC("aac", ".aac"),
+    /**
+     * parse result file extension
+     */
+    RS("rs", ".rs");
 
     String extension;
     String extensionWithPoint;

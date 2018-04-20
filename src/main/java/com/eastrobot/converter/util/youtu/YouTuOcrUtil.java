@@ -32,6 +32,7 @@ public class YouTuOcrUtil {
     @PostConstruct
     private void init() {
         faceYoutu = new YouTu(appId, appSecretId, appSecretKey, YouTu.API_YOUTU_END_POINT, appUserId);
+        log.info("initialize youtu ocr tools complete.");
     }
 
     public static String ocr(String imagePath) throws Exception {
