@@ -33,14 +33,18 @@ public class ConvertController {
 
     @ApiOperation(value = "上传视频,音频,图片,转换为文本.", response = ResponseMessage.class)
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "file", value = "待转换文件", dataType = "__file", required = true, paramType = "form")
+            @ApiImplicitParam(name = "file", value = "待转换文件", dataType = "__file", required = true, paramType = "form"),
+            @ApiImplicitParam(name = "isFrameExtractKeyword", dataType = "boolean", defaultValue = "false", paramType = "form",
+                    value = "视频的图片解析结果是每帧提取关键字后合并的还是全部合并后提取关键字<br/>(*仅当视频文件此参数才有效)"
+            )
     })
     @PostMapping(
             value = "/convert",
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
-    public ResponseMessage convert(@RequestParam(value = "file") MultipartFile file) {
+    public ResponseMessage convert(@RequestParam("file") MultipartFile file,
+                                   @RequestParam("isFrameExtractKeyword") Boolean isFrameExtractKeyword) {
         if (!file.isEmpty()) {
             String sn = UUID.randomUUID().toString();
             String targetFile;
@@ -52,7 +56,7 @@ public class ConvertController {
                 return new ResponseMessage(ResultCode.FILE_UPLOAD_FAILED);
             }
 
-            return converterService.driver(targetFile, false);
+            return converterService.driver(targetFile, isFrameExtractKeyword, false);
         } else {
             return new ResponseMessage(ResultCode.PARAM_ERROR);
         }

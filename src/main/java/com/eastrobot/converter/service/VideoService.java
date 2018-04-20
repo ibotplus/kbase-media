@@ -17,5 +17,5 @@ public interface VideoService {
      * @author Yogurt_lei
      * @date 2018-03-27 11:55
      */
-    VacParseResult handle(String videoFilePath);
+    VacParseResult handle(String videoFilePath, boolean isFrameExtractKeyword);
 }

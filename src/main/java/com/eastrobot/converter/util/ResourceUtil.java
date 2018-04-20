@@ -6,7 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -107,11 +106,11 @@ public class ResourceUtil {
      * @author Yogurt_lei
      * @date 2018-03-29 20:20
      */
-    public static String map2SortByKey(Map map, String split) {
-        TreeMap<Comparable, String> sortMap = map2SortByKey(map);
+    public static String map2SortByKeyAndMergeWithSplit(Map<Integer, String> map, String split) {
+        TreeMap<Integer, String> sortMap = map2SortByKey(map);
 
         StringBuilder result = new StringBuilder();
-        for (Map.Entry<Comparable, String> entry : sortMap.entrySet()) {
+        for (Map.Entry<Integer, String> entry : sortMap.entrySet()) {
             result.append(entry.getValue()).append(split);
         }
 
@@ -124,8 +123,8 @@ public class ResourceUtil {
      * @author Yogurt_lei
      * @date 2018-03-29 20:20
      */
-    public static TreeMap map2SortByKey(Map<Comparable, String> map) {
-        TreeMap sortMap = new TreeMap<>((Comparator<Comparable>) Comparable::compareTo);
+    public static TreeMap<Integer, String> map2SortByKey(Map<Integer, String> map) {
+        TreeMap<Integer, String> sortMap = new TreeMap<>(Integer::compareTo);
         sortMap.putAll(map);
 
         return sortMap;

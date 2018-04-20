@@ -6,18 +6,13 @@ import com.eastrobot.converter.service.ImageService;
 import com.eastrobot.converter.util.ResourceUtil;
 import com.eastrobot.converter.util.abbyy.AbbyyOcrUtil;
 import com.eastrobot.converter.util.youtu.YouTuOcrUtil;
+import com.hankcs.hanlp.HanLP;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.List;
 
 import static com.eastrobot.converter.model.ResultCode.*;
 
@@ -43,77 +38,20 @@ public class ImageServiceImpl implements ImageService {
             } else if (Constants.ABBYY.equals(imageTool)) {
                 result = AbbyyOcrUtil.ocr(imageFilePath);
             } else {
-                return new ParseResult(CFG_ERROR, "", "");
+                return new ParseResult(CFG_ERROR, CFG_ERROR.getMsg(), "", "");
             }
         } catch (Exception e) {
             log.warn("handler parse image occurred exception: {}", e.getMessage());
-            return new ParseResult(OCR_FAILURE, e.getMessage(), "");
+            return new ParseResult(OCR_FAILURE, e.getMessage(), "", "");
         }
 
         if (StringUtils.isNotBlank(result)) {
-            return new ParseResult(SUCCESS, "", result);
+            List<String> keywords = HanLP.extractKeyword(result, 100);
+            String keyword = ResourceUtil.list2String(keywords, "");
+
+            return new ParseResult(SUCCESS, SUCCESS.getMsg(), keyword, result);
         } else {
-            return new ParseResult(PARSE_EMPTY, "", "");
-        }
-    }
-
-    @Override
-    public ParseResult handle(File... imageFiles) {
-        int corePoolSize = Runtime.getRuntime().availableProcessors() + 1;
-        ExecutorService executor = Executors.newFixedThreadPool(corePoolSize);
-        // 总任务数门阀
-        final CountDownLatch latch = new CountDownLatch(imageFiles.length);
-        // 存储图片解析段-内容
-        final ConcurrentHashMap<Integer, String> imageContentMap = new ConcurrentHashMap<>();
-        AtomicBoolean hasOccurredException = new AtomicBoolean(false);
-        // 存储图片解析异常信息 [seg:message]
-        StringBuffer exceptionBuffer = new StringBuffer();
-
-        for (File file : imageFiles) {
-            String filePath = file.getAbsolutePath();
-            //提交图片转文字任务
-            executor.submit(() -> {
-                String currentSegIndex = FilenameUtils.getBaseName(filePath);
-                try {
-                    ParseResult parseResult = handle(filePath);
-                    if (parseResult.getCode().equals(SUCCESS)) {
-                        String content = parseResult.getResult();
-                        log.debug("imageHandler parse {} result : {}", filePath, content);
-                        imageContentMap.put(Integer.parseInt(currentSegIndex), content);
-                    } else {
-                        throw new Exception(parseResult.getMessage());
-                    }
-                } catch (Exception e) {
-                    log.warn("convert image occurred exception: {}", e.getMessage());
-                    hasOccurredException.set(true);
-                    exceptionBuffer.append("[").append(currentSegIndex).append(":").append(e.getMessage()).append("]");
-                } finally {
-                    latch.countDown();
-                }
-            });
-        }
-
-        try {
-            // 阻塞等待结束
-            latch.await();
-        } catch (Exception e) {
-            hasOccurredException.set(true);
-            exceptionBuffer.append("[").append(e.getMessage()).append("]");
-            log.error("imageHandler parse image thread occurred exception : {}", e.getMessage());
-        } finally {
-            executor.shutdownNow();
-        }
-
-        // 2. 解析结束后 合并内容
-        String resultText = ResourceUtil.map2SortByKey(imageContentMap, "");
-        if (StringUtils.isNotBlank(resultText)) {
-            if (hasOccurredException.get()) {
-                return new ParseResult(OCR_PART_PARSE_FAILED, exceptionBuffer.toString(), resultText);
-            } else {
-                return new ParseResult(SUCCESS, "", resultText);
-            }
-        } else {
-            return new ParseResult(PARSE_EMPTY, "", "");
+            return new ParseResult(PARSE_EMPTY, PARSE_EMPTY.getMsg(), "", "");
         }
     }
 }

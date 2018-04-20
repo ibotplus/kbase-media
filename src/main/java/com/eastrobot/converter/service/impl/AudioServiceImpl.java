@@ -44,7 +44,7 @@ public class AudioServiceImpl implements AudioService {
         } else if (Constants.XFYUN.equals(audioTool)) {
             return audioParserTemplate.handle(audioFilePath, this::xfyunAsrHandler);
         } else {
-            return new ParseResult(CFG_ERROR, "", "");
+            return new ParseResult(CFG_ERROR, CFG_ERROR.getMsg(), "", "");
         }
     }
 

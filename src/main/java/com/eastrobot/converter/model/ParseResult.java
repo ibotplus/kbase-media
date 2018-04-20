@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
  * ParseResult
  *
  * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
- * @version v1.0 , 2018-04-08 16:20
+ * @version v1.0 , 2018-04-20 17:56
  */
 @Data
 @AllArgsConstructor
@@ -23,13 +23,18 @@ public class ParseResult extends AbstractParseResult {
      */
     private String message;
     /**
-     * 分段 or 正常结果
+     * 关键字
      */
-    private String result;
+    private String keyword;
+    /**
+     * 内容
+     */
+    private String content;
 
-    public void updateResult(ParseResult other) {
+    public void update(ParseResult other) {
         this.code = other.code;
         this.message = other.message;
-        this.result = other.result;
+        this.keyword = other.keyword;
+        this.content = other.content;
     }
 }

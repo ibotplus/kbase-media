@@ -52,6 +52,7 @@ convert:
     # default asr tool
     asr:
       default: baidu
+      # baidu is 60s/seg ; shhan is 20s/seg
       seg-duration: 60
       #baidu asr config
       baidu:

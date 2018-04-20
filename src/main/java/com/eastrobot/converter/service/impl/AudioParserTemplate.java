@@ -5,6 +5,7 @@ import com.eastrobot.converter.model.ParseResult;
 import com.eastrobot.converter.service.ParserCallBack;
 import com.eastrobot.converter.util.ResourceUtil;
 import com.eastrobot.converter.util.ffmpeg.FFmpegUtil;
+import com.hankcs.hanlp.HanLP;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -40,7 +42,7 @@ public class AudioParserTemplate {
             FFmpegUtil.splitSegFileToPcm(audioFilePath, segmentDuration);
         } catch (IOException e) {
             log.error("splitSegToPcm occurred exception, check the ffmpeg location is right.");
-            return new ParseResult(FFMPEG_LOCATION_ERROR, "", "");
+            return new ParseResult(FFMPEG_LOCATION_ERROR, "splitSegToPcm occurred exception, check the ffmpeg location is right.", "", "");
         }
 
         File folder = new File(ResourceUtil.getFolder(audioFilePath, ""));
@@ -88,28 +90,32 @@ public class AudioParserTemplate {
                 executor.shutdownNow();
             }
 
-            // 2. 解析结束后 合并内容
-            String resultText = ResourceUtil.map2SortByKey(audioContentMap, "");
+            // 2. 解析结束后 合并内容 提取关键字
+            String resultText = ResourceUtil.map2SortByKeyAndMergeWithSplit(audioContentMap, "");
             if (StringUtils.isNotBlank(resultText)){
+                List<String> keywords = HanLP.extractKeyword(resultText, 100);
+                String keyword = ResourceUtil.list2String(keywords, ",");
                 if (hasOccurredException.get()) {
-                    return new ParseResult(ASR_PART_PARSE_FAILED, exceptionBuffer.toString(), resultText);
+                    return new ParseResult(ASR_PART_PARSE_FAILED, exceptionBuffer.toString(), keyword, resultText);
                 } else {
-                    return new ParseResult(SUCCESS, "", ResourceUtil.map2SortByKey(audioContentMap, ""));
+                    return new ParseResult(SUCCESS, SUCCESS.getMsg(), keyword, resultText);
                 }
             } else {
-                return new ParseResult(PARSE_EMPTY, "", "");
+                return new ParseResult(PARSE_EMPTY, PARSE_EMPTY.getMsg(), "", "");
             }
         } else { // 音频只有一段 不分段直解处理
             try {
-                String text = callBack.doInParser(allPcmFiles[0].getAbsolutePath());
-                if (StringUtils.isNotBlank(text)){
-                    return new ParseResult(SUCCESS, "", text);
+                String resultText = callBack.doInParser(allPcmFiles[0].getAbsolutePath());
+                if (StringUtils.isNotBlank(resultText)){
+                    List<String> keywords = HanLP.extractKeyword(resultText, 100);
+                    String keyword = ResourceUtil.list2String(keywords, ",");
+                    return new ParseResult(SUCCESS, SUCCESS.getMsg(), keyword, resultText);
                 }
 
-                return new ParseResult(PARSE_EMPTY, "", "");
+                return new ParseResult(PARSE_EMPTY, PARSE_EMPTY.getMsg(), "", "");
             } catch (Exception e) {
                 log.warn("asrHandler parse audio occurred exception: {}", e.getMessage());
-                return new ParseResult(ASR_FAILURE, e.getMessage(), "");
+                return new ParseResult(ASR_FAILURE, e.getMessage(), "", "");
             }
         }
     }

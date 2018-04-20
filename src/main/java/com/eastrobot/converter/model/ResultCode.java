@@ -21,7 +21,7 @@ public enum ResultCode {
     NOT_COMPLETED(13, "解析还在进行中,请稍后尝试读取结果."),
     ASYNC_READ_RESULT_FILE_FAILED(14, "读取解析结果文件失败."),
     FFMPEG_LOCATION_ERROR(15, "FFMPEG安装路径不正确,检查配置文件路径"),
-    PART_PARSE_FAILED(17,"图片或视频部分解析失败");
+    PART_PARSE_FAILED(17,"图片或音频频部分解析失败");
 
     private int code;
     private String msg;

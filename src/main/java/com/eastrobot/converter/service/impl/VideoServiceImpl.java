@@ -8,14 +8,21 @@ import com.eastrobot.converter.service.ImageService;
 import com.eastrobot.converter.service.VideoService;
 import com.eastrobot.converter.util.ResourceUtil;
 import com.eastrobot.converter.util.ffmpeg.FFmpegUtil;
+import com.hankcs.hanlp.HanLP;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static com.eastrobot.converter.model.ResultCode.*;
 
 /**
  * VideoServiceImpl
@@ -46,7 +53,7 @@ public class VideoServiceImpl implements VideoService {
      * @date 2018-03-26 18:06
      */
     @Override
-    public VacParseResult handle(String videoFilePath) {
+    public VacParseResult handle(String videoFilePath, boolean isFrameExtractKeyword) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         //提交视频分段抽取音轨任务 视频抽取图片
         Future handleFuture = executor.submit(() -> {
@@ -62,53 +69,99 @@ public class VideoServiceImpl implements VideoService {
             executor.shutdownNow();
         }
 
-        return this.doParseVideo(videoFilePath);
+        return this.doParseVideo(videoFilePath, isFrameExtractKeyword);
     }
 
-    private VacParseResult doParseVideo(final String videoPath) {
-        // 生成的文件 只要jpg和pcm(一个)
+    private VacParseResult doParseVideo(final String videoPath, boolean isFrameExtractKeyword) {
+        // 生成的文件 只有JPG和AAC(一个)
         String folderPath = ResourceUtil.getFolder(videoPath, "");
+        // 声音 AAC文件
+        final String audioFile = folderPath + FilenameUtils.getBaseName(videoPath)
+                + FileType.AAC.getExtensionWithPoint();
         File dir = new File(folderPath);
-        File[] allFiles = dir.listFiles(pathname -> FilenameUtils.getExtension(pathname.getName()).equals(FileType.JPG.getExtension()));
-        ExecutorService executor = Executors.newFixedThreadPool(2);
+        //图片 JPG文件
+        File[] allImageFiles = dir.listFiles(pathname -> FilenameUtils.getExtension(pathname.getName()).equals
+                (FileType.JPG.getExtension()));
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1);
         // 总任务数门阀
-        final CountDownLatch latch = new CountDownLatch(2);
+        final CountDownLatch latch = new CountDownLatch(allImageFiles.length + 1);
         // 存储图片解析段-内容
-        final ConcurrentHashMap<String, String> imageContentMap = new ConcurrentHashMap<>();
+        final Map<Integer, String> imageContentMap = new ConcurrentHashMap<>();
+        // 存储图片解析段-关键字
+        final Map<Integer, String> imageKeywordMap = new ConcurrentHashMap<>();
         // asr 解析结果
         final ParseResult asrParseResult = new ParseResult();
-        // ocr 解析结果
-        final ParseResult ocrParseResult = new ParseResult();
-        // 声音 AAC文件
-        final String audioFile = folderPath + FilenameUtils.getBaseName(videoPath) + FileType.AAC.getExtensionWithPoint();
+        AtomicBoolean hasOccurredException = new AtomicBoolean(false);
+        // 存储图片解析异常信息 [seg:message]
+        StringBuffer exceptionBuffer = new StringBuffer();
 
         //提交音轨转文字任务
         executor.submit(() -> {
             try {
-                asrParseResult.updateResult(audioService.handle(audioFile));
-                log.info("audioService convert is complete");
+                asrParseResult.update(audioService.handle(audioFile));
             } finally {
                 latch.countDown();
             }
         });
 
         //提交图片转文字任务
-        executor.submit(() -> {
-            try {
-                ocrParseResult.updateResult(imageService.handle(allFiles));
-                log.info("imageService convert is complete");
-            } finally {
-                latch.countDown();
-            }
-        });
+        for (final File file : allImageFiles) {
+            final String filepath = file.getAbsolutePath();
+            //提交图片转文字任务
+            executor.submit(() -> {
+                // 图片的段是 00001 00002 00003
+                String currentSegIndex = FilenameUtils.getBaseName(filepath);
+                try {
+                    ParseResult ocrResult = imageService.handle(filepath);
+                    if (ocrResult.getCode().equals(SUCCESS)) {
+                        String keyword = ocrResult.getKeyword();
+                        String content = ocrResult.getContent();
+                        log.debug("imageService convert {} result : {}", filepath, content);
+                        imageKeywordMap.put(Integer.parseInt(currentSegIndex), keyword);
+                        imageContentMap.put(Integer.parseInt(currentSegIndex), content);
+                    } else {
+                        throw new Exception(ocrResult.getMessage());
+                    }
+                } catch (Exception e) {
+                    log.debug("convert image occurred exception: {}", e.getMessage());
+                    hasOccurredException.set(true);
+                    exceptionBuffer.append("[").append(currentSegIndex).append(":").append(e.getMessage()).append("]");
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
 
         try {
             // 阻塞等待结束
             latch.await();
         } catch (Exception e) {
-            log.warn("handle convert image or video thread occurred exception : [%s]", e.getMessage());
+            hasOccurredException.set(true);
+            exceptionBuffer.append("[").append(e.getMessage()).append("]");
+            log.warn("imageService convert image thread occurred exception.", e);
         } finally {
             executor.shutdownNow();
+        }
+
+        // ocr 解析结果
+        ParseResult ocrParseResult;
+
+        // 2. 解析结束后 合并内容 根据frameExtractKeyword 绝定是否需要帧抽取关键字
+        String imageKeyword = ResourceUtil.map2SortByKeyAndMergeWithSplit(imageKeywordMap, ",");
+        String imageContent = ResourceUtil.map2SortByKeyAndMergeWithSplit(imageContentMap, "");
+        if (StringUtils.isNotBlank(imageContent)) {
+            if (!isFrameExtractKeyword) {
+                List<String> phraseList = HanLP.extractKeyword(imageContent, 100);
+                imageKeyword = ResourceUtil.list2String(phraseList, "");
+            }
+
+            if (hasOccurredException.get()) {
+                ocrParseResult = new ParseResult(OCR_PART_PARSE_FAILED, exceptionBuffer.toString(), imageKeyword, imageContent);
+            } else {
+                ocrParseResult = new ParseResult(SUCCESS, SUCCESS.getMsg(), imageKeyword, imageContent);
+            }
+        } else {
+            ocrParseResult = new ParseResult(PARSE_EMPTY, PARSE_EMPTY.getMsg(), "", "");
         }
 
         return new VacParseResult(asrParseResult, ocrParseResult);

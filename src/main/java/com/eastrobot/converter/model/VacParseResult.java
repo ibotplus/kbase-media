@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class VacParseResult extends AbstractParseResult{
+public class VacParseResult extends AbstractParseResult {
     private ParseResult asrParseResult;
 
     private ParseResult ocrParseResult;

@@ -34,8 +34,9 @@ convert:
   audio:
     # default asr tool
     asr:
-      default: baidu
-      seg-duration: 60
+      default: shhan
+      # baidu is 60s/seg ; shhan is 20s/seg
+      seg-duration: 20
       #baidu asr config
       baidu:
         appId: 11067243
