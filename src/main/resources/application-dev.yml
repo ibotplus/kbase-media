@@ -5,15 +5,21 @@ spring:
       max-request-size: 50MB
       max-file-size: 50MB
       enabled: true
-      # if not config the upload file is null.....
-      location: E:\\converter-output\\tmp
-  # redeploy thymeleaf
-  thymeleaf:
-    cache: false
 
-#default logger config
+# default logger config
 logging:
-  config: classpath:logback.xml
+  level:
+    root: debug
+    springfox.documentation: warn
+    org.springframework: warn
+    org.hibernate: warn
+    org.thymeleaf: warn
+    org.apache: warn
+    org.quartz: warn
+    io.swagger: warn
+    org.zbus: warn
+    sun.rmi: warn
+  file: ./stdot.log
 
 # default server config
 server:
