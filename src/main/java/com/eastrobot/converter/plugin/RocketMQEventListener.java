@@ -1,5 +1,7 @@
 package com.eastrobot.converter.plugin;
 
+import com.alibaba.fastjson.JSON;
+import com.eastrobot.converter.model.ResponseMessage;
 import com.eastrobot.converter.service.ConvertService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.common.message.MessageExt;
@@ -39,9 +41,8 @@ public class RocketMQEventListener {
             String fileAbsolutePath = new String(message.getBody(), RemotingHelper.DEFAULT_CHARSET);
             log.info("start convert file : {}", fileAbsolutePath);
             log.error("receive event, start convert file {}", fileAbsolutePath);
-            // 正式使用时下面注释打开
-            // ResponseMessage responseMessage = convertService.driver(fileAbsolutePath, true);
-            // log.info("convert file complete : {}", fileAbsolutePath, JSON.toJSONString(responseMessage));
+            ResponseMessage responseMessage = convertService.driver(fileAbsolutePath, false, true);
+            log.info("convert file complete : {}", fileAbsolutePath, JSON.toJSONString(responseMessage));
         } catch (UnsupportedEncodingException e) {
             // 业务发生错误 重试 发送回broker 等待下次消费
             log.warn("HANDLE-MSG occurred exception. do {} times retires.", message.getReconsumeTimes());

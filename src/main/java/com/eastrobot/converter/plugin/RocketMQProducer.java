@@ -54,7 +54,7 @@ public class RocketMQProducer {
         producer.setRetryTimesWhenSendAsyncFailed(Constants.MQ_RETRY_PRODUCT);
         try {
             producer.start();
-            log.warn("RocketMQProducer has been started. {}", producer);
+            log.info("RocketMQProducer has been started. {}", producer);
         } catch (Exception e) {
             log.error("RocketMQProducer init occurred exception", e);
         }
@@ -63,7 +63,7 @@ public class RocketMQProducer {
     @PreDestroy
     public void destroy() {
         producer.shutdown();
-        log.warn("RocketMQProducer has been destroyed. {}", producer);
+        log.info("RocketMQProducer has been destroyed. {}", producer);
     }
 
     /**
@@ -84,7 +84,7 @@ public class RocketMQProducer {
             producer.send(message, new SendCallback() {
                 @Override
                 public void onSuccess(SendResult sendResult) {
-                    log.warn("SEND-MSG >>> msgId: {}, msg: {}, status: {}", result.getMsgId(), msg, result.getSendStatus());
+                    log.info("SEND-MSG >>> msgId: {}, msg: {}, status: {}", result.getMsgId(), msg, result.getSendStatus());
                     log.info(sw.prettyPrint());
                 }
 

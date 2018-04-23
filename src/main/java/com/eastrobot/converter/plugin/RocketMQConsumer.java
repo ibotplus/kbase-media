@@ -65,7 +65,7 @@ public class RocketMQConsumer {
                     try {
                         // publish event to business method
                         String messageBody = new String(msg.getBody(), RemotingHelper.DEFAULT_CHARSET);
-                        log.warn("RECEIVE-MSG && publishEvent >>> msgId: {}, body: {}", msg.getMsgId(), messageBody);
+                        log.info("RECEIVE-MSG && publishEvent >>> msgId: {}, body: {}", msg.getMsgId(), messageBody);
                         eventPublisher.publishEvent(new RocketMQCreateFileEvent(msg));
                     } catch (Exception e) {
                         log.error("RECEIVE-MSG too many retries.[ >{} times ]", Constants.MQ_RETRY_CONSUME);
@@ -86,7 +86,7 @@ public class RocketMQConsumer {
                     log.error("MQPushConsumer init occurred exception.", e);
                 }
 
-                log.warn("MQPushConsumer has been started. {}", consumer);
+                log.info("MQPushConsumer has been started. {}", consumer);
             }).start();
         } catch (Exception e) {
             log.error("MQPushConsumer init occurred exception", e);
@@ -106,7 +106,7 @@ public class RocketMQConsumer {
             sw.start();
             consumer.sendMessageBack(message, 2);
             log.warn("send message back to broker. msgId: {}", message.getMsgId());
-            log.info(sw.prettyPrint());
+            log.warn(sw.prettyPrint());
         } catch (Exception e) {
             log.error("SEND-MSG occurred exception.", e);
         }
@@ -116,6 +116,6 @@ public class RocketMQConsumer {
     @PreDestroy
     public void destroy() {
         consumer.shutdown();
-        log.warn("MQPushConsumer has been destroyed. {}", consumer);
+        log.info("MQPushConsumer has been destroyed. {}", consumer);
     }
 }

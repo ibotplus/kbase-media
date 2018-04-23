@@ -156,41 +156,43 @@ public class ConvertServiceImpl implements ConvertService {
         String resultFilePath = asyncParse ? OUTPUT_FOLDER_ASYNC : OUTPUT_FOLDER;
         resultFilePath = resultFilePath + FilenameUtils.getBaseName(resPath) + FileType.RS.getExtensionWithPoint();
         File resultFile = new File(resultFilePath);
-
-        // write error message
-        if (!responseMessage.getCode().equals(SUCCESS.getCode())) {
-            String errorMessage = responseMessage.getMessage();
-            if (StringUtils.isNotBlank(errorMessage)) {
-                try (FileWriter fw = new FileWriter(resultFile, true)) {
-                    fw.write(Constants.ERROR_MSG + errorMessage + "\r\n");
-                } catch (IOException e) {
-                    log.error("write errorMessage to file occurred exception.");
+        // 如果存在 说明是重复消费 不做处理
+        if (!resultFile.exists()) {
+            // write error message
+            if (!responseMessage.getCode().equals(SUCCESS.getCode())) {
+                String errorMessage = responseMessage.getMessage();
+                if (StringUtils.isNotBlank(errorMessage)) {
+                    try (FileWriter fw = new FileWriter(resultFile, true)) {
+                        fw.write(Constants.ERROR_MSG + errorMessage + "\r\n");
+                    } catch (IOException e) {
+                        log.error("write errorMessage to file occurred exception.");
+                    }
                 }
             }
-        }
 
-        //extract image keyword and write to file
-        Optional.of(responseMessage)
-                .map(ResponseMessage::getResponseEntity)
-                .ifPresent((entity)->{
-                    try (FileWriter fw = new FileWriter(resultFile, true)) {
-                        fw.write(Constants.IMAGE_CONTENT + entity.getImageContent() + "\r\n");
-                        fw.write(Constants.IMAGE_KEYWORD + entity.getImageKeyword() + "\r\n");
-                    } catch (IOException e) {
-                        log.error("write image keyword to file occurred exception.");
-                    }
-                });
-        //extract audio keyword and write to file
-        Optional.of(responseMessage)
-                .map(ResponseMessage::getResponseEntity)
-                .ifPresent((entity) -> {
-                    try (FileWriter fw = new FileWriter(resultFile, true)) {
-                        fw.write(Constants.AUDIO_CONTENT + entity.getAudioContent() + "\r\n");
-                        fw.write(Constants.AUDIO_KEYWORD + entity.getAudioKeyword() + "\r\n");
-                    } catch (IOException e) {
-                        log.error("write audio keyword to file occurred exception.");
-                    }
-                });
+            //extract image keyword and write to file
+            Optional.of(responseMessage)
+                    .map(ResponseMessage::getResponseEntity)
+                    .ifPresent((entity)->{
+                        try (FileWriter fw = new FileWriter(resultFile, true)) {
+                            fw.write(Constants.IMAGE_CONTENT + entity.getImageContent() + "\r\n");
+                            fw.write(Constants.IMAGE_KEYWORD + entity.getImageKeyword() + "\r\n");
+                        } catch (IOException e) {
+                            log.error("write image keyword to file occurred exception.");
+                        }
+                    });
+            //extract audio keyword and write to file
+            Optional.of(responseMessage)
+                    .map(ResponseMessage::getResponseEntity)
+                    .ifPresent((entity) -> {
+                        try (FileWriter fw = new FileWriter(resultFile, true)) {
+                            fw.write(Constants.AUDIO_CONTENT + entity.getAudioContent() + "\r\n");
+                            fw.write(Constants.AUDIO_KEYWORD + entity.getAudioKeyword() + "\r\n");
+                        } catch (IOException e) {
+                            log.error("write audio keyword to file occurred exception.");
+                        }
+                    });
+        }
     }
 
     @Override
