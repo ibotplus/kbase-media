@@ -1,11 +1,5 @@
 This a api to easy converter multipartFile(video audio image) to text.
-There is [api-docs](http://localhost:8080/converter-api/swagger-ui.html) use Swagger2.
-
-
-
-
-**接口文档**
-	[接口文档 可以直接测试](http://localhost:8080/converter-api/swagger-ui.html)
+There is [api-docs](http://172.16.23.12/kbase-media/swagger-ui.html#) use Swagger2.
 
 **配置文件说明**
 (配置文件为application*.yml) 
