@@ -2,7 +2,8 @@ This a api to easy converter multipartFile(video audio image) to text.
 There is [api-docs](http://172.16.23.12/kbase-media/swagger-ui.html#) use Swagger2.
 
 **配置文件说明**
-(配置文件为application*.yml) 
+
+**注意启动日志: 提示fineReader engine license 过期需要再启动一次..**
 
 ``` yaml
 # convert部分配置
