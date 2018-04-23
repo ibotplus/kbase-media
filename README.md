@@ -54,7 +54,7 @@ convert:
         license: SWTT-1101-1006-4491-7660-4166
 ```
 ### Restful Apis
-[http://localhost:8080/converter-api/swagger-ui.html](http://localhost:8080/converter-api/swagger-ui.html)
+[http://172.16.23.12/kbase-media/swagger-ui.html](http://172.16.23.12/kbase-media/swagger-ui.html)
 
 ### Thanks For
 [Tencent-YouTu](https://github.com/Tencent-YouTu/java_sdk)
