@@ -55,7 +55,7 @@ public class AsyncConvertController {
                 return new ResponseMessageAsync(ResultCode.FILE_UPLOAD_FAILED, sn);
             }
 
-            return new ResponseMessageAsync(ResultCode.ASYNC_FILE_UPLOAD_SUCCESS, sn);
+            return new ResponseMessageAsync(ResultCode.SUCCESS, sn);
         } else {
             return new ResponseMessageAsync(ResultCode.PARAM_ERROR, sn);
         }

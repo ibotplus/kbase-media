@@ -42,7 +42,7 @@ public class AudioParserTemplate {
             FFmpegUtil.splitSegFileToPcm(audioFilePath, segmentDuration);
         } catch (IOException e) {
             log.error("splitSegToPcm occurred exception, check the ffmpeg location is right.");
-            return new ParseResult(FFMPEG_LOCATION_ERROR, "splitSegToPcm occurred exception, check the ffmpeg location is right.", "", "");
+            return new ParseResult(ASR_FAILURE, "splitSegToPcm occurred exception, check the ffmpeg location is right.", "", "");
         }
 
         File folder = new File(ResourceUtil.getFolder(audioFilePath, ""));
@@ -96,7 +96,7 @@ public class AudioParserTemplate {
                 List<String> keywords = HanLP.extractKeyword(resultText, 100);
                 String keyword = ResourceUtil.list2String(keywords, ",");
                 if (hasOccurredException.get()) {
-                    return new ParseResult(ASR_PART_PARSE_FAILED, exceptionBuffer.toString(), keyword, resultText);
+                    return new ParseResult(ASR_FAILURE, exceptionBuffer.toString(), keyword, resultText);
                 } else {
                     return new ParseResult(SUCCESS, SUCCESS.getMsg(), keyword, resultText);
                 }

@@ -156,7 +156,7 @@ public class VideoServiceImpl implements VideoService {
             }
 
             if (hasOccurredException.get()) {
-                ocrParseResult = new ParseResult(OCR_PART_PARSE_FAILED, exceptionBuffer.toString(), imageKeyword, imageContent);
+                ocrParseResult = new ParseResult(OCR_FAILURE, exceptionBuffer.toString(), imageKeyword, imageContent);
             } else {
                 ocrParseResult = new ParseResult(SUCCESS, SUCCESS.getMsg(), imageKeyword, imageContent);
             }

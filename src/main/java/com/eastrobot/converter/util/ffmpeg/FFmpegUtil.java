@@ -77,7 +77,7 @@ public class FFmpegUtil {
         String folder = ResourceUtil.getFolder(filePath, "");
         if (duration >= segDuration) {
             int totalSegment = (int) (duration / segDuration + ((duration % segDuration) > 0 ? 1 : 0));
-            log.debug("total segment :[%s], total second: [%s]", totalSegment, duration);
+            log.debug("total segment : {}, total second: {}", totalSegment, duration);
             for (int i = 1; i <= totalSegment; i++) {
                 FFmpegBuilder builder = new FFmpegBuilder();
                 builder.addInput(filePath)

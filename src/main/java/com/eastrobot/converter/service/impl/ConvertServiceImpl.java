@@ -125,9 +125,9 @@ public class ConvertServiceImpl implements ConvertService {
                 ParseResult ocrResult = vacParseResult.getOcrParseResult();
                 ParseResult asrResult = vacParseResult.getAsrParseResult();
 
-                if (ocrResult.getCode().equals(OCR_PART_PARSE_FAILED) || asrResult.getCode().equals(ASR_PART_PARSE_FAILED)) {
+                if (ocrResult.getCode().equals(OCR_FAILURE) || asrResult.getCode().equals(ASR_FAILURE)) {
                     message.setResultCode(PART_PARSE_FAILED);
-                    message.setMessage(ocrResult.getMessage() + "" + asrResult.getMessage());
+                    message.setMessage(PART_PARSE_FAILED.getMsg()+" => 图片:"+ocrResult.getMessage() + ",音频:" + asrResult.getMessage());
                 } else {
                     message.setResultCode(ResultCode.SUCCESS);
                 }
@@ -222,7 +222,7 @@ public class ConvertServiceImpl implements ConvertService {
             responseMessage.setResponseEntity(entity);
         } catch (FileNotFoundException e) {
             log.warn("convert is not complete.");
-            responseMessage.setResultCode(ResultCode.NOT_COMPLETED);
+            responseMessage.setResultCode(ResultCode.ASYNC_NOT_COMPLETED);
         } catch (IOException e) {
             log.warn("read result file occurred exception.");
             responseMessage.setResultCode(ResultCode.ASYNC_READ_RESULT_FILE_FAILED);

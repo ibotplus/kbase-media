@@ -5,23 +5,19 @@ package com.eastrobot.converter.model;
  */
 public enum ResultCode {
     SUCCESS(0, "SUCCESS"),
-    FAILURE(1, "请求失败"),
-    SYSTEM_BUSY(2, "系统繁忙"),
-    PARAM_ERROR(3, "参数错误"),
-    CFG_ERROR(4, "配置文件错误"),
-    FILE_UPLOAD_FAILED(5, "上传失败"),
-    UPDATE_CACHE_ERROR(6, "更新缓存失败"),
-    ILLEGAL_TYPE(7, "文件类型不支持"),
-    PARSE_EMPTY(8, "解析内容为空"),
-    OCR_FAILURE(9, "OCR解析错误"),
-    ASR_FAILURE(16, "ASR解析失败"),
-    ASYNC_FILE_UPLOAD_SUCCESS(10, "文件上传成功,通过sn来获取解析结果."),
-    ASR_PART_PARSE_FAILED(11, "语音解析部分失败."),
-    OCR_PART_PARSE_FAILED(12, "图片解析部分失败."),
-    NOT_COMPLETED(13, "解析还在进行中,请稍后尝试读取结果."),
-    ASYNC_READ_RESULT_FILE_FAILED(14, "读取解析结果文件失败."),
-    FFMPEG_LOCATION_ERROR(15, "FFMPEG安装路径不正确,检查配置文件路径"),
-    PART_PARSE_FAILED(17,"图片或音频频部分解析失败");
+
+    FAILURE(101, "请求失败"),
+    PARAM_ERROR(102, "参数错误"),
+    CFG_ERROR(103, "配置文件错误"),
+    FILE_UPLOAD_FAILED(104, "文件上传失败"),
+    ILLEGAL_TYPE(105, "文件类型不支持"),
+    PARSE_EMPTY(106, "解析内容为空"),
+    OCR_FAILURE(107, "OCR解析错误"),
+    ASR_FAILURE(108, "ASR解析失败"),
+    PART_PARSE_FAILED(109,"图片或音频部分解析失败"),
+
+    ASYNC_NOT_COMPLETED(201, "解析还在进行中,请稍后尝试读取结果."),
+    ASYNC_READ_RESULT_FILE_FAILED(202, "读取解析结果文件失败.");
 
     private int code;
     private String msg;
