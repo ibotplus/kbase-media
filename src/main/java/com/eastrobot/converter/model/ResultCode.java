@@ -12,8 +12,8 @@ public enum ResultCode {
     FILE_UPLOAD_FAILED(104, "文件上传失败"),
     ILLEGAL_TYPE(105, "文件类型不支持"),
     PARSE_EMPTY(106, "解析内容为空"),
-    OCR_FAILURE(107, "OCR解析错误"),
-    ASR_FAILURE(108, "ASR解析失败"),
+    OCR_FAILURE(107, "图片解析失败"),
+    ASR_FAILURE(108, "音频解析失败"),
     PART_PARSE_FAILED(109,"图片或音频部分解析失败"),
 
     ASYNC_NOT_COMPLETED(201, "解析还在进行中,请稍后尝试读取结果."),

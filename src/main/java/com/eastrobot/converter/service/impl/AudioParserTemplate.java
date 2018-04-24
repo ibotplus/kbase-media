@@ -3,6 +3,7 @@ package com.eastrobot.converter.service.impl;
 import com.eastrobot.converter.model.FileType;
 import com.eastrobot.converter.model.ParseResult;
 import com.eastrobot.converter.service.ParserCallBack;
+import com.eastrobot.converter.util.ChineseUtil;
 import com.eastrobot.converter.util.ResourceUtil;
 import com.eastrobot.converter.util.ffmpeg.FFmpegUtil;
 import com.hankcs.hanlp.HanLP;
@@ -47,6 +48,8 @@ public class AudioParserTemplate {
 
         File folder = new File(ResourceUtil.getFolder(audioFilePath, ""));
         File[] allPcmFiles = folder.listFiles(filename -> FileType.PCM.getExtension().equals(FilenameUtils.getExtension(filename.getName())));
+
+        assert allPcmFiles != null;
         if (allPcmFiles.length > 1) {
             // 2. 遍历pcm文件 解析每段文本
             int corePoolSize = Runtime.getRuntime().availableProcessors() + 1;
@@ -93,6 +96,7 @@ public class AudioParserTemplate {
             // 2. 解析结束后 合并内容 提取关键字
             String resultText = ResourceUtil.map2SortByKeyAndMergeWithSplit(audioContentMap, "");
             if (StringUtils.isNotBlank(resultText)){
+                resultText = ChineseUtil.removeMessy(resultText);
                 List<String> keywords = HanLP.extractKeyword(resultText, 100);
                 String keyword = ResourceUtil.list2String(keywords, ",");
                 if (hasOccurredException.get()) {

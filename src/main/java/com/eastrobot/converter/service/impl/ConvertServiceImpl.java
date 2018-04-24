@@ -103,6 +103,9 @@ public class ConvertServiceImpl implements ConvertService {
             case Constants.IMAGE: {
                 ParseResult ocrResult = (ParseResult) parseResult;
                 message.setResultCode(ocrResult.getCode());
+                if (StringUtils.isNotBlank(ocrResult.getMessage())) {
+                    message.setMessage(ocrResult.getMessage());
+                }
 
                 ResponseEntity entity = new ResponseEntity();
                 entity.setImageContent(ocrResult.getContent());
@@ -113,6 +116,9 @@ public class ConvertServiceImpl implements ConvertService {
             case Constants.AUDIO: {
                 ParseResult asrResult = (ParseResult) parseResult;
                 message.setResultCode(asrResult.getCode());
+                if (StringUtils.isNotBlank(asrResult.getMessage())) {
+                    message.setMessage(asrResult.getMessage());
+                }
 
                 ResponseEntity entity = new ResponseEntity();
                 entity.setAudioContent(asrResult.getContent());
@@ -128,7 +134,7 @@ public class ConvertServiceImpl implements ConvertService {
                 if (ocrResult.getCode().equals(OCR_FAILURE) || asrResult.getCode().equals(ASR_FAILURE)) {
                     message.setResultCode(PART_PARSE_FAILED);
                     message.setMessage(PART_PARSE_FAILED.getMsg()+" => 图片:"+ocrResult.getMessage() + ",音频:" + asrResult.getMessage());
-                } else {
+                } else if (ocrResult.getCode().equals(SUCCESS)){
                     message.setResultCode(ResultCode.SUCCESS);
                 }
 

@@ -3,6 +3,7 @@ package com.eastrobot.converter.service.impl;
 import com.eastrobot.converter.model.Constants;
 import com.eastrobot.converter.model.ParseResult;
 import com.eastrobot.converter.service.ImageService;
+import com.eastrobot.converter.util.ChineseUtil;
 import com.eastrobot.converter.util.ResourceUtil;
 import com.eastrobot.converter.util.abbyy.AbbyyOcrUtil;
 import com.eastrobot.converter.util.youtu.YouTuOcrUtil;
@@ -46,6 +47,7 @@ public class ImageServiceImpl implements ImageService {
         }
 
         if (StringUtils.isNotBlank(result)) {
+            result = ChineseUtil.removeMessy(result);
             List<String> keywords = HanLP.extractKeyword(result, 100);
             String keyword = ResourceUtil.list2String(keywords, "");
 
