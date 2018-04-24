@@ -103,7 +103,12 @@
             <artifactId>httpmime</artifactId>
             <version>4.5.5</version>
         </dependency>
-
+        <!--tess4j-->
+        <dependency>
+            <groupId>net.sourceforge.tess4j</groupId>
+            <artifactId>tess4j</artifactId>
+            <version>3.4.7</version>
+        </dependency>
         <!--RocketMQ-->
         <dependency>
             <groupId>org.apache.rocketmq</groupId>

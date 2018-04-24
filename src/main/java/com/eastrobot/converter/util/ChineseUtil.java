@@ -68,6 +68,10 @@ public class ChineseUtil {
         StringBuilder sb = new StringBuilder();
         str = str.replaceAll("\\\\r\\\\n|\\\\r|\\\\n|\\\\t|\\s*","");
 
+        //去掉中文之间的空格，并保留英文之间的空格 https://www.zhihu.com/question/39636240
+        str = str.replaceAll("(\\w) +(\\w)", "$1@$2");
+        str = str.replaceAll(" ", "").replaceAll("@", " ");
+
         for (char c : str.toCharArray()) {
             if (!isMessy(c)) {
                 sb.append(c);
