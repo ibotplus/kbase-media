@@ -72,10 +72,10 @@ convert:
 
 **附:SpringBoot项目开机自启动配置**
 
-1. 开机自启文件配置
+1.开机自启文件配置
 ``` bash
-1. vim /usr/lib/systemd/system/kbase-media.service
-2. 增加
+vim /usr/lib/systemd/system/kbase-media.service 增加
+
 [Unit]
 Description=kbase-media
 After=syslog.target
@@ -91,12 +91,14 @@ SuccessExitStatus=143
 [Install]
 WantedBy=multi-user.target
 ```
+
 2.startup.sh
 ``` bash
 #! /bin/sh
 /usr/local/jdk1.8/bin/java -Xms1024M -Xmx1024M -Xmn384M -Xss256k -jar /opt/kbase-media/kbase-media-1.0-SNAPSHOT.jar --spring.config.location=/opt/kbase-media/application.yml > /opt/kbase-media/logs/stdout.log &
 ```
-**注意使用spring.config.location直接指定springboot配置文件位置*
+*注意使用spring.config.location直接指定springboot配置文件位置*
+
 3.shutdown.sh
 ``` bash
 #! /bin/sh
