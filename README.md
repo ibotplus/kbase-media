@@ -1,5 +1,5 @@
 This a api to easy converter multipartFile(video audio image) to text.
-There is [api-docs](http://172.16.23.12/kbase-media/swagger-ui.html#) use Swagger2.
+Here is [Api-docs](http://172.16.23.12/kbase-media/swagger-ui.html#) which use Swagger2.
 
 **配置文件说明**
 
@@ -67,3 +67,44 @@ convert:
 [apache/rocketmq](https://github.com/apache/rocketmq)
 
 [ekoz/ocr-api](https://github.com/ekoz/ocr-api)
+
+
+
+**附:SpringBoot项目开机自启动配置**
+
+1. 开机自启文件配置
+``` bash
+1. vim /usr/lib/systemd/system/kbase-media.service
+2. 增加
+[Unit]
+Description=kbase-media
+After=syslog.target
+	   
+[Service]
+Type=forking
+ExecStart=/opt/kbase-media/startup.sh
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/opt/kbase-media/shutdown.sh
+PrivateTmp=true
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target
+```
+2.startup.sh
+``` bash
+#! /bin/sh
+/usr/local/jdk1.8/bin/java -Xms1024M -Xmx1024M -Xmn384M -Xss256k -jar /opt/kbase-media/kbase-media-1.0-SNAPSHOT.jar --spring.config.location=/opt/kbase-media/application.yml > /opt/kbase-media/logs/stdout.log &
+```
+**注意使用spring.config.location直接指定springboot配置文件位置*
+3.shutdown.sh
+``` bash
+#! /bin/sh
+kill -9 `ps -ef|grep java|grep -v grep|grep kbase-media|awk '{print $2}'`
+```
+4.重载配置文件&注册服务&查看console的日志
+``` bash
+systemctl daemon-reload
+systemctl enable kbase-media.service
+journalctl -u kbase-media
+```
