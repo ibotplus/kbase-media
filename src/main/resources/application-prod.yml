@@ -29,6 +29,9 @@ server:
 
 # default user converter config
 convert:
+  # whether to clean the temp directory in 1:00am every Sunday
+  clean-tmp:
+    enable: true
   # Whether to enable the asynchronous interface
   enable-async: false
   # default output-folder
