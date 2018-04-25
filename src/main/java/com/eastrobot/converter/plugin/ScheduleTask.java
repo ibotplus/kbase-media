@@ -27,7 +27,7 @@ public class ScheduleTask {
     /**
      * 每周日1:00am 删除临时文件
      */
-    @Scheduled(cron = "0 0 1 ? * L")
+    @Scheduled(cron = "0 0 1 ? * SUN")
     public void deleteTempFile() throws IOException {
         FileUtils.deleteDirectory(new File(OUTPUT_FOLDER));
     }
