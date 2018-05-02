@@ -48,7 +48,6 @@ public class FFmpegUtil {
     }
 
     /**
-     *
      * 获取文件时长
      *
      * @author Yogurt_lei
@@ -60,13 +59,12 @@ public class FFmpegUtil {
     }
 
     /**
-     *
      * 切割音频为pcm 长度segmentFileMaxDuration
      * ffmpeg -y -i {input.wav|.mp3} -ss {startOffset} -t {duration} -acodec pcm_s16le -f s16le -ac 1 -ar 16000 {output.pcm}
-     *
+     * <p>
      * pcm文件 or 存放切割pcm文件夹 (当前文件名的文件夹下)
      *
-     * @param filePath 文件路径 audio|video 通用
+     * @param filePath    文件路径 audio|video 通用
      * @param segDuration 分段文件持续时间
      *
      * @author Yogurt_lei
@@ -102,7 +100,7 @@ public class FFmpegUtil {
                 FFmpegUtil.transformAudio(filePath, FileType.PCM);
                 // FileUtils.deleteQuietly(new File(filePath)); //是否删除原始文件
             } else {
-                FileUtils.moveFileToDirectory(new File(filePath),new File(folder),true);
+                FileUtils.moveFileToDirectory(new File(filePath), new File(folder), true);
             }
         }
     }
@@ -131,6 +129,8 @@ public class FFmpegUtil {
                     .setFormat("s16le")
                     .setAudioChannels(1)
                     .setAudioSampleRate(16000);
+        } else if (FileType.AAC.equals(fileType)) {
+            outputBuilder.setAudioCodec("aac");
         } else {
             outputBuilder.setAudioCodec("copy");
         }
@@ -142,8 +142,8 @@ public class FFmpegUtil {
     /**
      * 视频抽取帧图像(.jpg) 按fps抽取 (e.g 0.2fps = 5s/帧)
      *
-     * @param videoPath  视频文件路径
-     * @param fps fps
+     * @param videoPath 视频文件路径
+     * @param fps       fps
      *
      * @author Yogurt_lei
      * @date 2018-04-13 11:36
