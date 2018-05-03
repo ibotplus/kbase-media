@@ -40,7 +40,7 @@ convert:
 	    # 声瀚引擎base-url
         base-url: http://172.16.8.103:8177/shRecBase/
   image:
-    # 可选值 youtu|abbyy 私有化部署设置abbyy
+    # 可选值 youtu|abbyy|tesseract 私有化部署设置abbyy|tesseract
     ocr:
       default: abbyy
       #tencent youtu ocr tool config
@@ -53,6 +53,10 @@ convert:
       abbyy:
         path: /opt/ABBYY/FREngine11/Bin
         license: SWTT-1101-1006-4491-7660-4166
+      # tesseract config
+      tesseract:
+        # language package path 设置tessact语言包路径 未设置读取TESSDATA_PREFIX环境变量
+        datapath: /opt/tesseract/tessdata
 ```
 ### Restful Apis
 [http://172.16.23.12/kbase-media/swagger-ui.html](http://172.16.23.12/kbase-media/swagger-ui.html)

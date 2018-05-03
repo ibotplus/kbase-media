@@ -61,7 +61,7 @@ convert:
   image:
     #default ocr tool
     ocr:
-      default: abbyy
+      default: tesseract
       #tencent youtu ocr tool config
       youtu:
         appId: 10125304
@@ -72,3 +72,7 @@ convert:
       abbyy:
         path: /opt/ABBYY/FREngine11/Bin
         license: SWTT-1101-1006-4491-7660-4166
+      # tesseract config
+      tesseract:
+        # language package path
+        datapath: /opt/tesseract/tessdata

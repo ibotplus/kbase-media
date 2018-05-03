@@ -173,6 +173,13 @@
             <version>${google-guava.version}</version>
         </dependency>
 
+        <!-- tess4j -->
+        <dependency>
+            <groupId>net.sourceforge.tess4j</groupId>
+            <artifactId>tess4j</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+
         <!--Abbyy-->
         <dependency>
             <groupId>com.abbyy</groupId>

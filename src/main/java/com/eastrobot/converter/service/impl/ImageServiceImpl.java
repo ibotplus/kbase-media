@@ -6,6 +6,7 @@ import com.eastrobot.converter.service.ImageService;
 import com.eastrobot.converter.util.ChineseUtil;
 import com.eastrobot.converter.util.ResourceUtil;
 import com.eastrobot.converter.util.abbyy.AbbyyOcrUtil;
+import com.eastrobot.converter.util.tesseract.TesseractUtil;
 import com.eastrobot.converter.util.youtu.YouTuOcrUtil;
 import com.hankcs.hanlp.HanLP;
 import lombok.extern.slf4j.Slf4j;
@@ -32,14 +33,21 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public ParseResult handle(String imageFilePath) {
+        ParseResult parseResult;
         String result;
         try {
-            if (Constants.YOUTU.equals(imageTool)) {
-                result = YouTuOcrUtil.ocr(imageFilePath);
-            } else if (Constants.ABBYY.equals(imageTool)) {
-                result = AbbyyOcrUtil.ocr(imageFilePath);
-            } else {
-                return new ParseResult(CFG_ERROR, CFG_ERROR.getMsg(), "", "");
+            switch (imageTool) {
+                case Constants.YOUTU:
+                    result = YouTuOcrUtil.ocr(imageFilePath);
+                    break;
+                case Constants.ABBYY:
+                    result = AbbyyOcrUtil.ocr(imageFilePath);
+                    break;
+                case Constants.TESSERACT:
+                    result = TesseractUtil.ocr(imageFilePath);
+                    break;
+                default:
+                    return new ParseResult(OCR_FAILURE, "undefined ocr tools", "", "");
             }
         } catch (Exception e) {
             log.warn("handler parse image occurred exception: {}", e.getMessage());

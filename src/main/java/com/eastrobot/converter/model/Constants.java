@@ -13,6 +13,7 @@ public interface Constants {
     //------------------------------------
     String YOUTU = "youtu";
     String ABBYY = "abbyy";
+    String TESSERACT = "tesseract";
     //------------------------------------
     // asr-converter supplier param
     //------------------------------------
