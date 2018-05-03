@@ -45,19 +45,22 @@ public class TesseractUtil {
     @Value("${convert.image.ocr.tesseract.datapath}")
     private String datapath;
 
+    private static String languagePath;
+
     @PostConstruct
     private void init() {
         tesseract = new Tesseract();
         // 优先加载本地的设置 没有就加载环境变量 再没有就报错
         if (StringUtils.isBlank(datapath)) {
             datapath = System.getenv("TESSDATA_PREFIX");
-        }
-        if (StringUtils.isBlank(datapath)) {
-            log.error("initialize tesseract ocr occurred exception.");
+            System.out.println(datapath);
+            if (StringUtils.isBlank(datapath)) {
+                log.error("initialize tesseract occurred exception. check language data path.");
+                throw new IllegalArgumentException("initialize tesseract occurred exception. check language data path");
+            }
         }
 
-        tesseract.setDatapath(datapath);
-        tesseract.setLanguage(DEFAULT_LANG);
+        languagePath = datapath;
         log.info("initialize tesseract ocr complete.");
     }
 
@@ -65,6 +68,10 @@ public class TesseractUtil {
      * 默认使用中文去解析图片内容
      */
     public static String ocr(String imageFilePath) throws Exception {
+        tesseract = new Tesseract();
+        tesseract.setDatapath(languagePath);
+        tesseract.setLanguage(DEFAULT_LANG);
+
         return tesseract.doOCR(new File(imageFilePath));
     }
 }

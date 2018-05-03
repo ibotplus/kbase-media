@@ -19,7 +19,7 @@ logging:
     io.swagger: warn
     org.zbus: warn
     sun.rmi: warn
-  file: ./stdot.log
+  file: ./stdout.log
 
 # default server config
 server:
