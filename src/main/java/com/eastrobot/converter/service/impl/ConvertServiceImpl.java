@@ -1,11 +1,13 @@
 package com.eastrobot.converter.service.impl;
 
+import com.eastrobot.converter.exception.BusinessException;
 import com.eastrobot.converter.model.*;
 import com.eastrobot.converter.service.AudioService;
 import com.eastrobot.converter.service.ConvertService;
 import com.eastrobot.converter.service.ImageService;
 import com.eastrobot.converter.service.VideoService;
 import com.eastrobot.converter.util.ResourceUtil;
+import com.eastrobot.converter.util.ZipUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,13 +34,23 @@ public class ConvertServiceImpl implements ConvertService {
     /**
      * 同步上传的文件夹
      */
-    @Value("${convert.outputFolder}")
-    private String OUTPUT_FOLDER;
+    @Value("${convert.async.output-folder}")
+    private String SYNC_OUTPUT_FOLDER;
     /**
      * 异步上传的文件夹
      */
-    @Value("${convert.outputFolder-async}")
-    private String OUTPUT_FOLDER_ASYNC;
+    @Value("${convert.async.output-folder}")
+    private String ASYNC_OUTPUT_FOLDER;
+    /**
+     * 同步模式文件上传大小
+     */
+    @Value("${convert.sync.upload-file-size}")
+    private String SYNC_FILE_UPLOAD_SIZE;
+    /**
+     * 异步模式文件上传大小
+     */
+    @Value("${convert.async.upload-file-size}")
+    private String ASYNC_FILE_UPLOAD_SIZE;
 
     @Autowired
     private VideoService videoService;
@@ -73,28 +85,58 @@ public class ConvertServiceImpl implements ConvertService {
     }
 
     /**
-     *
      * 上传文件 同步异步是不同的文件夹
+     * 异步上传的为zip或rar文件,其中包含具体要解析的文件
+     * 同步模式 异步模式所限制文件大小不同
      *
      * @author Yogurt_lei
      * @date 2018-04-20 16:05
      */
     @Override
-    public String doUpload(MultipartFile file, String sn, boolean asyncParse) throws Exception {
-        String targetFile = asyncParse ? OUTPUT_FOLDER_ASYNC : OUTPUT_FOLDER;
-        targetFile = targetFile + sn + "." + FilenameUtils.getExtension(file.getOriginalFilename());
+    public String doUpload(MultipartFile file, String sn, boolean asyncParse)
+            throws IOException, IllegalStateException, BusinessException {
+        String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
+        long fileSize = file.getSize();
+
+        // 确保文件夹存在
+        String targetFile = asyncParse ? ASYNC_OUTPUT_FOLDER : SYNC_OUTPUT_FOLDER;
+        targetFile = targetFile + sn + "." + fileExtension;
         File tmpFile = new File(targetFile);
         tmpFile.mkdirs();
-        file.transferTo(tmpFile);
+
+        if (!asyncParse) {
+            // 异步模式
+            long allowBytes = ResourceUtil.parseMBorKBtoByte(ASYNC_FILE_UPLOAD_SIZE);
+            if (fileSize > allowBytes) {
+                throw new BusinessException("异步模式文件大小不能超过[" + ASYNC_FILE_UPLOAD_SIZE + "].");
+            }
+
+            // 解压zip到当前路径
+            if (FileType.ZIP.getExtension().equals(fileExtension)) {
+                file.transferTo(tmpFile);
+                ZipUtil.unZip(tmpFile);
+            } else {
+                throw new BusinessException("异步模式上传文件需为ZIP文件");
+            }
+        } else {
+            // 同步模式
+            long allowBytes = ResourceUtil.parseMBorKBtoByte(SYNC_FILE_UPLOAD_SIZE);
+            if (fileSize > allowBytes) {
+                throw new BusinessException("同步模式文件大小不能超过[" + SYNC_FILE_UPLOAD_SIZE + "], 请访问异步接口.");
+            }
+            file.transferTo(tmpFile);
+        }
 
         return targetFile;
     }
 
+
     /**
      * 解析结果封装到ResponseMessage
-     * @param sn 序列号
+     *
+     * @param sn          序列号
      * @param parseResult 解析结果
-     * @param type 文件类型 {@link Constants}
+     * @param type        文件类型 {@link Constants}
      */
     private ResponseMessage doResultToResponseMessage(String sn, AbstractParseResult parseResult, String type) {
         ResponseMessage message = new ResponseMessage();
@@ -133,8 +175,9 @@ public class ConvertServiceImpl implements ConvertService {
 
                 if (ocrResult.getCode().equals(OCR_FAILURE) || asrResult.getCode().equals(ASR_FAILURE)) {
                     message.setResultCode(PART_PARSE_FAILED);
-                    message.setMessage(PART_PARSE_FAILED.getMsg()+" => 图片:"+ocrResult.getMessage() + ",音频:" + asrResult.getMessage());
-                } else if (ocrResult.getCode().equals(SUCCESS)){
+                    message.setMessage(PART_PARSE_FAILED.getMsg() + " => 图片:" + ocrResult.getMessage() + ",音频:" +
+                            asrResult.getMessage());
+                } else if (ocrResult.getCode().equals(SUCCESS)) {
                     message.setResultCode(ResultCode.SUCCESS);
                 }
 
@@ -154,12 +197,12 @@ public class ConvertServiceImpl implements ConvertService {
 
     /**
      * @param asyncParse 是否异步解析
-     *
-     * 解析结果写入文件:${convert.outputFolder}/sn.rs
+     *                   <p>
+     *                   解析结果写入文件:${convert.outputFolder}/sn.rs
      */
     private void doWriteResultToFile(String resPath, final ResponseMessage responseMessage, boolean asyncParse) {
         // 写到正确的文件夹下
-        String resultFilePath = asyncParse ? OUTPUT_FOLDER_ASYNC : OUTPUT_FOLDER;
+        String resultFilePath = asyncParse ? ASYNC_OUTPUT_FOLDER : SYNC_OUTPUT_FOLDER;
         resultFilePath = resultFilePath + FilenameUtils.getBaseName(resPath) + FileType.RS.getExtensionWithPoint();
         File resultFile = new File(resultFilePath);
         // 如果存在 说明是重复消费 不做处理
@@ -179,7 +222,7 @@ public class ConvertServiceImpl implements ConvertService {
             //extract image keyword and write to file
             Optional.of(responseMessage)
                     .map(ResponseMessage::getResponseEntity)
-                    .ifPresent((entity)->{
+                    .ifPresent((entity) -> {
                         try (FileWriter fw = new FileWriter(resultFile, true)) {
                             fw.write(Constants.IMAGE_CONTENT + entity.getImageContent() + "\r\n");
                             fw.write(Constants.IMAGE_KEYWORD + entity.getImageKeyword() + "\r\n");
@@ -203,7 +246,7 @@ public class ConvertServiceImpl implements ConvertService {
 
     @Override
     public ResponseMessage findAsyncParseResult(String sn) {
-        String filePath = OUTPUT_FOLDER_ASYNC + sn + FileType.RS.getExtensionWithPoint();
+        String filePath = ASYNC_OUTPUT_FOLDER + sn + FileType.RS.getExtensionWithPoint();
         File resultFile = new File(filePath);
         ResponseMessage responseMessage = new ResponseMessage(ResultCode.SUCCESS);
         responseMessage.setSn(sn);

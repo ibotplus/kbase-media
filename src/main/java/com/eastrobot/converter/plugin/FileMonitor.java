@@ -28,8 +28,11 @@ import java.util.concurrent.TimeUnit;
 @ConditionalOnBean(AsyncMode.class)
 public class FileMonitor {
 
-    @Value("${convert.outputFolder-async}")
-    private String OUTPUT_FOLDER_ASYNC;
+    /**
+     * 异步上传的文件夹
+     */
+    @Value("${convert.async.output-folder}")
+    private String ASYNC_OUTPUT_FOLDER;
 
     @PostConstruct
     public void init() throws Exception {
@@ -37,7 +40,7 @@ public class FileMonitor {
         // 默认轮询5s
         long interval = TimeUnit.SECONDS.toMillis(5);
         IOFileFilter filter = FileFilterUtils.and(FileFilterUtils.fileFileFilter());
-        FileAlterationObserver observer = new FileAlterationObserver(OUTPUT_FOLDER_ASYNC, filter);
+        FileAlterationObserver observer = new FileAlterationObserver(ASYNC_OUTPUT_FOLDER, filter);
         observer.addListener(new FileListener());
         // 开始监控
         FileAlterationMonitor monitor = new FileAlterationMonitor(interval, observer);

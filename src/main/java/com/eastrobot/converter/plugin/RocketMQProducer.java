@@ -67,7 +67,7 @@ public class RocketMQProducer {
     }
 
     /**
-     * 发送消息 异步 内部有重试机制 可能会有重复问题
+     * 发送消息 异步 内部有重试机制
      * @param topic topic
      * @param tag tag
      * @param msg 消息主体

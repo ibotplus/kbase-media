@@ -44,6 +44,12 @@ public class ResponseMessageAsync implements Serializable {
         this.message = ResultCode.SUCCESS.getMsg();
     }
 
+    public ResponseMessageAsync(ResultCode resultCode, String sn, String message) {
+        this.code = ResultCode.SUCCESS.getCode();
+        this.sn = sn;
+        this.message = message;
+    }
+
     public void setResultCode(ResultCode result) {
         this.code = result.getCode();
         this.message = result.getMsg();

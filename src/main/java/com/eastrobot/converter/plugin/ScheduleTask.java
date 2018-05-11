@@ -18,18 +18,27 @@ import java.io.IOException;
  */
 @Configuration
 @EnableScheduling
-@ConditionalOnProperty(prefix = "convert", name = "clean-tmp.enable", havingValue = "true")
+@ConditionalOnProperty(prefix = "convert", name = "clean-tmp", havingValue = "true")
 public class ScheduleTask {
 
-    @Value("${convert.outputFolder}")
-    private String OUTPUT_FOLDER;
+    /**
+     * 同步上传的文件夹
+     */
+    @Value("${convert.async.output-folder}")
+    private String SYNC_OUTPUT_FOLDER;
+    /**
+     * 异步上传的文件夹
+     */
+    @Value("${convert.async.output-folder}")
+    private String ASYNC_OUTPUT_FOLDER;
 
     /**
      * 每周日1:00am 删除临时文件
      */
     @Scheduled(cron = "0 0 1 ? * SUN")
     public void deleteTempFile() throws IOException {
-        FileUtils.deleteDirectory(new File(OUTPUT_FOLDER));
+        FileUtils.deleteDirectory(new File(SYNC_OUTPUT_FOLDER));
+        FileUtils.deleteDirectory(new File(ASYNC_OUTPUT_FOLDER));
     }
 
 }

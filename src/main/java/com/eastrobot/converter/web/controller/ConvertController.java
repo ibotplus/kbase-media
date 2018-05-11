@@ -1,5 +1,6 @@
 package com.eastrobot.converter.web.controller;
 
+import com.eastrobot.converter.exception.BusinessException;
 import com.eastrobot.converter.model.ResponseMessage;
 import com.eastrobot.converter.model.ResultCode;
 import com.eastrobot.converter.service.ConvertService;
@@ -31,7 +32,7 @@ public class ConvertController {
     @Autowired
     private ConvertService converterService;
 
-    @ApiOperation(value = "上传视频,音频,图片,转换为文本.", response = ResponseMessage.class)
+    @ApiOperation(value = "上传视频,音频,图片,转换为文本.(文件大小受限)", response = ResponseMessage.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "file", value = "待转换文件", dataType = "__file", required = true, paramType = "form"),
             @ApiImplicitParam(name = "isFrameExtractKeyword", dataType = "boolean", defaultValue = "false", paramType = "form",
@@ -50,9 +51,9 @@ public class ConvertController {
             String targetFile;
             try {
                 targetFile = converterService.doUpload(file, sn, false);
-            } catch (Exception e) {
-                log.error("file upload error!", e);
-
+            } catch (BusinessException e) {
+                return new ResponseMessage(ResultCode.PREPARE_UPLOAD_FILE_ERROR, e.getMessage());
+            } catch (Exception e1) {
                 return new ResponseMessage(ResultCode.FILE_UPLOAD_FAILED);
             }
 

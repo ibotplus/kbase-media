@@ -27,6 +27,8 @@
         <commons-io.version>2.6</commons-io.version>
         <commons-fileupload.version>1.3.3</commons-fileupload.version>
         <commons-httpclient.version>4.5.5</commons-httpclient.version>
+        <commons-compress.version>1.16.1</commons-compress.version>
+
         <tess4j.version>3.4.7</tess4j.version>
         <rocketmq.version>4.2.0</rocketmq.version>
         <lombok.version>1.16.20</lombok.version>
@@ -86,26 +88,22 @@
             <version>${google-gson.version}</version>
         </dependency>
 
-        <!--apache commons-->
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+        <!--apache commons start-->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons-lang.version}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>${commons-io.version}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/commons-fileupload/commons-fileupload -->
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
             <version>${commons-fileupload.version}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
@@ -116,6 +114,13 @@
             <artifactId>httpmime</artifactId>
             <version>${commons-httpclient.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>${commons-compress.version}</version>
+        </dependency>
+        <!--apache commons end-->
+
         <!--RocketMQ-->
         <dependency>
             <groupId>org.apache.rocketmq</groupId>
@@ -140,21 +145,18 @@
             <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
-
         <!-- 汉语言处理包 -->
         <dependency>
             <groupId>com.hankcs</groupId>
             <artifactId>hanlp</artifactId>
             <version>${hanlp.version}</version>
         </dependency>
-
         <!--baidu asr-->
         <dependency>
             <groupId>com.baidu.aip</groupId>
             <artifactId>java-sdk</artifactId>
             <version>${baiduAip.version}</version>
         </dependency>
-
         <!--ffmpeg 处理包-->
         <dependency>
             <groupId>net.bramp.ffmpeg</groupId>
@@ -166,14 +168,12 @@
             <artifactId>guava</artifactId>
             <version>${google-guava.version}</version>
         </dependency>
-
         <!-- tess4j -->
         <dependency>
             <groupId>net.sourceforge.tess4j</groupId>
             <artifactId>tess4j</artifactId>
             <version>4.0.0</version>
         </dependency>
-
         <!--Abbyy-->
         <dependency>
             <groupId>com.abbyy</groupId>

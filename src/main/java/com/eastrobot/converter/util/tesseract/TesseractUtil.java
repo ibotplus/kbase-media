@@ -53,7 +53,6 @@ public class TesseractUtil {
         // 优先加载本地的设置 没有就加载环境变量 再没有就报错
         if (StringUtils.isBlank(datapath)) {
             datapath = System.getenv("TESSDATA_PREFIX");
-            System.out.println(datapath);
             if (StringUtils.isBlank(datapath)) {
                 log.error("initialize tesseract occurred exception. check language data path.");
                 throw new IllegalArgumentException("initialize tesseract occurred exception. check language data path");

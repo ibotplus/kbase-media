@@ -11,6 +11,7 @@ public enum FileType {
     JPG("jpg", ".jpg"),
     TXT("txt", ".txt"),
     AAC("aac", ".aac"),
+    ZIP("zip", ".zip"),
     /**
      * parse result file extension
      */

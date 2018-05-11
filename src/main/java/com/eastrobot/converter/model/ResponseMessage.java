@@ -48,6 +48,11 @@ public class ResponseMessage implements Serializable {
         this.message = ResultCode.SUCCESS.getMsg();
     }
 
+    public ResponseMessage(ResultCode result, String message) {
+        this.code = ResultCode.SUCCESS.getCode();
+        this.message = message;
+    }
+
     public void setResultCode(ResultCode result) {
         this.code = result.getCode();
         this.message = result.getMsg();

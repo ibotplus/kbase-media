@@ -1,5 +1,6 @@
 package com.eastrobot.converter.web.controller;
 
+import com.eastrobot.converter.exception.BusinessException;
 import com.eastrobot.converter.model.ResponseMessage;
 import com.eastrobot.converter.model.ResponseMessageAsync;
 import com.eastrobot.converter.model.ResultCode;
@@ -34,7 +35,7 @@ public class AsyncConvertController {
     @Autowired
     private ConvertService converterService;
 
-    @ApiOperation(value = "上传视频,音频,图片,转换为文本.", response = ResponseMessageAsync.class)
+    @ApiOperation(value = "上传视频,音频,图片,转换为文本.(异步模式上传为压缩文件)", response = ResponseMessageAsync.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "file", value = "待转换文件", dataType = "__file", required = true, paramType = "form")
     })
@@ -46,12 +47,11 @@ public class AsyncConvertController {
     public ResponseMessageAsync convertAsync(@RequestParam(value = "file") MultipartFile file) {
         String sn = UUID.randomUUID().toString();
         if (!file.isEmpty()) {
-            String targetFile = "";
             try {
                 converterService.doUpload(file, sn, true);
+            }catch (BusinessException e) {
+                return new ResponseMessageAsync(ResultCode.PREPARE_UPLOAD_FILE_ERROR, sn, e.getMessage());
             } catch (Exception e) {
-                log.error("file upload error!", e);
-
                 return new ResponseMessageAsync(ResultCode.FILE_UPLOAD_FAILED, sn);
             }
 

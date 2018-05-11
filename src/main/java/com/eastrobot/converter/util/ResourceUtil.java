@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -128,5 +129,19 @@ public class ResourceUtil {
         sortMap.putAll(map);
 
         return sortMap;
+    }
+
+    /**
+     * 将 10MB or 10KB 转换为字节数
+     */
+    public static long parseMBorKBtoByte(String size) {
+        size = size.toUpperCase(Locale.ENGLISH);
+        if (size.endsWith("KB")) {
+            return Long.valueOf(size.substring(0, size.length() - 2)) * 1024;
+        }
+        if (size.endsWith("MB")) {
+            return Long.valueOf(size.substring(0, size.length() - 2)) * 1024 * 1024;
+        }
+        return Long.valueOf(size);
     }
 }

@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StopWatch;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -44,7 +43,7 @@ public class RocketMQConsumer {
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
-    private static DefaultMQPushConsumer consumer;
+    private DefaultMQPushConsumer consumer;
 
     /**
      * Initialized required param for RocketMQ PushConsumer
@@ -79,7 +78,7 @@ public class RocketMQConsumer {
                 try {
                     Thread.sleep(5000);
                     // 延迟5秒再启动，主要是等待spring事件监听相关程序初始化完成，
-                    // 否则，回出现对RocketMQ的消息进行消费后立即发布消息到达的事件，
+                    // 否则，会出现对RocketMQ的消息进行消费后立即发布消息到达的事件，
                     // 然而此事件的监听程序还未初始化，从而造成消息的丢失
                     consumer.start();
                 } catch (Exception e) {
@@ -92,26 +91,6 @@ public class RocketMQConsumer {
             log.error("MQPushConsumer init occurred exception", e);
         }
     }
-
-    /**
-     *
-     * 消费失败,消息退回到broker 等待后续重新消费
-     *
-     * @author Yogurt_lei
-     * @date 2018-04-18 11:00
-     */
-    public static void sendMessageBack(MessageExt message) {
-        try {
-            StopWatch sw = new StopWatch();
-            sw.start();
-            consumer.sendMessageBack(message, 2);
-            log.warn("send message back to broker. msgId: {}", message.getMsgId());
-            log.warn(sw.prettyPrint());
-        } catch (Exception e) {
-            log.error("SEND-MSG occurred exception.", e);
-        }
-    }
-
 
     @PreDestroy
     public void destroy() {

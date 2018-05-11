@@ -1,11 +1,3 @@
-# default multipart config
-spring:
-  servlet:
-    multipart:
-      max-request-size: 50MB
-      max-file-size: 50MB
-      enabled: true
-
 # default logger config
 logging:
   level:
@@ -42,13 +34,17 @@ apache:
 # default user converter config
 convert:
   # whether to clean the temp directory in 1:00am every Sunday
-  clean-tmp:
-    enable: true
+  clean-tmp: true
   # Whether to enable the asynchronous interface
   enable-async: false
-  # default output-folder
-  outputFolder: E:\\converter-output\\
-  outputFolder-async: E:\\converter-output\\async\\
+  # sync interface config
+  sync:
+    upload-file-size: 50MB
+    output-folder: E:\\converter-output\\
+  # async interface config
+  async:
+    upload-file-size: 500MB
+    output-folder: E:\\converter-output\\async\\
   video:
     vca:
       default: ffmpeg

@@ -3,17 +3,27 @@ Here is [Api-docs](http://172.16.23.12/kbase-media/swagger-ui.html#) which use S
 
 **配置文件说明**
 
-**注意启动日志: 提示fineReader engine license 过期需要再启动一次..**
+**注意启动日志: 当ocr工具使用abbyy启动,提示fineReader engine license 过期需要再启动一次..**
 
 ``` yaml
 # convert部分配置
 convert:
+  # 是否开启每周日1:00am清空上传文件夹
+  clean-tmp: true
   # 是否开启异步接口
   enable-async: false
-  # 文件默认上传路径
-  outputFolder: /tmp/convert/
-  #  异步接口文件默认上传路径
-  outputFolder-async: /tmp/convert/async/
+  # 同步接口配置
+  sync:
+    # 最大上传文件大小
+    upload-file-size: 50MB
+    # 上传文件存储路径
+    output-folder: E:\\converter-output\\
+  # 异步接口设置
+  async:
+    # 最大上传文件大小
+    upload-file-size: 500MB
+    # 上传文件存储路径
+    output-folder: E:\\converter-output\\async\\
   video:
     vca:
 	  # 项目依赖于ffmpeg,必须要安装,默认即可
@@ -83,7 +93,7 @@ vim /usr/lib/systemd/system/kbase-media.service 增加
 [Unit]
 Description=kbase-media
 After=syslog.target
-	   
+   
 [Service]
 Type=forking
 ExecStart=/opt/kbase-media/startup.sh
