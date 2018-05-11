@@ -52,8 +52,10 @@ public class FileMonitor {
         @Override
         public void onFileCreate(File file) {
             String absolutePath = file.getAbsolutePath();
-            // 后缀是存放结果的文件
-            if (FileType.RS.getExtension().equals(FilenameUtils.getExtension(absolutePath))) {
+            String extension = FilenameUtils.getExtension(absolutePath);
+
+            // 后缀是存放结果的文件或zip文件不处理
+            if (FileType.RS.getExtension().equals(extension) || FileType.ZIP.getExtension().equals(extension)) {
                 return;
             }
             RocketMQProducer.sendMessage(Constants.MQ_CREATE_FILE_TOPIC, Constants.MQ_CREATE_FILE_TAG, file.getAbsolutePath());
