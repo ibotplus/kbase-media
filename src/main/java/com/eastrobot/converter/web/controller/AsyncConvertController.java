@@ -2,7 +2,6 @@ package com.eastrobot.converter.web.controller;
 
 import com.eastrobot.converter.exception.BusinessException;
 import com.eastrobot.converter.model.ResponseMessage;
-import com.eastrobot.converter.model.ResponseMessageAsync;
 import com.eastrobot.converter.model.ResultCode;
 import com.eastrobot.converter.plugin.AsyncMode;
 import com.eastrobot.converter.service.ConvertService;
@@ -35,7 +34,7 @@ public class AsyncConvertController {
     @Autowired
     private ConvertService converterService;
 
-    @ApiOperation(value = "上传视频,音频,图片,转换为文本.(异步模式上传为压缩文件)", response = ResponseMessageAsync.class)
+    @ApiOperation(value = "上传视频,音频,图片,转换为文本.(异步模式上传为压缩文件)", response = ResponseMessage.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "file", value = "待转换文件", dataType = "__file", required = true, paramType = "form")
     })
@@ -44,26 +43,26 @@ public class AsyncConvertController {
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
-    public ResponseMessageAsync convertAsync(@RequestParam(value = "file") MultipartFile file) {
+    public ResponseMessage convertAsync(@RequestParam(value = "file") MultipartFile file) {
         String sn = UUID.randomUUID().toString();
         if (!file.isEmpty()) {
             try {
                 converterService.doUpload(file, sn, true);
             }catch (BusinessException e) {
-                return new ResponseMessageAsync(ResultCode.PREPARE_UPLOAD_FILE_ERROR, sn, e.getMessage());
+                return new ResponseMessage(ResultCode.PREPARE_UPLOAD_FILE_ERROR, e.getMessage());
             } catch (Exception e) {
-                return new ResponseMessageAsync(ResultCode.FILE_UPLOAD_FAILED, sn);
+                return new ResponseMessage(ResultCode.FILE_UPLOAD_FAILED, e.getMessage());
             }
 
-            return new ResponseMessageAsync(ResultCode.SUCCESS, sn);
+            return new ResponseMessage(ResultCode.SUCCESS, "", sn);
         } else {
-            return new ResponseMessageAsync(ResultCode.PARAM_ERROR, sn);
+            return new ResponseMessage(ResultCode.PARAM_ERROR, sn);
         }
     }
 
     @ApiOperation(value = "通过sn来获得解析结果.", response = ResponseMessage.class)
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "sn", value = "异步上传返回的sn", dataType = "string", required = true, paramType = "path")
+            @ApiImplicitParam(name = "sn", value = "异步模式上传文件返回的sn", dataType = "string", required = true, paramType = "path")
     })
     @GetMapping(
             value = "/convertAsync/{sn}",

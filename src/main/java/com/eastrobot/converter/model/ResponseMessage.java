@@ -53,6 +53,11 @@ public class ResponseMessage implements Serializable {
         this.message = message;
     }
 
+    public ResponseMessage(ResultCode result, String message, String sn) {
+        this(result, message);
+        this.sn = sn;
+    }
+
     public void setResultCode(ResultCode result) {
         this.code = result.getCode();
         this.message = result.getMsg();

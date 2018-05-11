@@ -1,8 +1,9 @@
 package com.eastrobot.converter.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * ParseResult
@@ -10,7 +11,8 @@ import lombok.NoArgsConstructor;
  * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
  * @version v1.0 , 2018-04-20 17:56
  */
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ParseResult extends AbstractParseResult {

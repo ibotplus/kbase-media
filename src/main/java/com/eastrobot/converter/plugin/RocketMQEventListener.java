@@ -1,15 +1,20 @@
 package com.eastrobot.converter.plugin;
 
 import com.alibaba.fastjson.JSON;
+import com.eastrobot.converter.model.FileType;
 import com.eastrobot.converter.model.ResponseMessage;
 import com.eastrobot.converter.service.ConvertService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.remoting.common.RemotingHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+
+import java.io.File;
 
 /**
  * RocketMQEventListener
@@ -21,6 +26,12 @@ import org.springframework.stereotype.Component;
 @Component
 @ConditionalOnBean(AsyncMode.class)
 public class RocketMQEventListener {
+
+    /**
+     * 异步上传的文件夹
+     */
+    @Value("${convert.async.output-folder}")
+    private String ASYNC_OUTPUT_FOLDER;
 
     @Autowired
     private ConvertService convertService;
@@ -37,6 +48,13 @@ public class RocketMQEventListener {
         MessageExt message = event.getMessage();
         String fileAbsolutePath = new String(message.getBody(), RemotingHelper.DEFAULT_CHARSET);
         log.info("receive event, start convert file {}", fileAbsolutePath);
+
+        // 判断是否存在rs文件  存在跳过 不重复进行解析
+        String rs = ASYNC_OUTPUT_FOLDER + FilenameUtils.getBaseName(fileAbsolutePath) + FileType.RS.getExtensionWithPoint();
+        if (new File(rs).exists()) {
+            return;
+        }
+
         ResponseMessage responseMessage = convertService.driver(fileAbsolutePath, false, true);
         log.info("convert file complete : {}", fileAbsolutePath, JSON.toJSONString(responseMessage));
     }

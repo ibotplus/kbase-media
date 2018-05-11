@@ -248,6 +248,10 @@ public class ConvertServiceImpl implements ConvertService {
     public ResponseMessage findAsyncParseResult(String sn) {
         String filePath = ASYNC_OUTPUT_FOLDER + sn + FileType.RS.getExtensionWithPoint();
         File resultFile = new File(filePath);
+        if (!resultFile.exists()) {
+            return new ResponseMessage(ResultCode.ASYNC_NOT_COMPLETED);
+        }
+
         ResponseMessage responseMessage = new ResponseMessage(ResultCode.SUCCESS);
         responseMessage.setSn(sn);
         try (FileReader fr = new FileReader(resultFile);
@@ -259,19 +263,16 @@ public class ConvertServiceImpl implements ConvertService {
                 if (line.startsWith(Constants.ERROR_MSG)) {
                     responseMessage.setMessage(line);
                 } else if (line.startsWith(Constants.IMAGE_KEYWORD)) {
-                    entity.setImageKeyword(line);
+                    entity.setImageKeyword(StringUtils.replace(line, Constants.IMAGE_KEYWORD, ""));
                 } else if (line.startsWith(Constants.AUDIO_KEYWORD)) {
-                    entity.setAudioKeyword(line);
+                    entity.setAudioKeyword(StringUtils.replace(line, Constants.AUDIO_KEYWORD, ""));
                 } else if (line.startsWith(Constants.IMAGE_CONTENT)) {
-                    entity.setImageContent(line);
+                    entity.setImageContent(StringUtils.replace(line, Constants.IMAGE_CONTENT, ""));
                 } else if (line.startsWith(Constants.AUDIO_CONTENT)) {
-                    entity.setAudioContent(line);
+                    entity.setAudioContent(StringUtils.replace(line, Constants.AUDIO_CONTENT, ""));
                 }
             }
             responseMessage.setResponseEntity(entity);
-        } catch (FileNotFoundException e) {
-            log.warn("convert is not complete.");
-            responseMessage.setResultCode(ResultCode.ASYNC_NOT_COMPLETED);
         } catch (IOException e) {
             log.warn("read result file occurred exception.");
             responseMessage.setResultCode(ResultCode.ASYNC_READ_RESULT_FILE_FAILED);
