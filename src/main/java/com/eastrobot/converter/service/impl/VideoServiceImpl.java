@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -78,8 +77,7 @@ public class VideoServiceImpl implements VideoService {
         // 生成的文件 只有JPG(多个)和AAC(一个)
         String folderPath = ResourceUtil.getFolder(videoPath, "");
         // 声音 AAC文件
-        final String audioFile = folderPath + FilenameUtils.getBaseName(videoPath) + FileType.AAC
-                .getExtensionWithPoint();
+        final String audioFile = folderPath + FilenameUtils.getBaseName(videoPath) + FileType.AAC.getExtensionWithPoint();
         File[] allImageFiles = Optional.of(new File(folderPath))
                 .map(f -> f.listFiles(pathname -> FilenameUtils.getExtension(pathname.getName()).equals(FileType.JPG
                         .getExtension())))
@@ -168,34 +166,5 @@ public class VideoServiceImpl implements VideoService {
         }
 
         return new VacParseResult(asrParseResult, ocrParseResult);
-    }
-
-    public static void main(String[] args) {
-        Map<Integer, String> map = new ConcurrentHashMap<>();
-        map.put(5, "e");
-        map.put(4, "d");
-        map.put(3, "c");
-        map.put(2, "b");
-        map.put(1, "a");
-        System.out.println(map);
-
-
-        // System.out.println(result);
-        // //Sort a map and add to finalMap
-        // LinkedHashMap<String, Long> finalMap = result.entrySet()
-        //         .stream()
-        //         .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-        //         .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2, LinkedHashMap::new));
-        // System.out.println(finalMap);
-        Map<Integer, String> finalMap = new LinkedHashMap<>();
-//Sort a map and add to finalMap
-        String index = map.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey())
-                .map(Map.Entry::getValue)
-                .reduce((a, b) -> a + "," + b).orElse("");
-
-        System.out.println(index);
-
-
     }
 }

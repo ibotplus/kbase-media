@@ -43,11 +43,11 @@ public class AudioParserTemplate {
             FFmpegUtil.splitSegFileToPcm(audioFilePath, segmentDuration);
         } catch (IOException e) {
             log.error("splitSegToPcm occurred exception, check the ffmpeg location is right.");
-            return new ParseResult(ASR_FAILURE, "splitSegToPcm occurred exception, check the ffmpeg location is right.", "", "");
+            return new ParseResult(ASR_FAILURE, e.getMessage(), "", "");
         }
 
-        File folder = new File(ResourceUtil.getFolder(audioFilePath, ""));
-        File[] allPcmFiles = folder.listFiles(filename -> FileType.PCM.getExtension().equals(FilenameUtils.getExtension(filename.getName())));
+        File[] allPcmFiles =  new File(ResourceUtil.getFolder(audioFilePath, ""))
+                .listFiles(filename -> FileType.PCM.getExtension().equals(FilenameUtils.getExtension(filename.getName())));
 
         assert allPcmFiles != null;
         if (allPcmFiles.length > 1) {
@@ -95,7 +95,7 @@ public class AudioParserTemplate {
 
             // 2. 解析结束后 合并内容 提取关键字
             String resultText = ResourceUtil.map2SortByKeyAndMergeWithSplit(audioContentMap, "");
-            if (StringUtils.isNotBlank(resultText)){
+            if (StringUtils.isNotBlank(resultText)) {
                 resultText = ChineseUtil.removeMessy(resultText);
                 List<String> keywords = HanLP.extractKeyword(resultText, 100);
                 String keyword = ResourceUtil.list2String(keywords, ",");
@@ -110,7 +110,7 @@ public class AudioParserTemplate {
         } else { // 音频只有一段 不分段直解处理
             try {
                 String resultText = callBack.doInParser(allPcmFiles[0].getAbsolutePath());
-                if (StringUtils.isNotBlank(resultText)){
+                if (StringUtils.isNotBlank(resultText)) {
                     List<String> keywords = HanLP.extractKeyword(resultText, 100);
                     String keyword = ResourceUtil.list2String(keywords, ",");
                     return new ParseResult(SUCCESS, SUCCESS.getMsg(), keyword, resultText);

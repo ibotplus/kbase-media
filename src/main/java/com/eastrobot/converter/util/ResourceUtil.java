@@ -2,13 +2,11 @@ package com.eastrobot.converter.util;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * ResourceUtil
@@ -39,38 +37,10 @@ public class ResourceUtil {
     /**
      * 将数组转换成字符串
      *
-     * @author eko.zhan at 2017年12月21日 下午1:18:33
-     */
-    public static String list2String(Collection<String> list) {
-        return list2String(list, " ");
-    }
-
-    /**
-     * 将数组转换成字符串
-     *
      * @author eko.zhan at 2017年12月21日 下午1:18:51
      */
-    public static String list2String(Collection<String> list, String split) {
-        StringBuilder sb = new StringBuilder();
-        for (String s : list) {
-            sb.append(s).append(split);
-        }
-        return sb.toString();
-    }
-
-    /**
-     * 获取项目根路径 结尾不含/
-     *
-     * @author Yogurt_lei
-     * @date 2018-03-29 10:03
-     */
-    public static String getRootPath() {
-        String path = ResourceUtil.class.getResource("/").getPath();
-        if (SystemUtils.isLinux()) {
-            return StringUtils.substringBefore(path, "/WEB-INF/classes/");
-        } else {
-            return StringUtils.substringBetween(path, "/", "/WEB-INF/classes/");
-        }
+    public static String list2String(Collection<String> list, final String split) {
+        return list.stream().reduce((a, b) -> a + split + b).orElse("");
     }
 
     private static String[] videoArray = new String[]{"avi", "asf", "wmv", "avs", "flv", "mkv", "mov", "3gp", "mp4",
@@ -107,28 +77,11 @@ public class ResourceUtil {
      * @author Yogurt_lei
      * @date 2018-03-29 20:20
      */
-    public static String map2SortByKeyAndMergeWithSplit(Map<Integer, String> map, String split) {
-        TreeMap<Integer, String> sortMap = map2SortByKey(map);
-
-        StringBuilder result = new StringBuilder();
-        for (Map.Entry<Integer, String> entry : sortMap.entrySet()) {
-            result.append(entry.getValue()).append(split);
-        }
-
-        return result.toString();
-    }
-
-    /**
-     * 根据key正序 返回有序TreeMap
-     *
-     * @author Yogurt_lei
-     * @date 2018-03-29 20:20
-     */
-    public static TreeMap<Integer, String> map2SortByKey(Map<Integer, String> map) {
-        TreeMap<Integer, String> sortMap = new TreeMap<>(Integer::compareTo);
-        sortMap.putAll(map);
-
-        return sortMap;
+    public static String map2SortByKeyAndMergeWithSplit(Map<Integer, String> map, final String split) {
+        return map.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(Map.Entry::getValue)
+                .reduce((a, b) -> a + split + b).orElse("");
     }
 
     /**
