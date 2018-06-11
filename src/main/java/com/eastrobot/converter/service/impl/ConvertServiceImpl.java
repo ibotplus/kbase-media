@@ -34,7 +34,7 @@ public class ConvertServiceImpl implements ConvertService {
     /**
      * 同步上传的文件夹
      */
-    @Value("${convert.async.output-folder}")
+    @Value("${convert.sync.output-folder}")
     private String SYNC_OUTPUT_FOLDER;
     /**
      * 异步上传的文件夹
@@ -104,7 +104,7 @@ public class ConvertServiceImpl implements ConvertService {
         File tmpFile = new File(targetFile);
         tmpFile.mkdirs();
 
-        if (!asyncParse) {
+        if (asyncParse) {
             // 异步模式
             long allowBytes = ResourceUtil.parseMBorKBtoByte(ASYNC_FILE_UPLOAD_SIZE);
             if (fileSize > allowBytes) {

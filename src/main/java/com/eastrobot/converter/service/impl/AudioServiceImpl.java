@@ -14,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+
+import static com.eastrobot.converter.model.ResultCode.ASR_FAILURE;
 import static com.eastrobot.converter.model.ResultCode.CFG_ERROR;
 import static com.eastrobot.converter.util.baidu.BaiduAsrConstants.PCM;
 import static com.eastrobot.converter.util.baidu.BaiduAsrConstants.RATE;
@@ -37,14 +40,18 @@ public class AudioServiceImpl implements AudioService {
 
     @Override
     public ParseResult handle(String audioFilePath) {
-        if (Constants.BAIDU.equals(audioTool)) {
-            return audioParserTemplate.handle(audioFilePath, this::baiduAsrHandler);
-        } else if (Constants.SHHAN.equals(audioTool)) {
-            return audioParserTemplate.handle(audioFilePath, this::shhanAsrHandler);
-        } else if (Constants.XFYUN.equals(audioTool)) {
-            return audioParserTemplate.handle(audioFilePath, this::xfyunAsrHandler);
+        if (new File(audioFilePath).exists()) {
+            if (Constants.BAIDU.equals(audioTool)) {
+                return audioParserTemplate.handle(audioFilePath, this::baiduAsrHandler);
+            } else if (Constants.SHHAN.equals(audioTool)) {
+                return audioParserTemplate.handle(audioFilePath, this::shhanAsrHandler);
+            } else if (Constants.XFYUN.equals(audioTool)) {
+                return audioParserTemplate.handle(audioFilePath, this::xfyunAsrHandler);
+            } else {
+                return new ParseResult(CFG_ERROR, CFG_ERROR.getMsg(), "", "");
+            }
         } else {
-            return new ParseResult(CFG_ERROR, CFG_ERROR.getMsg(), "", "");
+            return new ParseResult(ASR_FAILURE, "提取到空的音频流", "", "");
         }
     }
 
