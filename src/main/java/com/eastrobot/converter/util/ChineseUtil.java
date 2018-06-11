@@ -67,6 +67,7 @@ public class ChineseUtil {
     public static String removeMessy(String str) {
         StringBuilder sb = new StringBuilder();
         str = str.replaceAll("\\\\r\\\\n|\\\\r|\\\\n|\\\\t|\\s*","");
+        str = str.replaceAll("[\\pP\\p{Punct}]", "");//去除标点符号
 
         //去掉中文之间的空格，并保留英文之间的空格 https://www.zhihu.com/question/39636240
         str = str.replaceAll("(\\w) +(\\w)", "$1@$2");
@@ -77,6 +78,7 @@ public class ChineseUtil {
                 sb.append(c);
             }
         }
+
         return sb.toString();
     }
 }

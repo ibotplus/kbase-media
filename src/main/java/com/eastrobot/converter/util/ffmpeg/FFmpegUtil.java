@@ -136,7 +136,11 @@ public class FFmpegUtil {
         }
         builder = outputBuilder.setStrict(FFmpegBuilder.Strict.EXPERIMENTAL).done();
         FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
-        executor.createJob(builder).run();
+        try {
+            executor.createJob(builder).run();
+        } catch (Exception e) {
+            log.error("transformAudio occurred exception: {}" + e.getMessage());
+        }
     }
 
     /**
