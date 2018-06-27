@@ -11,13 +11,16 @@ logging:
     io.swagger: warn
     org.zbus: warn
     sun.rmi: warn
+  file:
+    max-history: 7
+    max-size: 100MB
   file: ./stdout.log
 
 # default server config
 server:
-  port: 8080
+  port: 12345
   servlet:
-    context-path: /converter-api
+    context-path: /kbase-media
 
 # default rocketmq config
 apache:

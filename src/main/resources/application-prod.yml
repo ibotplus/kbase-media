@@ -1,21 +1,15 @@
 # default logger config
 logging:
   level:
-    root: info
-    springfox.documentation: warn
-    org.springframework: warn
-    org.hibernate: warn
-    org.thymeleaf: warn
-    org.apache: warn
-    org.quartz: warn
-    io.swagger: warn
-    org.zbus: warn
-    sun.rmi: warn
+    root: WARN
+  file:
+    max-history: 7
+    max-size: 100MB
   file: ./stdout.log
 
 # default server config
 server:
-  port: 80
+  port: 12345
   servlet:
     context-path: /kbase-media
 
@@ -27,7 +21,7 @@ convert:
   enable-async: false
   # sync interface config
   sync:
-    upload-file-size: 50MB
+    upload-file-size: 500MB
     output-folder: /tmp/convert/
    # async interface config
   async:
