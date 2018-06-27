@@ -2,13 +2,14 @@ package com.eastrobot.converter;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.web.servlet.MultipartAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.DispatcherServlet;
 
-@SpringBootApplication
 @EnableConfigurationProperties
+@SpringBootApplication(exclude = {MultipartAutoConfiguration.class})
 public class Application {
     public static void main(String[] args) {
         new SpringApplication(Application.class).run(args);
