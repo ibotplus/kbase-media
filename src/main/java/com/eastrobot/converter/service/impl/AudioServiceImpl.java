@@ -2,6 +2,7 @@ package com.eastrobot.converter.service.impl;
 
 import com.eastrobot.converter.model.Constants;
 import com.eastrobot.converter.model.ParseResult;
+import com.eastrobot.converter.model.tts.TTSOption;
 import com.eastrobot.converter.model.tts.TTSParam;
 import com.eastrobot.converter.service.AudioService;
 import com.eastrobot.converter.util.baidu.BaiduAsrUtils;
@@ -14,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cglib.beans.BeanMap;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -62,13 +64,21 @@ public class AudioServiceImpl implements AudioService {
     @Override
     public ParseResult handleTts(TTSParam param) {
         String text = param.getText();
+        TTSOption option = param.getOption();
+        HashMap<String, Object> options = new HashMap<String, Object>();
+        if(option!=null){
+            BeanMap beanMap = BeanMap.create(option);
+            for (Object key : beanMap.keySet()) {
+                options.put(key+"", beanMap.get(key));
+            }
+        }
         if (StringUtils.isNoneBlank(text)) {
             byte[] data = null;
             // 截取
             if (text.length() > 512) {//需截取
                 List<String> splitList = splitText(text);
                 for (String sText : splitList) {
-                    byte[] bytes = baiduTtsHandler(sText);
+                    byte[] bytes = baiduTtsHandler(sText,options);
                     if (data == null) {
                         data = bytes;
                     } else if (data != null && bytes != null) {
@@ -77,7 +87,7 @@ public class AudioServiceImpl implements AudioService {
                     }
                 }
             } else {
-                data = baiduTtsHandler(text);
+                data = baiduTtsHandler(text,options);
             }
             if (data != null) {
                 return new ParseResult(SUCCESS, SUCCESS.getMsg(), "", "", data);
@@ -142,11 +152,11 @@ public class AudioServiceImpl implements AudioService {
         }
     }
 
-    private byte[] baiduTtsHandler(String tex){
+    private byte[] baiduTtsHandler(String tex,HashMap<String, Object> options){
         //String tex = "每次启动和定时器每天晚上校验 license";
         String lan="zh";// 固定值zh。语言选择,目前只有中英文混合模式，填写固定值zh
         int ctp = 1; // 客户端类型选择，web端填写固定值1
-        HashMap<String, Object> options = new HashMap<String, Object>();
+        //HashMap<String, Object> options = new HashMap<String, Object>();
 
         return BaiduAsrUtils.tts(tex,lan,ctp,options);
     }
