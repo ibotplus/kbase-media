@@ -2,6 +2,7 @@ package com.eastrobot.converter.service.impl;
 
 import com.eastrobot.converter.model.Constants;
 import com.eastrobot.converter.model.ParseResult;
+import com.eastrobot.converter.model.tts.TTSParam;
 import com.eastrobot.converter.service.AudioService;
 import com.eastrobot.converter.util.baidu.BaiduAsrUtils;
 import com.eastrobot.converter.util.shhan.ShhanAsrUtil;
@@ -59,7 +60,8 @@ public class AudioServiceImpl implements AudioService {
     }
 
     @Override
-    public ParseResult handleTts(String text) {
+    public ParseResult handleTts(TTSParam param) {
+        String text = param.getText();
         if (StringUtils.isNoneBlank(text)) {
             byte[] data = null;
             // 截取

@@ -2,6 +2,7 @@ package com.eastrobot.converter.service;
 
 
 import com.eastrobot.converter.model.ParseResult;
+import com.eastrobot.converter.model.tts.TTSParam;
 
 /**
  * AudioService
@@ -22,8 +23,8 @@ public interface AudioService {
 
     /**
      * 文本合成音频（byte[]输出）
-     * @param text
+     * @param param
      * @return
      */
-    ParseResult handleTts(String text);
+    ParseResult handleTts(TTSParam param);
 }

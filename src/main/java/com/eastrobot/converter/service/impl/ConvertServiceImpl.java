@@ -298,7 +298,7 @@ public class ConvertServiceImpl implements ConvertService {
     public ResponseMessage driver(TTSParam ttsParam, boolean asyncParse) {
         ResponseMessage responseMessage;
         String sn = UUID.randomUUID().toString();
-        ParseResult ttsResult = audioService.handleTts(ttsParam.getText());
+        ParseResult ttsResult = audioService.handleTts(ttsParam);
         responseMessage = this.doResultToResponseMessage(sn, ttsResult, Constants.TEXT);
         return responseMessage;
     }
