@@ -2,6 +2,7 @@ package com.eastrobot.converter.service.impl;
 
 import com.eastrobot.converter.exception.BusinessException;
 import com.eastrobot.converter.model.*;
+import com.eastrobot.converter.model.tts.TTSParam;
 import com.eastrobot.converter.service.AudioService;
 import com.eastrobot.converter.service.ConvertService;
 import com.eastrobot.converter.service.ImageService;
@@ -190,7 +191,7 @@ public class ConvertServiceImpl implements ConvertService {
                 message.setResponseEntity(entity);
             }
             break;
-            case Constants.TEXT:{
+            case Constants.TEXT: {
                 ParseResult ttsResult = (ParseResult) parseResult;
                 message.setResultCode(ttsResult.getCode());
                 if (StringUtils.isNotBlank(ttsResult.getMessage())) {
@@ -294,11 +295,11 @@ public class ConvertServiceImpl implements ConvertService {
     }
 
     @Override
-    public ResponseMessage driver(String text, boolean asyncParse) {
+    public ResponseMessage driver(TTSParam ttsParam, boolean asyncParse) {
         ResponseMessage responseMessage;
         String sn = UUID.randomUUID().toString();
-        ParseResult ttsResult = audioService.handleTts(text);
+        ParseResult ttsResult = audioService.handleTts(ttsParam.getText());
         responseMessage = this.doResultToResponseMessage(sn, ttsResult, Constants.TEXT);
         return responseMessage;
-     }
+    }
 }

@@ -2,6 +2,7 @@ package com.eastrobot.converter.service;
 
 
 import com.eastrobot.converter.model.ResponseMessage;
+import com.eastrobot.converter.model.tts.TTSParam;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -13,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 public interface ConvertService {
 
     /**
-     *
      * 上传文件 异步和同步上传到不同的文件夹
      *
      * @author Yogurt_lei
@@ -22,12 +22,11 @@ public interface ConvertService {
     String doUpload(MultipartFile file, String sn, boolean asyncParse) throws Exception;
 
     /**
-     *
      * 传入资源绝对路径,开始解析
      *
-     * @param resPath 资源绝对路径
+     * @param resPath               资源绝对路径
      * @param isFrameExtractKeyword 仅针对视频文件有效, 视频帧图片是否按帧提取关键字
-     * @param asyncParse 是否是异步解析
+     * @param asyncParse            是否是异步解析
      *
      * @author Yogurt_lei
      * @date 2018-03-29 15:00
@@ -36,7 +35,6 @@ public interface ConvertService {
 
 
     /**
-     *
      * 查找异步解析的结果
      *
      * @author Yogurt_lei
@@ -46,9 +44,9 @@ public interface ConvertService {
 
     /**
      * tts 解析
-     * @param text 待合成语音文本内容
+     *
+     * @param ttsParam   ttsParam
      * @param asyncParse 是否异步解析
-     * @return
      */
-    ResponseMessage driver(String text,boolean asyncParse);
- }
+    ResponseMessage driver(TTSParam ttsParam, boolean asyncParse);
+}

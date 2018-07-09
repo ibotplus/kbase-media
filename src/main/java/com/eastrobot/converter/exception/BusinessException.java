@@ -5,6 +5,10 @@ package com.eastrobot.converter.exception;
  * @version v1.0 , 2018-05-11 14:47
  */
 public class BusinessException extends Exception {
+    public BusinessException() {
+        super();
+    }
+
     public BusinessException(String message) {
         super(message);
     }
