@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -61,5 +62,28 @@ public class ConvertController {
         } else {
             return new ResponseMessage(ResultCode.PARAM_ERROR);
         }
+    }
+
+    @ApiOperation(value = "文本语音合成(文本长度)", response = ResponseMessage.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "text", value = "待转语音文本内容，使用UTF-8编码。小于512个中文字或者英文数字", dataType = "string", defaultValue = "", required = true, paramType = "form"),
+            @ApiImplicitParam(name = "param", dataType = "string", defaultValue = "", paramType = "form",
+                    value = "语音合成可选参数<br/>spd:语速，取值0-9，默认为5中语速,<br/>pit:音调，取值0-9，默认为5中语调,<br/>vol:音量，取值0-15，默认为5中音量,<br/>per:发音人选择, 0为女声，1为男声，3为情感合成-度逍遥，4为情感合成-度丫丫，默认为普通女"
+            )
+    })
+    @PostMapping(
+            value = "/convert/tts",
+            produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
+            consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
+    )
+    public ResponseMessage convertTts(@RequestParam("text") String text,
+                                      @RequestParam("param") String param){
+
+        if (StringUtils.isNoneBlank(text)){
+            return converterService.driver(text,false);
+        }else {
+            return new ResponseMessage(ResultCode.PARAM_ERROR);
+        }
+
     }
 }

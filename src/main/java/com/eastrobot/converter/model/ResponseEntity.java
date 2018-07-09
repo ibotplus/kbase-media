@@ -35,4 +35,9 @@ public class ResponseEntity {
      */
     @ApiModelProperty("音频关键字")
     private String audioKeyword;
+    /**
+     * 文字转语音音频byte数组 base64
+     */
+    @ApiModelProperty("文字语音")
+    private byte[] textAudio;
 }

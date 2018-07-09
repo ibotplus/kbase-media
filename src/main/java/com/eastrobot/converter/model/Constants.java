@@ -26,6 +26,7 @@ public interface Constants {
     String AUDIO = "AUDIO";
     String IMAGE = "IMAGE";
     String VIDEO = "VIDEO";
+    String TEXT = "TEXT";
     //------------------------------------
     // parse result key definition
     //------------------------------------

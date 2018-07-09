@@ -13,11 +13,12 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import sun.misc.BASE64Encoder;
 
 import java.io.File;
+import java.util.HashMap;
 
-import static com.eastrobot.converter.model.ResultCode.ASR_FAILURE;
-import static com.eastrobot.converter.model.ResultCode.CFG_ERROR;
+import static com.eastrobot.converter.model.ResultCode.*;
 import static com.eastrobot.converter.util.baidu.BaiduAsrConstants.PCM;
 import static com.eastrobot.converter.util.baidu.BaiduAsrConstants.RATE;
 
@@ -48,10 +49,26 @@ public class AudioServiceImpl implements AudioService {
             } else if (Constants.XFYUN.equals(audioTool)) {
                 return audioParserTemplate.handle(audioFilePath, this::xfyunAsrHandler);
             } else {
-                return new ParseResult(CFG_ERROR, CFG_ERROR.getMsg(), "", "");
+                return new ParseResult(CFG_ERROR, CFG_ERROR.getMsg(), "", "",null);
             }
         } else {
-            return new ParseResult(ASR_FAILURE, "提取到空的音频流", "", "");
+            return new ParseResult(ASR_FAILURE, "提取到空的音频流", "", "",null);
+        }
+    }
+
+    @Override
+    public ParseResult handleTts(String text) {
+        if(StringUtils.isNoneBlank(text)){
+            byte[] data = baiduTtsHandler(text);
+            if(data!=null){
+                //对字节数组Base64编码
+                BASE64Encoder encoder = new BASE64Encoder();//encoder.encode(data)
+                return new ParseResult(SUCCESS, SUCCESS.getMsg(), "", "",data);
+            }else{
+                return new ParseResult(PARSE_EMPTY, PARSE_EMPTY.getMsg(), "", "",null);
+            }
+         }else {
+            return new ParseResult(TTS_FAILURE, "文本内容为空", "", "",null);
         }
     }
 
@@ -82,5 +99,13 @@ public class AudioServiceImpl implements AudioService {
         } else {
             throw new Exception(asr.toString());
         }
+    }
+
+    private byte[] baiduTtsHandler(String tex){
+        //String tex = "每次启动和定时器每天晚上校验 license";
+        String lan="zh";// 固定值zh。语言选择,目前只有中英文混合模式，填写固定值zh
+        int ctp = 1; // 客户端类型选择，web端填写固定值1
+        HashMap<String, Object> options = new HashMap<String, Object>();
+        return BaiduAsrUtils.tts(tex,lan,ctp,options);
     }
 }

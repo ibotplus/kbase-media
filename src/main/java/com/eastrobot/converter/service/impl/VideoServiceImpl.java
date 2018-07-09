@@ -157,12 +157,12 @@ public class VideoServiceImpl implements VideoService {
             }
 
             if (hasOccurredException.get()) {
-                ocrParseResult = new ParseResult(OCR_FAILURE, exceptionBuffer.toString(), imageKeyword, imageContent);
+                ocrParseResult = new ParseResult(OCR_FAILURE, exceptionBuffer.toString(), imageKeyword, imageContent,null);
             } else {
-                ocrParseResult = new ParseResult(SUCCESS, SUCCESS.getMsg(), imageKeyword, imageContent);
+                ocrParseResult = new ParseResult(SUCCESS, SUCCESS.getMsg(), imageKeyword, imageContent,null);
             }
         } else {
-            ocrParseResult = new ParseResult(PARSE_EMPTY, PARSE_EMPTY.getMsg(), "", "");
+            ocrParseResult = new ParseResult(PARSE_EMPTY, PARSE_EMPTY.getMsg(), "", "",null);
         }
 
         return new VacParseResult(asrParseResult, ocrParseResult);

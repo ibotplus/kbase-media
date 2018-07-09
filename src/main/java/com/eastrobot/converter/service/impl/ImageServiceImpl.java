@@ -47,11 +47,11 @@ public class ImageServiceImpl implements ImageService {
                     result = TesseractUtil.ocr(imageFilePath);
                     break;
                 default:
-                    return new ParseResult(OCR_FAILURE, "undefined ocr tools", "", "");
+                    return new ParseResult(OCR_FAILURE, "undefined ocr tools", "", "",null);
             }
         } catch (Exception e) {
             log.warn("handler parse image occurred exception: {}", e.getMessage());
-            return new ParseResult(OCR_FAILURE, e.getMessage(), "", "");
+            return new ParseResult(OCR_FAILURE, e.getMessage(), "", "",null);
         }
 
         if (StringUtils.isNotBlank(result)) {
@@ -59,9 +59,9 @@ public class ImageServiceImpl implements ImageService {
             List<String> keywords = HanLP.extractKeyword(result, 100);
             String keyword = ResourceUtil.list2String(keywords, "");
 
-            return new ParseResult(SUCCESS, SUCCESS.getMsg(), keyword, result);
+            return new ParseResult(SUCCESS, SUCCESS.getMsg(), keyword, result,null);
         } else {
-            return new ParseResult(PARSE_EMPTY, PARSE_EMPTY.getMsg(), "", "");
+            return new ParseResult(PARSE_EMPTY, PARSE_EMPTY.getMsg(), "", "",null);
         }
     }
 }

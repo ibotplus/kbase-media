@@ -43,4 +43,12 @@ public interface ConvertService {
      * @date 2018-04-12 19:59
      */
     ResponseMessage findAsyncParseResult(String sn);
-}
+
+    /**
+     * tts 解析
+     * @param text 待合成语音文本内容
+     * @param asyncParse 是否异步解析
+     * @return
+     */
+    ResponseMessage driver(String text,boolean asyncParse);
+ }

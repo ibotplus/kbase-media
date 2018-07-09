@@ -19,4 +19,11 @@ public interface AudioService {
      * @date 2018-03-27 11:54
      */
     ParseResult handle(String audioFilePath);
+
+    /**
+     * 文本合成音频（byte[]输出）
+     * @param text
+     * @return
+     */
+    ParseResult handleTts(String text);
 }

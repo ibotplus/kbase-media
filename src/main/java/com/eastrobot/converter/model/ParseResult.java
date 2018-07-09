@@ -33,10 +33,17 @@ public class ParseResult extends AbstractParseResult {
      */
     private String content;
 
+    /**
+     * 音频
+     */
+    private byte[] audio;
+
+
     public void update(ParseResult other) {
         this.code = other.code;
         this.message = other.message;
         this.keyword = other.keyword;
         this.content = other.content;
+        this.audio = other.audio;
     }
 }

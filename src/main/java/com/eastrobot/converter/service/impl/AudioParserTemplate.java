@@ -43,7 +43,7 @@ public class AudioParserTemplate {
             FFmpegUtil.splitSegFileToPcm(audioFilePath, segmentDuration);
         } catch (IOException e) {
             log.error("splitSegToPcm occurred exception, check the ffmpeg location is right.");
-            return new ParseResult(ASR_FAILURE, e.getMessage(), "", "");
+            return new ParseResult(ASR_FAILURE, e.getMessage(), "", "",null);
         }
 
         File[] allPcmFiles =  new File(ResourceUtil.getFolder(audioFilePath, ""))
@@ -100,12 +100,12 @@ public class AudioParserTemplate {
                 List<String> keywords = HanLP.extractKeyword(resultText, 100);
                 String keyword = ResourceUtil.list2String(keywords, ",");
                 if (hasOccurredException.get()) {
-                    return new ParseResult(ASR_FAILURE, exceptionBuffer.toString(), keyword, resultText);
+                    return new ParseResult(ASR_FAILURE, exceptionBuffer.toString(), keyword, resultText,null);
                 } else {
-                    return new ParseResult(SUCCESS, SUCCESS.getMsg(), keyword, resultText);
+                    return new ParseResult(SUCCESS, SUCCESS.getMsg(), keyword, resultText,null);
                 }
             } else {
-                return new ParseResult(PARSE_EMPTY, PARSE_EMPTY.getMsg(), "", "");
+                return new ParseResult(PARSE_EMPTY, PARSE_EMPTY.getMsg(), "", "",null);
             }
         } else { // 音频只有一段 不分段直解处理
             try {
@@ -113,13 +113,13 @@ public class AudioParserTemplate {
                 if (StringUtils.isNotBlank(resultText)) {
                     List<String> keywords = HanLP.extractKeyword(resultText, 100);
                     String keyword = ResourceUtil.list2String(keywords, ",");
-                    return new ParseResult(SUCCESS, SUCCESS.getMsg(), keyword, resultText);
+                    return new ParseResult(SUCCESS, SUCCESS.getMsg(), keyword, resultText,null);
                 }
 
-                return new ParseResult(PARSE_EMPTY, PARSE_EMPTY.getMsg(), "", "");
+                return new ParseResult(PARSE_EMPTY, PARSE_EMPTY.getMsg(), "", "",null);
             } catch (Exception e) {
                 log.warn("asrHandler parse audio occurred exception: {}", e.getMessage());
-                return new ParseResult(ASR_FAILURE, e.getMessage(), "", "");
+                return new ParseResult(ASR_FAILURE, e.getMessage(), "", "",null);
             }
         }
     }

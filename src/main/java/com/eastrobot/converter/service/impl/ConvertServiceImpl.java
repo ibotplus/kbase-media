@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.util.Optional;
+import java.util.UUID;
 
 import static com.eastrobot.converter.model.ResultCode.*;
 
@@ -189,6 +190,17 @@ public class ConvertServiceImpl implements ConvertService {
                 message.setResponseEntity(entity);
             }
             break;
+            case Constants.TEXT:{
+                ParseResult ttsResult = (ParseResult) parseResult;
+                message.setResultCode(ttsResult.getCode());
+                if (StringUtils.isNotBlank(ttsResult.getMessage())) {
+                    message.setMessage(ttsResult.getMessage());
+                }
+
+                ResponseEntity entity = new ResponseEntity();
+                entity.setTextAudio(ttsResult.getAudio());
+                message.setResponseEntity(entity);
+            }
             default:
                 break;
         }
@@ -280,4 +292,13 @@ public class ConvertServiceImpl implements ConvertService {
 
         return responseMessage;
     }
+
+    @Override
+    public ResponseMessage driver(String text, boolean asyncParse) {
+        ResponseMessage responseMessage;
+        String sn = UUID.randomUUID().toString();
+        ParseResult ttsResult = audioService.handleTts(text);
+        responseMessage = this.doResultToResponseMessage(sn, ttsResult, Constants.TEXT);
+        return responseMessage;
+     }
 }
