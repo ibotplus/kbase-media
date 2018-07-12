@@ -1,8 +1,11 @@
 package com.eastrobot.converter.model;
 
+import com.alibaba.fastjson.JSON;
+import com.eastrobot.converter.model.aitype.AiType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
@@ -15,8 +18,9 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
+@NoArgsConstructor
 @ApiModel(description = "响应数据")
-public class ResponseMessage implements Serializable {
+public class ResponseMessage<T extends AiType> implements Serializable {
     /**
      * 结果码
      */
@@ -36,30 +40,37 @@ public class ResponseMessage implements Serializable {
      * 结果封装
      */
     @ApiModelProperty("结果封装")
-    private ResponseEntity responseEntity;
+    private T responseEntity;
 
-    public ResponseMessage(ResultCode result) {
-        this.code = result.getCode();
-        this.message = result.getMsg();
-    }
-
-    public ResponseMessage() {
-        this.code = ResultCode.SUCCESS.getCode();
-        this.message = ResultCode.SUCCESS.getMsg();
-    }
-
-    public ResponseMessage(ResultCode result, String message) {
-        this.code = ResultCode.SUCCESS.getCode();
-        this.message = message;
-    }
-
-    public ResponseMessage(ResultCode result, String message, String sn) {
-        this(result, message);
+    public ResponseMessage(String sn) {
         this.sn = sn;
     }
 
-    public void setResultCode(ResultCode result) {
-        this.code = result.getCode();
-        this.message = result.getMsg();
+    public ResponseMessage(ResultCode resultCode) {
+        this.code = resultCode.getCode();
+        this.message = resultCode.getMsg();
+    }
+
+    public ResponseMessage(ResultCode resultCode, String sn) {
+        this.code = resultCode.getCode();
+        this.message = resultCode.getMsg();
+        this.sn = sn;
+    }
+
+    public ResponseMessage(ResultCode resultCode, String sn, T responseEntity) {
+        this.code = resultCode.getCode();
+        this.message = resultCode.getMsg();
+        this.sn = sn;
+        this.responseEntity = responseEntity;
+    }
+
+    public void setResultCode(ResultCode resultCode) {
+        this.code = resultCode.getCode();
+        this.message = resultCode.getMsg();
+    }
+
+    @Override
+    public String toString() {
+        return JSON.toJSONString(this);
     }
 }

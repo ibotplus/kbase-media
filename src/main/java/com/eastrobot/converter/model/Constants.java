@@ -8,33 +8,48 @@ package com.eastrobot.converter.model;
  * @version v1.0 , 2018-04-08 12:47
  */
 public interface Constants {
+    /**
+     * 是否异步解析
+     */
+    String IS_ASYNC_PARSE = "IS_ASYNC_PARSE";
     //------------------------------------
-    // ocr-converter supplier param
+    // ocr supplier param
     //------------------------------------
     String YOUTU = "youtu";
     String ABBYY = "abbyy";
     String TESSERACT = "tesseract";
     //------------------------------------
-    // asr-converter supplier param
+    // asr supplier param
     //------------------------------------
     String BAIDU = "baidu";
     String SHHAN = "shhan";
     String XFYUN = "xfyun";
     //------------------------------------
-    // parse file type definition
     //------------------------------------
-    String AUDIO = "AUDIO";
-    String IMAGE = "IMAGE";
-    String VIDEO = "VIDEO";
-    String TEXT = "TEXT";
+    // parse type definition
+    String RECOGNITION = "RECOGNITION";
+    String ASR = "ASR";
+    String OCR = "OCR";
+    String VAC = "VAC";
+    String SYNTHESIS = "SYNTHESIS";
+    String TTS = "TTS";
     //------------------------------------
-    // parse result key definition
+    // AiRecognition request param constants
     //------------------------------------
-    String AUDIO_CONTENT = "AUDIO_CONTENT";
-    String IMAGE_CONTENT = "IMAGE_CONTENT";
-    String AUDIO_KEYWORD = "AUDIO_KEYWORD";
-    String IMAGE_KEYWORD = "IMAGE_KEYWORD";
-    String ERROR_MSG = "ERROR_MSG";
+    /**
+     * ai识别目标文件路径
+     */
+    String AI_RESOURCE_FILE_PATH = "resourceFilePath";
+    /**
+     * ai识别视频文件是否按帧提取关键字
+     */
+    String AI_IS_FRAME_EXTRACT_KEYWORD = "isFrameExtractKeyword";
+    /**
+     * AiType see {@link com.eastrobot.converter.model.aitype.AiType}
+     */
+    String AI_TYPE = "AI_TYPE";
+    String AI_TTS_TEXT = "AI_TTS_TEXT";
+    String AI_TTS_OPTION = "AI_TTS_OPTION";
     //------------------------------------
     // RocketMQ default constants
     //------------------------------------

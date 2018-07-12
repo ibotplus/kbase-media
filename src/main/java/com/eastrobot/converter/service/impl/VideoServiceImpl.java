@@ -2,7 +2,10 @@ package com.eastrobot.converter.service.impl;
 
 import com.eastrobot.converter.model.FileType;
 import com.eastrobot.converter.model.ParseResult;
-import com.eastrobot.converter.model.VacParseResult;
+import com.eastrobot.converter.model.ResultCode;
+import com.eastrobot.converter.model.aitype.ASR;
+import com.eastrobot.converter.model.aitype.OCR;
+import com.eastrobot.converter.model.aitype.VAC;
 import com.eastrobot.converter.service.AudioService;
 import com.eastrobot.converter.service.ImageService;
 import com.eastrobot.converter.service.VideoService;
@@ -54,7 +57,7 @@ public class VideoServiceImpl implements VideoService {
      * @date 2018-03-26 18:06
      */
     @Override
-    public VacParseResult handle(String videoFilePath, boolean isFrameExtractKeyword) {
+    public ParseResult<VAC> handle(String videoFilePath, boolean isFrameExtractKeyword) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         //提交视频分段抽取音轨任务 视频抽取图片
         Future handleFuture = executor.submit(() -> {
@@ -73,15 +76,17 @@ public class VideoServiceImpl implements VideoService {
         return this.doParseVideo(videoFilePath, isFrameExtractKeyword);
     }
 
-    private VacParseResult doParseVideo(final String videoPath, boolean isFrameExtractKeyword) {
+    private ParseResult<VAC> doParseVideo(final String videoPath, boolean isFrameExtractKeyword) {
         // 生成的文件 只有JPG(多个)和AAC(一个)
         String folderPath = ResourceUtil.getFolder(videoPath, "");
         // 声音 AAC文件
-        final String audioFile = folderPath + FilenameUtils.getBaseName(videoPath) + FileType.AAC.getExtensionWithPoint();
+        final String audioFile = folderPath + FilenameUtils.getBaseName(videoPath) + FileType.AAC
+                .getExtensionWithPoint();
         File[] allImageFiles = Optional.of(new File(folderPath))
-                .map(f -> f.listFiles(pathname -> FilenameUtils.getExtension(pathname.getName()).equals(FileType.JPG
-                        .getExtension())))
-                .get();
+                .map(f ->
+                        f.listFiles(pathname ->
+                                FilenameUtils.getExtension(pathname.getName()).equals(FileType.JPG.getExtension())))
+                .orElseGet(() -> new File[0]);
         //图片 JPG文件
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1);
         // 总任务数门阀
@@ -90,8 +95,8 @@ public class VideoServiceImpl implements VideoService {
         final Map<Integer, String> imageContentMap = new ConcurrentHashMap<>();
         // 存储图片解析段-关键字
         final Map<Integer, String> imageKeywordMap = new ConcurrentHashMap<>();
-        // asr 解析结果
-        final ParseResult asrParseResult = new ParseResult();
+        // asr ocr 解析结果
+        final ParseResult<ASR> asrResult = new ParseResult<>();
         AtomicBoolean hasOccurredException = new AtomicBoolean(false);
         // 存储图片解析异常信息 [seg:message]
         StringBuffer exceptionBuffer = new StringBuffer();
@@ -99,7 +104,9 @@ public class VideoServiceImpl implements VideoService {
         //提交音轨转文字任务
         executor.submit(() -> {
             try {
-                asrParseResult.update(audioService.handle(audioFile));
+                ParseResult<ASR> parseResult = audioService.handle(audioFile);
+                asrResult.setCode(parseResult.getCode());
+                asrResult.setResult(parseResult.getResult());
             } finally {
                 latch.countDown();
             }
@@ -113,15 +120,15 @@ public class VideoServiceImpl implements VideoService {
                 // 图片的段是 00001 00002 00003
                 String currentSegIndex = FilenameUtils.getBaseName(filepath);
                 try {
-                    ParseResult ocrResult = imageService.handle(filepath);
-                    if (ocrResult.getCode().equals(SUCCESS)) {
-                        String keyword = ocrResult.getKeyword();
-                        String content = ocrResult.getContent();
+                    ParseResult<OCR> parseResult = imageService.handle(filepath);
+                    if (parseResult.getCode().equals(SUCCESS)) {
+                        String keyword = parseResult.getResult().getImageKeyword();
+                        String content = parseResult.getResult().getImageContent();
                         log.debug("imageService convert {} result : {}", filepath, content);
                         imageKeywordMap.put(Integer.parseInt(currentSegIndex), keyword);
                         imageContentMap.put(Integer.parseInt(currentSegIndex), content);
                     } else {
-                        throw new Exception(ocrResult.getMessage());
+                        throw new Exception(parseResult.getCode().getMsg());
                     }
                 } catch (Exception e) {
                     log.debug("convert image occurred exception: {}", e.getMessage());
@@ -145,7 +152,7 @@ public class VideoServiceImpl implements VideoService {
         }
 
         // ocr 解析结果
-        ParseResult ocrParseResult;
+        ParseResult<OCR> ocrResult;
 
         // 2. 解析结束后 合并内容 根据frameExtractKeyword 绝定是否需要帧抽取关键字
         String imageKeyword = ResourceUtil.map2SortByKeyAndMergeWithSplit(imageKeywordMap, ",");
@@ -157,14 +164,20 @@ public class VideoServiceImpl implements VideoService {
             }
 
             if (hasOccurredException.get()) {
-                ocrParseResult = new ParseResult(OCR_FAILURE, exceptionBuffer.toString(), imageKeyword, imageContent,null);
+                ocrResult = new ParseResult<>(OCR_FAILURE, new OCR(imageContent, imageKeyword));
+                log.warn("video handle occurred exception:{}", exceptionBuffer.toString());
             } else {
-                ocrParseResult = new ParseResult(SUCCESS, SUCCESS.getMsg(), imageKeyword, imageContent,null);
+                ocrResult = new ParseResult<>(SUCCESS, new OCR(imageKeyword, imageContent));
             }
         } else {
-            ocrParseResult = new ParseResult(PARSE_EMPTY, PARSE_EMPTY.getMsg(), "", "",null);
+            ocrResult = new ParseResult<>(PARSE_EMPTY, null);
         }
 
-        return new VacParseResult(asrParseResult, ocrParseResult);
+        ResultCode code = SUCCESS;
+        if (ocrResult.getCode().equals(OCR_FAILURE) || asrResult.getCode().equals(ASR_FAILURE)) {
+            code = PART_PARSE_FAILED;
+        }
+
+        return new ParseResult<>(code, new VAC(ocrResult.getResult(), asrResult.getResult()));
     }
 }

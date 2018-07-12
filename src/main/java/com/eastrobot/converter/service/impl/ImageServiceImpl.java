@@ -2,6 +2,7 @@ package com.eastrobot.converter.service.impl;
 
 import com.eastrobot.converter.model.Constants;
 import com.eastrobot.converter.model.ParseResult;
+import com.eastrobot.converter.model.aitype.OCR;
 import com.eastrobot.converter.service.ImageService;
 import com.eastrobot.converter.util.ChineseUtil;
 import com.eastrobot.converter.util.ResourceUtil;
@@ -32,26 +33,21 @@ public class ImageServiceImpl implements ImageService {
     private String imageTool;
 
     @Override
-    public ParseResult handle(String imageFilePath) {
-        ParseResult parseResult;
+    public ParseResult<OCR> handle(String imageFilePath) {
         String result;
         try {
-            switch (imageTool) {
-                case Constants.YOUTU:
-                    result = YouTuOcrUtil.ocr(imageFilePath);
-                    break;
-                case Constants.ABBYY:
-                    result = AbbyyOcrUtil.ocr(imageFilePath);
-                    break;
-                case Constants.TESSERACT:
-                    result = TesseractUtil.ocr(imageFilePath);
-                    break;
-                default:
-                    return new ParseResult(OCR_FAILURE, "undefined ocr tools", "", "",null);
+            if (Constants.YOUTU.equals(imageTool)) {
+                result = YouTuOcrUtil.ocr(imageFilePath);
+            } else if (Constants.ABBYY.equals(imageTool)) {
+                result = AbbyyOcrUtil.ocr(imageFilePath);
+            } else if (Constants.TESSERACT.equals(imageTool)) {
+                result = TesseractUtil.ocr(imageFilePath);
+            } else {
+                return new ParseResult<>(CFG_ERROR, null);
             }
         } catch (Exception e) {
             log.warn("handler parse image occurred exception: {}", e.getMessage());
-            return new ParseResult(OCR_FAILURE, e.getMessage(), "", "",null);
+            return new ParseResult<>(OCR_FAILURE, null);
         }
 
         if (StringUtils.isNotBlank(result)) {
@@ -59,9 +55,9 @@ public class ImageServiceImpl implements ImageService {
             List<String> keywords = HanLP.extractKeyword(result, 100);
             String keyword = ResourceUtil.list2String(keywords, "");
 
-            return new ParseResult(SUCCESS, SUCCESS.getMsg(), keyword, result,null);
+            return new ParseResult<>(SUCCESS, new OCR(result, keyword));
         } else {
-            return new ParseResult(PARSE_EMPTY, PARSE_EMPTY.getMsg(), "", "",null);
+            return new ParseResult<>(PARSE_EMPTY, null);
         }
     }
 }

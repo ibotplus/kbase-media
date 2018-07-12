@@ -2,7 +2,10 @@ package com.eastrobot.converter.service;
 
 
 import com.eastrobot.converter.model.ParseResult;
-import com.eastrobot.converter.model.tts.TTSParam;
+import com.eastrobot.converter.model.aitype.ASR;
+import com.eastrobot.converter.model.aitype.TTS;
+
+import java.util.Map;
 
 /**
  * AudioService
@@ -13,18 +16,15 @@ import com.eastrobot.converter.model.tts.TTSParam;
 public interface AudioService {
 
     /**
-     *
      * 解析音频(pcm格式) 生成文本
      *
      * @author Yogurt_lei
      * @date 2018-03-27 11:54
      */
-    ParseResult handle(String audioFilePath);
+    ParseResult<ASR> handle(String audioFilePath);
 
     /**
      * 文本合成音频（byte[]输出）
-     * @param param
-     * @return
      */
-    ParseResult handleTts(TTSParam param);
+    ParseResult<TTS> handleTts(String text, Map ttsOption);
 }

@@ -1,8 +1,11 @@
 package com.eastrobot.converter.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.eastrobot.converter.exception.BusinessException;
-import com.eastrobot.converter.model.*;
-import com.eastrobot.converter.model.tts.TTSParam;
+import com.eastrobot.converter.model.Constants;
+import com.eastrobot.converter.model.FileType;
+import com.eastrobot.converter.model.ParseResult;
+import com.eastrobot.converter.model.ResponseMessage;
 import com.eastrobot.converter.service.AudioService;
 import com.eastrobot.converter.service.ConvertService;
 import com.eastrobot.converter.service.ImageService;
@@ -10,15 +13,16 @@ import com.eastrobot.converter.service.VideoService;
 import com.eastrobot.converter.util.ResourceUtil;
 import com.eastrobot.converter.util.ZipUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import static com.eastrobot.converter.model.ResultCode.*;
@@ -64,21 +68,64 @@ public class ConvertServiceImpl implements ConvertService {
     private ImageService imageService;
 
     @Override
-    public ResponseMessage driver(String resPath, boolean isFrameExtractKeyword, boolean asyncParse) {
-        ResponseMessage responseMessage;
-        String sn = FilenameUtils.getBaseName(resPath);
+    public ResponseMessage driver(HashMap<String, Object> paramMap) {
+        String resPath = null;
+        ResponseMessage responseMessage = null;
+        boolean asyncParse = MapUtils.getBoolean(paramMap, Constants.IS_ASYNC_PARSE, false);
+        String aiType = MapUtils.getString(paramMap, Constants.AI_TYPE);
 
-        if (ResourceUtil.isImage(resPath)) {
-            ParseResult ocrResult = imageService.handle(resPath);
-            responseMessage = this.doResultToResponseMessage(sn, ocrResult, Constants.IMAGE);
-        } else if (ResourceUtil.isAudio(resPath)) {
-            ParseResult asrResult = audioService.handle(resPath);
-            responseMessage = this.doResultToResponseMessage(sn, asrResult, Constants.AUDIO);
-        } else if (ResourceUtil.isVideo(resPath)) {
-            VacParseResult vacParseResult = videoService.handle(resPath, isFrameExtractKeyword);
-            responseMessage = this.doResultToResponseMessage(sn, vacParseResult, Constants.VIDEO);
-        } else {
-            responseMessage = new ResponseMessage(ILLEGAL_TYPE);
+        if (Constants.RECOGNITION.equals(aiType)) {
+            // 通用AI识别
+            resPath = MapUtils.getString(paramMap, Constants.AI_RESOURCE_FILE_PATH);
+            boolean isFrameExtractKeyword = MapUtils.getBoolean(paramMap, Constants.AI_IS_FRAME_EXTRACT_KEYWORD, false);
+            String sn = FilenameUtils.getBaseName(resPath);
+
+            if (ResourceUtil.isImage(resPath)) {
+                ParseResult ocrResult = imageService.handle(resPath);
+                responseMessage = new ResponseMessage<>(ocrResult.getCode(), sn, ocrResult.getResult());
+            } else if (ResourceUtil.isAudio(resPath)) {
+                ParseResult asrResult = audioService.handle(resPath);
+                responseMessage = new ResponseMessage<>(asrResult.getCode(), sn, asrResult.getResult());
+            } else if (ResourceUtil.isVideo(resPath)) {
+                ParseResult vacParseResult = videoService.handle(resPath, isFrameExtractKeyword);
+                responseMessage = new ResponseMessage<>(vacParseResult.getCode(), sn, vacParseResult.getResult());
+            } else {
+                responseMessage = new ResponseMessage(ILLEGAL_TYPE);
+            }
+        } else if (Constants.ASR.equals(aiType)) {
+            resPath = MapUtils.getString(paramMap, Constants.AI_RESOURCE_FILE_PATH);
+            String sn = FilenameUtils.getBaseName(resPath);
+            if (ResourceUtil.isAudio(resPath)) {
+                ParseResult asrResult = audioService.handle(resPath);
+                responseMessage = new ResponseMessage<>(asrResult.getCode(), sn, asrResult.getResult());
+            } else {
+                responseMessage = new ResponseMessage(ILLEGAL_TYPE);
+            }
+        } else if (Constants.OCR.equals(aiType)) {
+            resPath = MapUtils.getString(paramMap, Constants.AI_RESOURCE_FILE_PATH);
+            String sn = FilenameUtils.getBaseName(resPath);
+            if (ResourceUtil.isImage(resPath)) {
+                ParseResult ocrResult = imageService.handle(resPath);
+                responseMessage = new ResponseMessage<>(ocrResult.getCode(), sn, ocrResult.getResult());
+            } else {
+                responseMessage = new ResponseMessage(ILLEGAL_TYPE);
+            }
+        } else if (Constants.VAC.equals(aiType)) {
+            resPath = MapUtils.getString(paramMap, Constants.AI_RESOURCE_FILE_PATH);
+            boolean isFrameExtractKeyword = MapUtils.getBoolean(paramMap, Constants.AI_IS_FRAME_EXTRACT_KEYWORD, false);
+            String sn = FilenameUtils.getBaseName(resPath);
+            if (ResourceUtil.isVideo(resPath)) {
+                ParseResult vacParseResult = videoService.handle(resPath, isFrameExtractKeyword);
+                responseMessage = new ResponseMessage<>(vacParseResult.getCode(), sn, vacParseResult.getResult());
+            } else {
+                responseMessage = new ResponseMessage(ILLEGAL_TYPE);
+            }
+        } else if (Constants.TTS.equals(aiType)) {
+            String text = MapUtils.getString(paramMap, Constants.AI_TTS_TEXT);
+            Map ttsOption = MapUtils.getMap(paramMap, Constants.AI_TTS_OPTION, new HashMap());
+            ParseResult ttsResult = audioService.handleTts(text, ttsOption);
+            resPath = UUID.randomUUID().toString();
+            responseMessage = new ResponseMessage<>(ttsResult.getCode(), resPath, ttsResult.getResult());
         }
 
         this.doWriteResultToFile(resPath, responseMessage, asyncParse);
@@ -95,8 +142,7 @@ public class ConvertServiceImpl implements ConvertService {
      * @date 2018-04-20 16:05
      */
     @Override
-    public String doUpload(MultipartFile file, String sn, boolean asyncParse)
-            throws IOException, IllegalStateException, BusinessException {
+    public String uploadFile(MultipartFile file, String sn, boolean asyncParse) throws IOException, BusinessException {
         String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
         long fileSize = file.getSize();
 
@@ -134,84 +180,11 @@ public class ConvertServiceImpl implements ConvertService {
 
 
     /**
-     * 解析结果封装到ResponseMessage
+     * 解析结果写入文件:${convert.outputFolder}/sn.rs
      *
-     * @param sn          序列号
-     * @param parseResult 解析结果
-     * @param type        文件类型 {@link Constants}
-     */
-    private ResponseMessage doResultToResponseMessage(String sn, AbstractParseResult parseResult, String type) {
-        ResponseMessage message = new ResponseMessage();
-        message.setSn(sn);
-        switch (type) {
-            case Constants.IMAGE: {
-                ParseResult ocrResult = (ParseResult) parseResult;
-                message.setResultCode(ocrResult.getCode());
-                if (StringUtils.isNotBlank(ocrResult.getMessage())) {
-                    message.setMessage(ocrResult.getMessage());
-                }
-
-                ResponseEntity entity = new ResponseEntity();
-                entity.setImageContent(ocrResult.getContent());
-                entity.setImageKeyword(ocrResult.getKeyword());
-                message.setResponseEntity(entity);
-            }
-            break;
-            case Constants.AUDIO: {
-                ParseResult asrResult = (ParseResult) parseResult;
-                message.setResultCode(asrResult.getCode());
-                if (StringUtils.isNotBlank(asrResult.getMessage())) {
-                    message.setMessage(asrResult.getMessage());
-                }
-
-                ResponseEntity entity = new ResponseEntity();
-                entity.setAudioContent(asrResult.getContent());
-                entity.setAudioKeyword(asrResult.getKeyword());
-                message.setResponseEntity(entity);
-            }
-            break;
-            case Constants.VIDEO: {
-                VacParseResult vacParseResult = (VacParseResult) parseResult;
-                ParseResult ocrResult = vacParseResult.getOcrParseResult();
-                ParseResult asrResult = vacParseResult.getAsrParseResult();
-
-                if (ocrResult.getCode().equals(OCR_FAILURE) || asrResult.getCode().equals(ASR_FAILURE)) {
-                    message.setResultCode(PART_PARSE_FAILED);
-                    message.setMessage(PART_PARSE_FAILED.getMsg() + " => 图片:" + ocrResult.getMessage() + ",音频:" +
-                            asrResult.getMessage());
-                } else if (ocrResult.getCode().equals(SUCCESS)) {
-                    message.setResultCode(ResultCode.SUCCESS);
-                }
-
-                ResponseEntity entity = new ResponseEntity();
-                entity.setImageContent(ocrResult.getContent());
-                entity.setImageKeyword(ocrResult.getKeyword());
-                entity.setAudioContent(asrResult.getContent());
-                entity.setAudioKeyword(asrResult.getKeyword());
-                message.setResponseEntity(entity);
-            }
-            break;
-            case Constants.TEXT: {
-                ParseResult ttsResult = (ParseResult) parseResult;
-                message.setResultCode(ttsResult.getCode());
-                if (StringUtils.isNotBlank(ttsResult.getMessage())) {
-                    message.setMessage(ttsResult.getMessage());
-                }
-
-                ResponseEntity entity = new ResponseEntity();
-                entity.setTextAudio(ttsResult.getAudio());
-                message.setResponseEntity(entity);
-            }
-            default:
-                break;
-        }
-        return message;
-    }
-
-    /**
-     * @param asyncParse 是否异步解析
-     *                   <p>
-     *                   解析结果写入文件:${convert.outputFolder}/sn.rs
+     * @param resPath         资源文件路径
+     * @param responseMessage 响应结果
+     * @param asyncParse      是否异步解析
      */
     private void doWriteResultToFile(String resPath, final ResponseMessage responseMessage, boolean asyncParse) {
         // 写到正确的文件夹下
@@ -220,86 +193,37 @@ public class ConvertServiceImpl implements ConvertService {
         File resultFile = new File(resultFilePath);
         // 如果存在 说明是重复消费 不做处理
         if (!resultFile.exists()) {
-            // write error message
-            if (!responseMessage.getCode().equals(SUCCESS.getCode())) {
-                String errorMessage = responseMessage.getMessage();
-                if (StringUtils.isNotBlank(errorMessage)) {
-                    try (FileWriter fw = new FileWriter(resultFile, true)) {
-                        fw.write(Constants.ERROR_MSG + errorMessage + "\r\n");
-                    } catch (IOException e) {
-                        log.error("write errorMessage to file occurred exception.");
-                    }
-                }
+            try (FileWriter fw = new FileWriter(resultFile)) {
+                fw.write(responseMessage.toString());
+            } catch (IOException e) {
+                log.error("write responseMessage to file occurred exception.");
             }
-
-            //extract image keyword and write to file
-            Optional.of(responseMessage)
-                    .map(ResponseMessage::getResponseEntity)
-                    .ifPresent((entity) -> {
-                        try (FileWriter fw = new FileWriter(resultFile, true)) {
-                            fw.write(Constants.IMAGE_CONTENT + entity.getImageContent() + "\r\n");
-                            fw.write(Constants.IMAGE_KEYWORD + entity.getImageKeyword() + "\r\n");
-                        } catch (IOException e) {
-                            log.error("write image keyword to file occurred exception.");
-                        }
-                    });
-            //extract audio keyword and write to file
-            Optional.of(responseMessage)
-                    .map(ResponseMessage::getResponseEntity)
-                    .ifPresent((entity) -> {
-                        try (FileWriter fw = new FileWriter(resultFile, true)) {
-                            fw.write(Constants.AUDIO_CONTENT + entity.getAudioContent() + "\r\n");
-                            fw.write(Constants.AUDIO_KEYWORD + entity.getAudioKeyword() + "\r\n");
-                        } catch (IOException e) {
-                            log.error("write audio keyword to file occurred exception.");
-                        }
-                    });
         }
     }
 
     @Override
     public ResponseMessage findAsyncParseResult(String sn) {
+        ResponseMessage responseMessage;
         String filePath = ASYNC_OUTPUT_FOLDER + sn + FileType.RS.getExtensionWithPoint();
         File resultFile = new File(filePath);
         if (!resultFile.exists()) {
-            return new ResponseMessage(ResultCode.ASYNC_NOT_COMPLETED);
-        }
-
-        ResponseMessage responseMessage = new ResponseMessage(ResultCode.SUCCESS);
-        responseMessage.setSn(sn);
-        try (FileReader fr = new FileReader(resultFile);
-             BufferedReader br = new BufferedReader(fr)
-        ) {
-            String line;
-            ResponseEntity entity = new ResponseEntity();
-            if ((line = br.readLine()) != null) {
-                if (line.startsWith(Constants.ERROR_MSG)) {
-                    responseMessage.setMessage(line);
-                } else if (line.startsWith(Constants.IMAGE_KEYWORD)) {
-                    entity.setImageKeyword(StringUtils.replace(line, Constants.IMAGE_KEYWORD, ""));
-                } else if (line.startsWith(Constants.AUDIO_KEYWORD)) {
-                    entity.setAudioKeyword(StringUtils.replace(line, Constants.AUDIO_KEYWORD, ""));
-                } else if (line.startsWith(Constants.IMAGE_CONTENT)) {
-                    entity.setImageContent(StringUtils.replace(line, Constants.IMAGE_CONTENT, ""));
-                } else if (line.startsWith(Constants.AUDIO_CONTENT)) {
-                    entity.setAudioContent(StringUtils.replace(line, Constants.AUDIO_CONTENT, ""));
+            responseMessage = new ResponseMessage(ASYNC_NOT_COMPLETED);
+        } else {
+            try (FileReader fr = new FileReader(resultFile);
+                 BufferedReader br = new BufferedReader(fr)
+            ) {
+                StringBuilder lineBuilder = new StringBuilder("");
+                String tmp;
+                if ((tmp = br.readLine()) != null) {
+                    lineBuilder.append(tmp);
                 }
+                responseMessage = JSON.parseObject(lineBuilder.toString(), ResponseMessage.class);
+            } catch (IOException e) {
+                log.warn("read result file occurred exception.");
+                responseMessage = new ResponseMessage(ASYNC_READ_RESULT_FILE_FAILED);
             }
-            responseMessage.setResponseEntity(entity);
-        } catch (IOException e) {
-            log.warn("read result file occurred exception.");
-            responseMessage.setResultCode(ResultCode.ASYNC_READ_RESULT_FILE_FAILED);
         }
 
-        return responseMessage;
-    }
-
-    @Override
-    public ResponseMessage driver(TTSParam ttsParam, boolean asyncParse) {
-        ResponseMessage responseMessage;
-        String sn = UUID.randomUUID().toString();
-        ParseResult ttsResult = audioService.handleTts(ttsParam);
-        responseMessage = this.doResultToResponseMessage(sn, ttsResult, Constants.TEXT);
         return responseMessage;
     }
 }

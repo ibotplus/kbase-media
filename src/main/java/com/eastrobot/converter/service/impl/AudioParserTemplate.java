@@ -2,6 +2,7 @@ package com.eastrobot.converter.service.impl;
 
 import com.eastrobot.converter.model.FileType;
 import com.eastrobot.converter.model.ParseResult;
+import com.eastrobot.converter.model.aitype.ASR;
 import com.eastrobot.converter.service.ParserCallBack;
 import com.eastrobot.converter.util.ChineseUtil;
 import com.eastrobot.converter.util.ResourceUtil;
@@ -37,17 +38,18 @@ public class AudioParserTemplate {
     @Value("${convert.audio.asr.seg-duration}")
     private Long segmentDuration;
 
-    ParseResult handle(String audioFilePath, ParserCallBack callBack) {
+    ParseResult<ASR> handle(String audioFilePath, ParserCallBack callBack) {
         try {
             // 1. 是否切割文件 {segmentDuration} 每段 文件放入当前文件夹下当前文件名命名的文件夹下
             FFmpegUtil.splitSegFileToPcm(audioFilePath, segmentDuration);
         } catch (IOException e) {
             log.error("splitSegToPcm occurred exception, check the ffmpeg location is right.");
-            return new ParseResult(ASR_FAILURE, e.getMessage(), "", "",null);
+            return new ParseResult<>(ASR_FAILURE, null);
         }
 
-        File[] allPcmFiles =  new File(ResourceUtil.getFolder(audioFilePath, ""))
-                .listFiles(filename -> FileType.PCM.getExtension().equals(FilenameUtils.getExtension(filename.getName())));
+        File[] allPcmFiles = new File(ResourceUtil.getFolder(audioFilePath, ""))
+                .listFiles(filename ->
+                        FileType.PCM.getExtension().equals(FilenameUtils.getExtension(filename.getName())));
 
         assert allPcmFiles != null;
         if (allPcmFiles.length > 1) {
@@ -75,7 +77,8 @@ public class AudioParserTemplate {
                     } catch (Exception e) {
                         log.warn("asrHandler parse seg audio occurred exception: {}", e.getMessage());
                         hasOccurredException.set(true);
-                        exceptionBuffer.append("[").append(currentSegIndex).append(":").append(e.getMessage()).append("]");
+                        exceptionBuffer.append("[").append(currentSegIndex).append(":").append(e.getMessage()).append
+                                ("]");
                     } finally {
                         latch.countDown();
                     }
@@ -100,12 +103,13 @@ public class AudioParserTemplate {
                 List<String> keywords = HanLP.extractKeyword(resultText, 100);
                 String keyword = ResourceUtil.list2String(keywords, ",");
                 if (hasOccurredException.get()) {
-                    return new ParseResult(ASR_FAILURE, exceptionBuffer.toString(), keyword, resultText,null);
+                    log.warn("asrHandler parse audio occurred exception: {}", exceptionBuffer.toString());
+                    return new ParseResult<>(ASR_FAILURE, new ASR(resultText, keyword));
                 } else {
-                    return new ParseResult(SUCCESS, SUCCESS.getMsg(), keyword, resultText,null);
+                    return new ParseResult<>(SUCCESS, new ASR(resultText, keyword));
                 }
             } else {
-                return new ParseResult(PARSE_EMPTY, PARSE_EMPTY.getMsg(), "", "",null);
+                return new ParseResult<>(PARSE_EMPTY, null);
             }
         } else { // 音频只有一段 不分段直解处理
             try {
@@ -113,13 +117,13 @@ public class AudioParserTemplate {
                 if (StringUtils.isNotBlank(resultText)) {
                     List<String> keywords = HanLP.extractKeyword(resultText, 100);
                     String keyword = ResourceUtil.list2String(keywords, ",");
-                    return new ParseResult(SUCCESS, SUCCESS.getMsg(), keyword, resultText,null);
+                    return new ParseResult<>(SUCCESS, new ASR(resultText, keyword));
                 }
 
-                return new ParseResult(PARSE_EMPTY, PARSE_EMPTY.getMsg(), "", "",null);
+                return new ParseResult<>(PARSE_EMPTY, null);
             } catch (Exception e) {
                 log.warn("asrHandler parse audio occurred exception: {}", e.getMessage());
-                return new ParseResult(ASR_FAILURE, e.getMessage(), "", "",null);
+                return new ParseResult<>(ASR_FAILURE, null);
             }
         }
     }

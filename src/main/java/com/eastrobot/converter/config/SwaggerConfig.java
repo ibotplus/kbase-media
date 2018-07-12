@@ -34,10 +34,10 @@ public class SwaggerConfig {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("MultipartFile Converter-API")
-                .description("converter multimedia to text(e.g. video, audio, image)")
-                .termsOfServiceUrl("http://localhost:8080/converter-api")
+                .description("converter multimedia to text(e.g. video, audio, image) or revert text to audio")
+                .termsOfServiceUrl("http://localhost:12345/kbase-media")
                 .contact(new Contact("Yogurt_lei", "", "yogurt_lei@foxmail.com"))
-                .version("1.0")
+                .version("2.0")
                 .build();
     }
 }

@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
+ * BaiduTTSOption
+ *
  * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
  * @version v1.0 , 2018-07-09 17:47
  */
@@ -16,7 +18,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel("百度TTS参数")
-public class BaiduTTS implements TTSOption {
+public class BaiduTTSOption {
     /**
      * 语速，取值0-9，默认为5
      */

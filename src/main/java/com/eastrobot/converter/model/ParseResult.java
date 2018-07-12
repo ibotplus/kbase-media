@@ -1,5 +1,6 @@
 package com.eastrobot.converter.model;
 
+import com.eastrobot.converter.model.aitype.AiType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,35 +16,13 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ParseResult extends AbstractParseResult {
+public class ParseResult<T extends AiType> {
     /**
      * 错误码
      */
     private ResultCode code;
     /**
-     * 错误信息
+     * 结果包装
      */
-    private String message;
-    /**
-     * 关键字
-     */
-    private String keyword;
-    /**
-     * 内容
-     */
-    private String content;
-
-    /**
-     * 音频
-     */
-    private byte[] audio;
-
-
-    public void update(ParseResult other) {
-        this.code = other.code;
-        this.message = other.message;
-        this.keyword = other.keyword;
-        this.content = other.content;
-        this.audio = other.audio;
-    }
+    T result;
 }

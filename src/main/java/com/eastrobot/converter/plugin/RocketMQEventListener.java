@@ -1,6 +1,5 @@
 package com.eastrobot.converter.plugin;
 
-import com.alibaba.fastjson.JSON;
 import com.eastrobot.converter.model.FileType;
 import com.eastrobot.converter.model.ResponseMessage;
 import com.eastrobot.converter.service.ConvertService;
@@ -15,6 +14,9 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.util.HashMap;
+
+import static com.eastrobot.converter.model.Constants.*;
 
 /**
  * RocketMQEventListener
@@ -55,7 +57,12 @@ public class RocketMQEventListener {
             return;
         }
 
-        ResponseMessage responseMessage = convertService.driver(fileAbsolutePath, false, true);
-        log.info("convert file complete : {}", fileAbsolutePath, JSON.toJSONString(responseMessage));
+        HashMap<String, Object> recognitionParam = new HashMap<>();
+        recognitionParam.put(IS_ASYNC_PARSE, true);
+        recognitionParam.put(AI_RESOURCE_FILE_PATH, fileAbsolutePath);
+        recognitionParam.put(AI_TYPE, RECOGNITION);
+
+        ResponseMessage responseMessage = convertService.driver(recognitionParam);
+        log.info("convert file complete : {}", fileAbsolutePath, responseMessage);
     }
 }

@@ -47,22 +47,23 @@ public class AsyncConvertController {
         String sn = UUID.randomUUID().toString();
         if (!file.isEmpty()) {
             try {
-                converterService.doUpload(file, sn, true);
-            }catch (BusinessException e) {
-                return new ResponseMessage(ResultCode.PREPARE_UPLOAD_FILE_ERROR, e.getMessage());
+                converterService.uploadFile(file, sn, true);
+            } catch (BusinessException e) {
+                return new ResponseMessage(ResultCode.PREPARE_UPLOAD_FILE_ERROR);
             } catch (Exception e) {
-                return new ResponseMessage(ResultCode.FILE_UPLOAD_FAILED, e.getMessage());
+                return new ResponseMessage(ResultCode.FILE_UPLOAD_FAILED);
             }
 
-            return new ResponseMessage(ResultCode.SUCCESS, "", sn);
+            return new ResponseMessage(ResultCode.SUCCESS, sn);
         } else {
-            return new ResponseMessage(ResultCode.PARAM_ERROR, sn);
+            return new ResponseMessage(ResultCode.PARAM_ERROR);
         }
     }
 
     @ApiOperation(value = "通过sn来获得解析结果.", response = ResponseMessage.class)
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "sn", value = "异步模式上传文件返回的sn", dataType = "string", required = true, paramType = "path")
+            @ApiImplicitParam(name = "sn", value = "异步模式上传文件返回的sn", dataType = "string", required = true, paramType =
+                    "path")
     })
     @GetMapping(
             value = "/convertAsync/{sn}",

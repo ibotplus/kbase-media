@@ -2,8 +2,8 @@ package com.eastrobot.converter.service.impl;
 
 import com.eastrobot.converter.model.Constants;
 import com.eastrobot.converter.model.ParseResult;
-import com.eastrobot.converter.model.tts.TTSOption;
-import com.eastrobot.converter.model.tts.TTSParam;
+import com.eastrobot.converter.model.aitype.ASR;
+import com.eastrobot.converter.model.aitype.TTS;
 import com.eastrobot.converter.service.AudioService;
 import com.eastrobot.converter.util.baidu.BaiduAsrUtils;
 import com.eastrobot.converter.util.shhan.ShhanAsrUtil;
@@ -15,13 +15,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cglib.beans.BeanMap;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.eastrobot.converter.model.ResultCode.*;
 import static com.eastrobot.converter.util.baidu.BaiduAsrConstants.PCM;
@@ -45,78 +44,63 @@ public class AudioServiceImpl implements AudioService {
     private AudioParserTemplate audioParserTemplate;
 
     @Override
-    public ParseResult handle(String audioFilePath) {
-        if (new File(audioFilePath).exists()) {
-            if (Constants.BAIDU.equals(audioTool)) {
-                return audioParserTemplate.handle(audioFilePath, this::baiduAsrHandler);
-            } else if (Constants.SHHAN.equals(audioTool)) {
-                return audioParserTemplate.handle(audioFilePath, this::shhanAsrHandler);
-            } else if (Constants.XFYUN.equals(audioTool)) {
-                return audioParserTemplate.handle(audioFilePath, this::xfyunAsrHandler);
-            } else {
-                return new ParseResult(CFG_ERROR, CFG_ERROR.getMsg(), "", "",null);
-            }
+    public ParseResult<ASR> handle(String audioFilePath) {
+        if (Constants.BAIDU.equals(audioTool)) {
+            return audioParserTemplate.handle(audioFilePath, this::baiduAsrHandler);
+        } else if (Constants.SHHAN.equals(audioTool)) {
+            return audioParserTemplate.handle(audioFilePath, this::shhanAsrHandler);
+        } else if (Constants.XFYUN.equals(audioTool)) {
+            return audioParserTemplate.handle(audioFilePath, this::xfyunAsrHandler);
         } else {
-            return new ParseResult(ASR_FAILURE, "提取到空的音频流", "", "",null);
+            return new ParseResult<>(PARSE_EMPTY, null);
         }
     }
 
     @Override
-    public ParseResult handleTts(TTSParam param) {
-        String text = param.getText();
-        TTSOption option = param.getOption();
-        HashMap<String, Object> options = new HashMap<String, Object>();
-        if(option!=null){
-            BeanMap beanMap = BeanMap.create(option);
-            for (Object key : beanMap.keySet()) {
-                options.put(key+"", beanMap.get(key));
-            }
-        }
+    public ParseResult<TTS> handleTts(String text, Map ttsOption) {
+        HashMap<String, Object> options = (HashMap<String, Object>) ttsOption;
         if (StringUtils.isNoneBlank(text)) {
             byte[] data = null;
             // 截取
             if (text.length() > 512) {//需截取
                 List<String> splitList = splitText(text);
                 for (String sText : splitList) {
-                    byte[] bytes = baiduTtsHandler(sText,options);
+                    byte[] bytes = baiduTtsHandler(sText, options);
                     if (data == null) {
                         data = bytes;
-                    } else if (data != null && bytes != null) {
-                        byte[] copy = ArrayUtils.addAll(data, bytes);
-                        data = copy;
+                    } else if (bytes != null) {
+                        data = ArrayUtils.addAll(data, bytes);
                     }
                 }
             } else {
-                data = baiduTtsHandler(text,options);
+                data = baiduTtsHandler(text, options);
             }
             if (data != null) {
-                return new ParseResult(SUCCESS, SUCCESS.getMsg(), "", "", data);
+                return new ParseResult<>(SUCCESS, new TTS(data));
             } else {
-                return new ParseResult(PARSE_EMPTY, PARSE_EMPTY.getMsg(), "", "", null);
+                return new ParseResult<>(PARSE_EMPTY, null);
             }
         } else {
-            return new ParseResult(TTS_FAILURE, "文本内容为空", "", "", null);
+            return new ParseResult<>(TTS_FAILURE, null);
         }
     }
 
     /**
      * 根据长度500和句号进行混合截取
-     * @param text
-     * @return
      */
     private List<String> splitText(String text) {
-        ArrayList<String> result = new ArrayList<String>();
-        while (text.length()>500){
-            String value = text.substring(0,Math.min(500,text.length()));
+        ArrayList<String> result = new ArrayList<>();
+        while (text.length() > 500) {
+            String value = text.substring(0, Math.min(500, text.length()));
             text = text.substring(500);
-            if(!value.endsWith("。")){//
-                value = value + text.substring(0,text.indexOf("。")+1);
-                text = text.substring(text.indexOf("。")+1);
+            if (!value.endsWith("。")) {
+                value = value + text.substring(0, text.indexOf("。") + 1);
+                text = text.substring(text.indexOf("。") + 1);
             }
             result.add(value);
         }
 
-        if (text.length()<100){
+        if (text.length() < 100) {
             result.add(text);
         }
 
@@ -152,12 +136,11 @@ public class AudioServiceImpl implements AudioService {
         }
     }
 
-    private byte[] baiduTtsHandler(String tex,HashMap<String, Object> options){
+    private byte[] baiduTtsHandler(String tex, HashMap<String, Object> options) {
         //String tex = "每次启动和定时器每天晚上校验 license";
-        String lan="zh";// 固定值zh。语言选择,目前只有中英文混合模式，填写固定值zh
+        String lan = "zh";// 固定值zh。语言选择,目前只有中英文混合模式，填写固定值zh
         int ctp = 1; // 客户端类型选择，web端填写固定值1
-        //HashMap<String, Object> options = new HashMap<String, Object>();
 
-        return BaiduAsrUtils.tts(tex,lan,ctp,options);
+        return BaiduAsrUtils.tts(tex, lan, ctp, options);
     }
 }
