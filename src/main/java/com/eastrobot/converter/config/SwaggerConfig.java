@@ -33,9 +33,9 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("MultipartFile Converter-API")
-                .description("converter multimedia to text(e.g. video, audio, image) or revert text to audio")
-                .termsOfServiceUrl("http://localhost:12345/kbase-media")
+                .title("Convert API")
+                .description("easy convert video audio image to text, and revert text to audio(base64)")
+                .termsOfServiceUrl("http://kbs55.demo.xiaoi.com/kbase-media/swagger-ui.html")
                 .contact(new Contact("Yogurt_lei", "", "yogurt_lei@foxmail.com"))
                 .version("2.0")
                 .build();

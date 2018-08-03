@@ -9,5 +9,5 @@ import io.swagger.annotations.ApiModel;
  * @version v1.0 , 2018-07-10 19:42
  */
 @ApiModel(description = "Ai合成结果封装", subTypes = {TTS.class})
-interface AiSynthesis extends AiType {
+public interface AiSynthesis extends AiType {
 }

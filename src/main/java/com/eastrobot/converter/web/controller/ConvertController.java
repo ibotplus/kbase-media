@@ -41,7 +41,7 @@ public class ConvertController {
     @Autowired
     private ConvertService converterService;
 
-    @ApiOperation("(通用接口)视频,音频,图片,转换为文本.(文件大小受限)")
+    @ApiOperation("(AI识别通用接口)视频,音频,图片,转换为文本.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "file", value = "待转换文件", dataType = "__file", required = true,
                     paramType = "form"),
@@ -55,11 +55,11 @@ public class ConvertController {
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
-    public ResponseMessage<AiRecognition> recognition(MultipartFile file, HttpServletRequest request) {
+    public ResponseMessage recognition(MultipartFile file, HttpServletRequest request) {
         return getRecognitionResponse(file, RECOGNITION, request);
     }
 
-    @ApiOperation("自动语音识别[ASR].(文件大小受限)")
+    @ApiOperation("自动语音识别[ASR].")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "file", value = "待转换文件", dataType = "__file", required = true, paramType = "form")
     })
@@ -72,7 +72,7 @@ public class ConvertController {
         return getRecognitionResponse(file, ASR, request);
     }
 
-    @ApiOperation("光学图像识别[OCR].(文件大小受限)")
+    @ApiOperation("光学图像识别[OCR].")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "file", value = "待转换文件", dataType = "__file", required = true, paramType = "form")
     })
@@ -85,7 +85,7 @@ public class ConvertController {
         return getRecognitionResponse(file, OCR, request);
     }
 
-    @ApiOperation("视频解析转写[VAC].(文件大小受限)")
+    @ApiOperation("视频解析转写[VAC].")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "file", value = "待转换文件", dataType = "__file", required = true, paramType = "form"),
             @ApiImplicitParam(name = "isFrameExtractKeyword", dataType = "boolean", defaultValue = "false",
