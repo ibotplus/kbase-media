@@ -2,15 +2,12 @@
 logging:
   level:
     root: debug
+    net.bramp: debug
     springfox.documentation: warn
-    org.springframework: warn
-    org.hibernate: warn
-    org.thymeleaf: warn
-    org.apache: warn
-    org.quartz: warn
-    io.swagger: warn
-    org.zbus: warn
-    sun.rmi: warn
+    de.codecentric: warn
+    sun: warn
+    org: warn
+    io: warn
   file:
     max-history: 7
     max-size: 100MB
@@ -75,7 +72,7 @@ convert:
   image:
     #default ocr tool
     ocr:
-      default: tesseract
+      default: youtu
       #tencent youtu ocr tool config
       youtu:
         appId: 10125304
@@ -90,3 +87,25 @@ convert:
       tesseract:
         # language package path
         datapath: D:\tessdata
+
+# kbase-monitor config
+spring:
+  application:
+    name: kbase-media
+  boot:
+    admin:
+      client:
+        url: "http://172.16.8.143:8888"
+        username: admin
+        password: admin
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS
+  server:
+    ssl:
+      enabled: false

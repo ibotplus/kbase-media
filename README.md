@@ -1,9 +1,9 @@
-This a api to easy converter multipartFile(video audio image) to text.
-Here is [Api-docs](http://172.16.23.12/kbase-media/swagger-ui.html#) which use Swagger2.
+There have some api to easy convert video audio image to text, and revert text to audio(base64).
+Here is [api-docs](http://kbs55.demo.xiaoi.com/kbase-media/swagger-ui.html) which use Swagger2.
 
 **配置文件说明**
 
-**注意启动日志: 当ocr工具使用abbyy启动,提示fineReader engine license 过期需要再启动一次..**
+**注意启动日志: 当ocr引擎使用abbyy时,启动是若提示fineReader engine license 过期需要再启动一次..**
 
 ``` yaml
 # convert部分配置
@@ -17,13 +17,13 @@ convert:
     # 最大上传文件大小
     upload-file-size: 50MB
     # 上传文件存储路径
-    output-folder: E:\\converter-output\\
+    output-folder: ./convert/
   # 异步接口设置
   async:
     # 最大上传文件大小
     upload-file-size: 500MB
     # 上传文件存储路径
-    output-folder: E:\\converter-output\\async\\
+    output-folder: ./convert/async/
   video:
     vca:
 	  # 项目依赖于ffmpeg,必须要安装,默认即可
@@ -35,11 +35,11 @@ convert:
           # ffmpeg视频切割图片默认为1帧/5s
           fps: 0.2                                           
   audio:
-    # default asr tool
+    # asr引擎配置
     asr:
-	  # 可选值:shhan:声瀚引擎(私有化部署),baidu:百度asr
+	  # 可选值:shhan:声瀚引擎(私有化部署),baidu:百度引擎
       default: shhan
-      # asr接口对音频时间长度有限制,所以此值为切割文件的长度,声瀚为20s/seg,百度为60s/seg 
+      # asr接口对音频时间长度有限制,所以此值为切割文件的长度,声瀚为20s/段,百度为60s/段 
       seg-duration: 20 
       #baidu asr config 
       baidu:
@@ -50,8 +50,9 @@ convert:
 	    # 声瀚引擎base-url
         base-url: http://172.16.8.103:8177/shRecBase/
   image:
-    # 可选值 youtu|abbyy|tesseract 私有化部署设置abbyy|tesseract
+    # ocr 引擎配置
     ocr:
+      # 可选值 youtu|abbyy|tesseract 私有化部署设置abbyy|tesseract
       default: abbyy
       #tencent youtu ocr tool config
       youtu:
@@ -67,9 +68,31 @@ convert:
       tesseract:
         # language package path 设置tessact语言包路径 未设置读取TESSDATA_PREFIX环境变量
         datapath: /opt/tesseract/tessdata
+# kbase-monitor 监控配置
+spring:
+  application:
+    name: kbase-media
+  boot:
+    admin:
+      client:
+        # kbase-monitor url
+        url: "http://172.16.8.143:8888"
+        username: admin
+        password: admin
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS
+  server:
+    ssl:
+      enabled: false
 ```
 ### Restful Apis
-[http://172.16.23.12/kbase-media/swagger-ui.html](http://172.16.23.12/kbase-media/swagger-ui.html)
+[http://kbs55.demo.xiaoi.com/kbase-media/swagger-ui.html](http://kbs55.demo.xiaoi.com/kbase-media/swagger-ui.html)
 
 ### Thanks For
 [Tencent-YouTu](https://github.com/Tencent-YouTu/java_sdk)
