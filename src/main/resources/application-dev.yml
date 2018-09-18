@@ -40,17 +40,17 @@ convert:
   # sync interface config
   sync:
     upload-file-size: 50MB
-    output-folder: E:\\converter-output\\
+    output-folder: E:\converter-output\
   # async interface config
   async:
     upload-file-size: 500MB
-    output-folder: E:\\converter-output\\async\\
+    output-folder: E:\converter-output\async\
   video:
     vca:
       default: ffmpeg
       ffmpeg:
         # in windows os, it's Necessary, in unix os, it will load by system environment
-        path: D:\\ffmpeg\\bin\\
+        path: D:\ffmpeg\bin\
         toImage:
           fps: 0.2
   audio:

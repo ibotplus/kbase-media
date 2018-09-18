@@ -23,7 +23,7 @@ public enum ResultCode {
     /**
      * 文件上传失败
      */
-    FILE_UPLOAD_FAILED(104, "文件上传失败"),
+    FILE_UPLOAD_FAILURE(104, "文件上传失败"),
     /**
      * 文件类型不支持
      */
@@ -43,19 +43,19 @@ public enum ResultCode {
     /**
      * 图片或音频部分解析失败
      */
-    PART_PARSE_FAILED(109, "图片或音频部分解析失败"),
+    PART_PARSE_FAILURE(109, "图片或音频部分解析失败"),
     /**
      * TTS失败
      */
     TTS_FAILURE(110, "文本合成语音失败"),
     /**
-     * 异步解析未完成
+     * 解析未完成
      */
-    ASYNC_NOT_COMPLETED(201, "解析还在进行中,请稍后尝试读取结果."),
+    NOT_COMPLETED(201, "解析未完成."),
     /**
-     * 异步结果读取失败
+     * 结果文件读取失败吖
      */
-    ASYNC_READ_RESULT_FILE_FAILED(202, "读取解析结果文件失败.");
+    READ_RESULT_FILE_FAILURE(202, "读取解析结果文件失败.");
 
     private int code;
     private String msg;
@@ -65,11 +65,11 @@ public enum ResultCode {
         this.msg = msg;
     }
 
-    public int getCode() {
+    public int code() {
         return code;
     }
 
-    public String getMsg() {
+    public String msg() {
         return msg;
     }
 }

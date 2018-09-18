@@ -58,30 +58,29 @@ public class AudioServiceImpl implements AudioService {
 
     @Override
     public ParseResult<TTS> handleTts(String text, Map ttsOption) {
-        HashMap<String, Object> options = (HashMap<String, Object>) ttsOption;
-        if (StringUtils.isNoneBlank(text)) {
-            byte[] data = null;
-            // 截取
-            if (text.length() > 512) {//需截取
-                List<String> splitList = splitText(text);
-                for (String sText : splitList) {
-                    byte[] bytes = baiduTtsHandler(sText, options);
-                    if (data == null) {
-                        data = bytes;
-                    } else if (bytes != null) {
-                        data = ArrayUtils.addAll(data, bytes);
-                    }
+        HashMap<String, Object> options = new HashMap<>(0);
+        if (!ttsOption.isEmpty()) {
+            options = (HashMap<String, Object>) ttsOption;
+        }
+        byte[] data = null;
+        // 需截取
+        if (text.length() > 512) {
+            List<String> splitList = splitText(text);
+            for (String sText : splitList) {
+                byte[] bytes = baiduTtsHandler(sText, options);
+                if (data == null) {
+                    data = bytes;
+                } else if (bytes != null) {
+                    data = ArrayUtils.addAll(data, bytes);
                 }
-            } else {
-                data = baiduTtsHandler(text, options);
-            }
-            if (data != null) {
-                return new ParseResult<>(ResultCode.SUCCESS, new TTS(data));
-            } else {
-                return new ParseResult<>(ResultCode.PARSE_EMPTY, null);
             }
         } else {
-            return new ParseResult<>(ResultCode.TTS_FAILURE, null);
+            data = baiduTtsHandler(text, options);
+        }
+        if (data != null) {
+            return new ParseResult<>(ResultCode.SUCCESS, new TTS(text, data));
+        } else {
+            return new ParseResult<>(ResultCode.PARSE_EMPTY, null);
         }
     }
 

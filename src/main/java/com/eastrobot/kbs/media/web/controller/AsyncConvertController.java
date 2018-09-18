@@ -1,5 +1,6 @@
 package com.eastrobot.kbs.media.web.controller;
 
+import com.eastrobot.kbs.media.exception.BusinessException;
 import com.eastrobot.kbs.media.model.ResponseMessage;
 import com.eastrobot.kbs.media.model.ResultCode;
 import com.eastrobot.kbs.media.plugin.AsyncMode;
@@ -9,6 +10,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -16,7 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.UUID;
+import java.util.Optional;
 
 /**
  * AsyncConvertController
@@ -43,32 +45,34 @@ public class AsyncConvertController {
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
     public ResponseMessage convertAsync(@RequestParam(value = "file") MultipartFile file) {
-        String sn = UUID.randomUUID().toString();
-        if (!file.isEmpty()) {
+        try {
+            Optional.ofNullable(file).filter(v -> !v.isEmpty()).orElseThrow(BusinessException::new);
+            String md5 = DigestUtils.md5Hex(file.getBytes());
             try {
-                converterService.uploadFile(file, sn, true);
+                converterService.uploadFile(file, md5, true);
             } catch (Exception e) {
-                return new ResponseMessage(ResultCode.FILE_UPLOAD_FAILED);
+                return new ResponseMessage(ResultCode.FILE_UPLOAD_FAILURE);
             }
 
-            return new ResponseMessage(ResultCode.SUCCESS, sn);
-        } else {
+            return new ResponseMessage(ResultCode.SUCCESS, md5);
+        } catch (Exception e) {
             return new ResponseMessage(ResultCode.PARAM_ERROR);
         }
     }
 
-    @ApiOperation(value = "通过sn来获得解析结果.", response = ResponseMessage.class)
+    @ApiOperation(value = "通过md5来获得解析结果.", response = ResponseMessage.class)
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "sn", value = "异步模式上传文件返回的sn", dataType = "string", required = true, paramType =
+            @ApiImplicitParam(name = "sn", value = "异步模式上传文件返回的md5", dataType = "string", required = true, paramType =
                     "path")
     })
     @GetMapping(
-            value = "/convertAsync/{sn}",
+            value = "/convertAsync/{md5}",
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE}
     )
-    public ResponseMessage convertAsync(@PathVariable String sn) {
-        if (StringUtils.isNotBlank(sn)) {
-            return converterService.findAsyncParseResult(sn);
+    public ResponseMessage convertAsync(@PathVariable String md5) {
+        Optional<String> md5Op = Optional.ofNullable(md5).filter(StringUtils::isNotBlank);
+        if (md5Op.isPresent()) {
+            return converterService.findParseResultByMd5(md5, true);
         } else {
             return new ResponseMessage(ResultCode.PARAM_ERROR);
         }

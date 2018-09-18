@@ -106,7 +106,7 @@ public class ImageServiceImpl implements ImageService {
                         imageKeywordMap.put(Integer.parseInt(currentSegIndex), keyword);
                         imageContentMap.put(Integer.parseInt(currentSegIndex), content);
                     } else {
-                        throw new Exception(parseResult.getCode().getMsg());
+                        throw new Exception(parseResult.getCode().msg());
                     }
                 } catch (Exception e) {
                     log.debug("convert image occurred exception: {}", e.getMessage());

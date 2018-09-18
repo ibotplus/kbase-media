@@ -18,6 +18,11 @@ import lombok.Setter;
 @ApiModel(description = "TTS结果封装")
 public class TTS implements AiSynthesis {
     /**
+     * 原始文本
+     */
+    @ApiModelProperty("原始文本")
+    private String originText;
+    /**
      * 文字转语音音频byte数组 base64
      */
     @ApiModelProperty("TTS结果, base64")

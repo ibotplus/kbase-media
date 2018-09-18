@@ -4,9 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.eastrobot.kbs.media.model.aitype.AiType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -18,7 +16,9 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "响应数据")
 public class ResponseMessage<T extends AiType> implements Serializable {
     /**
@@ -35,38 +35,36 @@ public class ResponseMessage<T extends AiType> implements Serializable {
      * 序列号
      */
     @ApiModelProperty("序列号")
-    public String sn;
+    private String md5;
+
+    private com.eastrobot.kbs.media.model.AiType aiType;
     /**
      * 结果封装
      */
     @ApiModelProperty("结果封装")
     private T responseEntity;
 
-    public ResponseMessage(String sn) {
-        this.sn = sn;
-    }
-
     public ResponseMessage(ResultCode resultCode) {
-        this.code = resultCode.getCode();
-        this.message = resultCode.getMsg();
+        this.code = resultCode.code();
+        this.message = resultCode.msg();
     }
 
-    public ResponseMessage(ResultCode resultCode, String sn) {
-        this.code = resultCode.getCode();
-        this.message = resultCode.getMsg();
-        this.sn = sn;
+    public ResponseMessage(ResultCode resultCode, String md5) {
+        this.code = resultCode.code();
+        this.message = resultCode.msg();
+        this.md5 = md5;
     }
 
-    public ResponseMessage(ResultCode resultCode, String sn, T responseEntity) {
-        this.code = resultCode.getCode();
-        this.message = resultCode.getMsg();
-        this.sn = sn;
+    public ResponseMessage(ResultCode resultCode, String md5, T responseEntity) {
+        this.code = resultCode.code();
+        this.message = resultCode.msg();
+        this.md5 = md5;
         this.responseEntity = responseEntity;
     }
 
     public void setResultCode(ResultCode resultCode) {
-        this.code = resultCode.getCode();
-        this.message = resultCode.getMsg();
+        this.code = resultCode.code();
+        this.message = resultCode.msg();
     }
 
     @Override

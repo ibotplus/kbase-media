@@ -16,12 +16,21 @@ public interface ConvertService {
 
     /**
      * 上传文件 异步和同步上传到不同的文件夹
-     * 文件名 sn.extension
+     * 文件名 md5.extension
+     * <p>
+     * 同步模式、异步模式所限制文件大小不同,上传文件夹不同,文件类型不同
+     * 异步上传的为zip或rar文件,其中包含具体要解析的文件
+     *
+     * @param file  MultipartFile
+     * @param md5   文件流md5
+     * @param async 是否异步
+     *
+     * @return 上传完毕的资源文件路径
      *
      * @author Yogurt_lei
      * @date 2018-04-11 15:05
      */
-    String uploadFile(MultipartFile file, String sn, boolean asyncParse) throws Exception;
+    String uploadFile(MultipartFile file, String md5, boolean async) throws Exception;
 
     /**
      * 开始解析资源
@@ -35,10 +44,13 @@ public interface ConvertService {
 
 
     /**
-     * 查找异步解析的结果
+     * 查找解析的结果
+     *
+     * @param md5   文件md5
+     * @param async 是否异步
      *
      * @author Yogurt_lei
      * @date 2018-04-12 19:59
      */
-    ResponseMessage findAsyncParseResult(String sn);
+    ResponseMessage findParseResultByMd5(String md5, boolean async);
 }

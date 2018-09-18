@@ -84,7 +84,7 @@ public class VideoServiceImpl implements VideoService {
 
         ResultCode code = ResultCode.SUCCESS;
         if (ocrResult.getCode().equals(ResultCode.OCR_FAILURE) || asrResult.getCode().equals(ResultCode.ASR_FAILURE)) {
-            code = ResultCode.PART_PARSE_FAILED;
+            code = ResultCode.PART_PARSE_FAILURE;
         }
 
         return new ParseResult<>(code, new VAC(ocrResult.getResult(), asrResult.getResult()));

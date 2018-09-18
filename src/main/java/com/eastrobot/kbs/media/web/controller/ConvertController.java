@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -28,7 +29,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 import static com.eastrobot.kbs.media.model.Constants.*;
 
@@ -121,6 +121,7 @@ public class ConvertController {
                     .put(AI_TYPE, AiType.TTS)
                     .put(AI_TTS_TEXT, text)
                     .put(AI_TTS_OPTION, Collections.emptyMap())
+                    .put(AI_RESOURCE_FILE_PATH, DigestUtils.md5Hex(text))
                     .build();
 
             return converterService.driver(ttsParam);
@@ -132,12 +133,12 @@ public class ConvertController {
     private ResponseMessage getRecognitionResponse(MultipartFile file, AiType aiType, HttpServletRequest request) {
         try {
             Optional.ofNullable(file).filter(v -> !v.isEmpty()).orElseThrow(BusinessException::new);
-            String sn = UUID.randomUUID().toString();
+            String md5 = DigestUtils.md5Hex(file.getBytes());
             String targetFile;
             try {
-                targetFile = converterService.uploadFile(file, sn, false);
+                targetFile = converterService.uploadFile(file, md5, false);
             } catch (Exception e) {
-                return new ResponseMessage(ResultCode.FILE_UPLOAD_FAILED);
+                return new ResponseMessage(ResultCode.FILE_UPLOAD_FAILURE);
             }
 
             Map<String, Object> recognitionParam = ImmutableMap.<String, Object>builder()
