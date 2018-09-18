@@ -36,22 +36,22 @@ public class ConvertServiceImpl implements ConvertService {
      * 同步上传的文件夹
      */
     @Value("${convert.sync.output-folder}")
-    private String SYNC_OUTPUT_FOLDER;
+    private String syncOutputFolder;
     /**
      * 异步上传的文件夹
      */
     @Value("${convert.async.output-folder}")
-    private String ASYNC_OUTPUT_FOLDER;
+    private String asyncOutputFolder;
     /**
      * 同步模式文件上传大小
      */
     @Value("${convert.sync.upload-file-size}")
-    private String SYNC_FILE_UPLOAD_SIZE;
+    private String syncFileUploadSize;
     /**
      * 异步模式文件上传大小
      */
     @Value("${convert.async.upload-file-size}")
-    private String ASYNC_FILE_UPLOAD_SIZE;
+    private String asyncFileUploadSize;
 
     @Autowired
     private VideoService videoService;
@@ -67,9 +67,9 @@ public class ConvertServiceImpl implements ConvertService {
         String resPath = null;
         ResponseMessage responseMessage = null;
         boolean asyncParse = MapUtils.getBoolean(paramMap, Constants.IS_ASYNC_PARSE, false);
-        String aiType = MapUtils.getString(paramMap, Constants.AI_TYPE);
+        AiType aiType = (AiType) MapUtils.getObject(paramMap, Constants.AI_TYPE);
 
-        if (Constants.RECOGNITION.equals(aiType)) {
+        if (AiType.GENERIC_RECOGNITION.equals(aiType)) {
             // 通用AI识别
             resPath = MapUtils.getString(paramMap, Constants.AI_RESOURCE_FILE_PATH);
             boolean isFrameExtractKeyword = MapUtils.getBoolean(paramMap, Constants.AI_IS_FRAME_EXTRACT_KEYWORD, false);
@@ -87,7 +87,7 @@ public class ConvertServiceImpl implements ConvertService {
             } else {
                 responseMessage = new ResponseMessage(ResultCode.ILLEGAL_TYPE);
             }
-        } else if (Constants.ASR.equals(aiType)) {
+        } else if (AiType.ASR.equals(aiType)) {
             resPath = MapUtils.getString(paramMap, Constants.AI_RESOURCE_FILE_PATH);
             String sn = FilenameUtils.getBaseName(resPath);
             if (ResourceUtil.isAudio(resPath)) {
@@ -96,7 +96,7 @@ public class ConvertServiceImpl implements ConvertService {
             } else {
                 responseMessage = new ResponseMessage(ResultCode.ILLEGAL_TYPE);
             }
-        } else if (Constants.OCR.equals(aiType)) {
+        } else if (AiType.OCR.equals(aiType)) {
             resPath = MapUtils.getString(paramMap, Constants.AI_RESOURCE_FILE_PATH);
             String sn = FilenameUtils.getBaseName(resPath);
             if (ResourceUtil.isImage(resPath)) {
@@ -105,7 +105,7 @@ public class ConvertServiceImpl implements ConvertService {
             } else {
                 responseMessage = new ResponseMessage(ResultCode.ILLEGAL_TYPE);
             }
-        } else if (Constants.VAC.equals(aiType)) {
+        } else if (AiType.VAC.equals(aiType)) {
             resPath = MapUtils.getString(paramMap, Constants.AI_RESOURCE_FILE_PATH);
             boolean isFrameExtractKeyword = MapUtils.getBoolean(paramMap, Constants.AI_IS_FRAME_EXTRACT_KEYWORD, false);
             String sn = FilenameUtils.getBaseName(resPath);
@@ -115,7 +115,7 @@ public class ConvertServiceImpl implements ConvertService {
             } else {
                 responseMessage = new ResponseMessage(ResultCode.ILLEGAL_TYPE);
             }
-        } else if (Constants.TTS.equals(aiType)) {
+        } else if (AiType.TTS.equals(aiType)) {
             String text = MapUtils.getString(paramMap, Constants.AI_TTS_TEXT);
             Map ttsOption = MapUtils.getMap(paramMap, Constants.AI_TTS_OPTION, new HashMap());
             ParseResult ttsResult = audioService.handleTts(text, ttsOption);
@@ -142,18 +142,19 @@ public class ConvertServiceImpl implements ConvertService {
         long fileSize = file.getSize();
 
         // 确保文件夹存在
-        String targetFile = asyncParse ? ASYNC_OUTPUT_FOLDER : SYNC_OUTPUT_FOLDER;
-        targetFile = targetFile + sn + "." + fileExtension;
-        File tmpFile = new File(targetFile);
-        if (!tmpFile.exists()) {
+        String targetFile = asyncParse ? asyncOutputFolder : syncOutputFolder;
+        File tmpFile = new File(targetFile + sn + "." + fileExtension);
+        if (tmpFile.exists()) {
+            return targetFile;
+        } else {
             tmpFile.mkdirs();
         }
 
         if (asyncParse) {
             // 异步模式
-            long allowBytes = ResourceUtil.parseMBorKBtoByte(ASYNC_FILE_UPLOAD_SIZE);
+            long allowBytes = ResourceUtil.parseMBorKBtoByte(asyncFileUploadSize);
             if (fileSize > allowBytes) {
-                throw new BusinessException("异步模式文件大小不能超过[" + ASYNC_FILE_UPLOAD_SIZE + "].");
+                throw new BusinessException("异步模式文件大小不能超过[" + asyncFileUploadSize + "].");
             }
 
             // 解压zip到当前路径
@@ -165,9 +166,9 @@ public class ConvertServiceImpl implements ConvertService {
             }
         } else {
             // 同步模式
-            long allowBytes = ResourceUtil.parseMBorKBtoByte(SYNC_FILE_UPLOAD_SIZE);
+            long allowBytes = ResourceUtil.parseMBorKBtoByte(syncFileUploadSize);
             if (fileSize > allowBytes) {
-                throw new BusinessException("同步模式文件大小不能超过[" + SYNC_FILE_UPLOAD_SIZE + "], 请访问异步接口.");
+                throw new BusinessException("同步模式文件大小不能超过[" + syncFileUploadSize + "], 请访问异步接口.");
             }
             file.transferTo(tmpFile);
         }
@@ -185,7 +186,7 @@ public class ConvertServiceImpl implements ConvertService {
      */
     private void doWriteResultToFile(String resPath, final ResponseMessage responseMessage, boolean asyncParse) {
         // 写到正确的文件夹下
-        String resultFilePath = asyncParse ? ASYNC_OUTPUT_FOLDER : SYNC_OUTPUT_FOLDER;
+        String resultFilePath = asyncParse ? asyncOutputFolder : syncOutputFolder;
         resultFilePath = resultFilePath + FilenameUtils.getBaseName(resPath) + FileExtensionType.RS.pExt();
         File resultFile = new File(resultFilePath);
         // 如果存在 说明是重复消费 不做处理
@@ -201,7 +202,7 @@ public class ConvertServiceImpl implements ConvertService {
     @Override
     public ResponseMessage findAsyncParseResult(String sn) {
         ResponseMessage responseMessage;
-        String filePath = ASYNC_OUTPUT_FOLDER + sn + FileExtensionType.RS.pExt();
+        String filePath = asyncOutputFolder + sn + FileExtensionType.RS.pExt();
         File resultFile = new File(filePath);
         if (!resultFile.exists()) {
             responseMessage = new ResponseMessage(ResultCode.ASYNC_NOT_COMPLETED);

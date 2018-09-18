@@ -32,20 +32,19 @@ public class FileMonitor {
      * 异步上传的文件夹
      */
     @Value("${convert.async.output-folder}")
-    private String ASYNC_OUTPUT_FOLDER;
+    private String asyncOutputFolder;
 
     @PostConstruct
     public void init() throws Exception {
-        log.warn("*************file monitor is starting*************");
+        log.info("*************file monitor is starting*************");
         // 默认轮询5s
         long interval = TimeUnit.SECONDS.toMillis(5);
         IOFileFilter filter = FileFilterUtils.and(FileFilterUtils.fileFileFilter());
-        FileAlterationObserver observer = new FileAlterationObserver(ASYNC_OUTPUT_FOLDER, filter);
+        FileAlterationObserver observer = new FileAlterationObserver(asyncOutputFolder, filter);
         observer.addListener(new FileListener());
-        // 开始监控
         FileAlterationMonitor monitor = new FileAlterationMonitor(interval, observer);
         monitor.start();
-        log.warn("*************file monitor is running*************");
+        log.info("*************file monitor is running*************");
     }
 
     private class FileListener extends FileAlterationListenerAdaptor {

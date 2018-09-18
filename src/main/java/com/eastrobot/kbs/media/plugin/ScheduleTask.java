@@ -27,12 +27,12 @@ public class ScheduleTask {
      * 同步上传的文件夹
      */
     @Value("${convert.sync.output-folder}")
-    private String SYNC_OUTPUT_FOLDER;
+    private String syncOutputFolder;
     /**
      * 异步上传的文件夹
      */
     @Value("${convert.async.output-folder}")
-    private String ASYNC_OUTPUT_FOLDER;
+    private String asyncOutputFolder;
 
     /**
      * 每周日1:00am 删除临时文件
@@ -40,8 +40,8 @@ public class ScheduleTask {
     @Scheduled(cron = "0 0 1 ? * SUN")
     public void deleteTempFile() {
         try {
-            FileUtils.deleteDirectory(new File(SYNC_OUTPUT_FOLDER));
-            FileUtils.deleteDirectory(new File(ASYNC_OUTPUT_FOLDER));
+            FileUtils.deleteDirectory(new File(syncOutputFolder));
+            FileUtils.deleteDirectory(new File(asyncOutputFolder));
         } catch (IOException e) {
             log.warn("删除临时文件目录失败.");
         }

@@ -1,5 +1,6 @@
 package com.eastrobot.kbs.media.plugin;
 
+import com.eastrobot.kbs.media.model.AiType;
 import com.eastrobot.kbs.media.model.Constants;
 import com.eastrobot.kbs.media.model.FileExtensionType;
 import com.eastrobot.kbs.media.model.ResponseMessage;
@@ -59,7 +60,7 @@ public class RocketMQEventListener {
         HashMap<String, Object> recognitionParam = new HashMap<>();
         recognitionParam.put(Constants.IS_ASYNC_PARSE, true);
         recognitionParam.put(Constants.AI_RESOURCE_FILE_PATH, fileAbsolutePath);
-        recognitionParam.put(Constants.AI_TYPE, Constants.RECOGNITION);
+        recognitionParam.put(Constants.AI_TYPE, AiType.GENERIC_RECOGNITION);
 
         ResponseMessage responseMessage = convertService.driver(recognitionParam);
         log.info("convert file complete : {}", fileAbsolutePath, responseMessage);

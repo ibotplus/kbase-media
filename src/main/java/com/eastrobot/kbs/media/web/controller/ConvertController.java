@@ -1,6 +1,7 @@
 package com.eastrobot.kbs.media.web.controller;
 
 import com.eastrobot.kbs.media.exception.BusinessException;
+import com.eastrobot.kbs.media.model.AiType;
 import com.eastrobot.kbs.media.model.ResponseMessage;
 import com.eastrobot.kbs.media.model.ResultCode;
 import com.eastrobot.kbs.media.model.aitype.ASR;
@@ -14,6 +15,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -59,7 +61,7 @@ public class ConvertController {
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
     public ResponseMessage recognition(MultipartFile file, HttpServletRequest request) {
-        return getRecognitionResponse(file, RECOGNITION, request);
+        return getRecognitionResponse(file, AiType.GENERIC_RECOGNITION, request);
     }
 
     @ApiOperation("自动语音识别[ASR].")
@@ -72,7 +74,7 @@ public class ConvertController {
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
     public ResponseMessage<ASR> asr(MultipartFile file, HttpServletRequest request) {
-        return getRecognitionResponse(file, ASR, request);
+        return getRecognitionResponse(file, AiType.ASR, request);
     }
 
     @ApiOperation("光学图像识别[OCR].")
@@ -85,7 +87,7 @@ public class ConvertController {
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
     public ResponseMessage<OCR> ocr(MultipartFile file, HttpServletRequest request) {
-        return getRecognitionResponse(file, OCR, request);
+        return getRecognitionResponse(file, AiType.OCR, request);
     }
 
     @ApiOperation("视频解析转写[VAC].")
@@ -102,7 +104,7 @@ public class ConvertController {
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
     public ResponseMessage<VAC> vac(MultipartFile file, HttpServletRequest request) {
-        return getRecognitionResponse(file, VAC, request);
+        return getRecognitionResponse(file, AiType.VAC, request);
     }
 
     @ApiOperation("文本语音合成[TTS]")
@@ -113,27 +115,28 @@ public class ConvertController {
     )
     public ResponseMessage<TTS> tts(@RequestBody String text) {
         try {
-            Optional.ofNullable(text).orElseThrow(BusinessException::new);
+            Optional.ofNullable(text).filter(StringUtils::isNotBlank).orElseThrow(BusinessException::new);
             Map<String, Object> ttsParam = ImmutableMap.<String, Object>builder()
                     .put(IS_ASYNC_PARSE, false)
-                    .put(AI_TYPE, TTS)
+                    .put(AI_TYPE, AiType.TTS)
                     .put(AI_TTS_TEXT, text)
                     .put(AI_TTS_OPTION, Collections.emptyMap())
                     .build();
 
             return converterService.driver(ttsParam);
-        } catch (BusinessException x) {
+        } catch (BusinessException e) {
             return new ResponseMessage<>(ResultCode.PARAM_ERROR);
         }
     }
 
-    private ResponseMessage getRecognitionResponse(MultipartFile file, String aiType, HttpServletRequest request) {
-        if (!file.isEmpty()) {
+    private ResponseMessage getRecognitionResponse(MultipartFile file, AiType aiType, HttpServletRequest request) {
+        try {
+            Optional.ofNullable(file).filter(v -> !v.isEmpty()).orElseThrow(BusinessException::new);
             String sn = UUID.randomUUID().toString();
             String targetFile;
             try {
                 targetFile = converterService.uploadFile(file, sn, false);
-            } catch (Exception e1) {
+            } catch (Exception e) {
                 return new ResponseMessage(ResultCode.FILE_UPLOAD_FAILED);
             }
 
@@ -145,7 +148,7 @@ public class ConvertController {
                     .build();
 
             return converterService.driver(recognitionParam);
-        } else {
+        } catch (Exception e) {
             return new ResponseMessage<>(ResultCode.PARAM_ERROR);
         }
     }

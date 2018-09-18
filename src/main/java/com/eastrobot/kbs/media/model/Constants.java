@@ -1,8 +1,6 @@
 package com.eastrobot.kbs.media.model;
 
 
-import com.eastrobot.kbs.media.model.aitype.AiType;
-
 /**
  * Global Constants
  *
@@ -27,15 +25,6 @@ public interface Constants {
     String SHHAN = "shhan";
     String XFYUN = "xfyun";
     //------------------------------------
-    //------------------------------------
-    // parse type definition
-    String RECOGNITION = "RECOGNITION";
-    String ASR = "ASR";
-    String OCR = "OCR";
-    String VAC = "VAC";
-    String SYNTHESIS = "SYNTHESIS";
-    String TTS = "TTS";
-    //------------------------------------
     // AiRecognition request param constants
     //------------------------------------
     /**
@@ -47,7 +36,7 @@ public interface Constants {
      */
     String AI_IS_FRAME_EXTRACT_KEYWORD = "isFrameExtractKeyword";
     /**
-     * AiType see {@link AiType}
+     * AiType see {@link com.eastrobot.kbs.media.model.AiType}
      */
     String AI_TYPE = "AI_TYPE";
     String AI_TTS_TEXT = "AI_TTS_TEXT";
