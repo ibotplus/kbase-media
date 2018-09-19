@@ -79,4 +79,12 @@ public class ResponseMessageTest {
             System.out.println(tokenizer.nextElement());
         }
     }
+
+    @Test
+    public void testSfJson() {
+        String json = "{\"code\":0,\"message\":null,\"md5\":\"4a65a5d2287e0466e510470dbebee60d\",\"aiType\":\"TTS\"," +
+                "\"responseEntity\":{\"originText\":\"测试123\"," +
+                "\"textAudio\":\"//MoxAAL4FnoAUwQADsQwBwAwraEAGhYgcpRhYsc1Ysc7/wwUOcMcoCFf/4nPiMP/y7\"}}";
+
+    }
 }

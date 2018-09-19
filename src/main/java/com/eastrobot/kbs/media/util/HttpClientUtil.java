@@ -16,7 +16,6 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
@@ -66,7 +65,6 @@ public class HttpClientUtil {
     }
 
     private static void init() {
-        HttpClientBuilder httpClientBuilder = HttpClients.custom();
         //socket配置
         SocketConfig socketConfig = SocketConfig.custom()
                 //是否立即发送数据，设置为true会关闭Socket缓冲，默认为false
@@ -107,10 +105,10 @@ public class HttpClientUtil {
         connectManager.setMaxTotal(MAX_TOTAL_CONNECTIONS);
 
         httpClient = HttpClients.custom()
-                .setUserAgent(USER_AGENT)               //伪装的浏览器类型
-                .setConnectionManager(connectManager)   //连接管理器
-                .setDefaultRequestConfig(requestConfig) //默认请求配置
-                .setRetryHandler(new DefaultHttpRequestRetryHandler(0, false)) //重试策略-禁用重试
+                .setUserAgent(USER_AGENT)
+                .setConnectionManager(connectManager)
+                .setDefaultRequestConfig(requestConfig)
+                .setRetryHandler(new DefaultHttpRequestRetryHandler(0, false))
                 .build();
     }
 

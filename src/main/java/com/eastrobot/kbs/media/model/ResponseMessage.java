@@ -55,13 +55,6 @@ public class ResponseMessage<T extends AiType> implements Serializable {
         this.md5 = md5;
     }
 
-    public ResponseMessage(ResultCode resultCode, String md5, T responseEntity) {
-        this.code = resultCode.code();
-        this.message = resultCode.msg();
-        this.md5 = md5;
-        this.responseEntity = responseEntity;
-    }
-
     public void setResultCode(ResultCode resultCode) {
         this.code = resultCode.code();
         this.message = resultCode.msg();
