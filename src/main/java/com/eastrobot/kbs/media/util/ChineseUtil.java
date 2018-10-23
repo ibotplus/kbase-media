@@ -1,5 +1,7 @@
 package com.eastrobot.kbs.media.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.regex.Pattern;
 
 /**
@@ -12,13 +14,25 @@ import java.util.regex.Pattern;
  * @version v1.0 , 2018-04-24 11:57
  */
 public class ChineseUtil {
-    //使用UnicodeBlock方法判断中文
+    /**
+     * use UnicodeBlock check the character is chinese
+     *
+     * @param c characters for ready check
+     *
+     * @return true if this character is chinese, false otherwise
+     */
     private static boolean isChinese(char c) {
         Character.UnicodeScript sc = Character.UnicodeScript.of(c);
         return Character.UnicodeScript.HAN == sc;
     }
 
-    // 根据UnicodeBlock方法判断中文标点符号
+    /**
+     * use UnicodeBlock check the character is punctuation
+     *
+     * @param c characters for ready check
+     *
+     * @return true if this character is punctuation, false otherwise
+     */
     private static boolean isPunctuation(char c) {
         Character.UnicodeBlock ub = Character.UnicodeBlock.of(c);
         return ub == Character.UnicodeBlock.GENERAL_PUNCTUATION
@@ -43,14 +57,18 @@ public class ChineseUtil {
                 || c == '\u00a0';
     }
 
-    // 使用Unicode编码范围来判断汉字；这个方法不准确,因为还有很多汉字不在这个范围之内
-    public boolean isChineseByRange(String str) {
-        if (str == null) {
-            return false;
-        }
-        Pattern pattern = Pattern.compile("[\\u4E00-\\u9FCC]+");
+    private static final Pattern CHINESE_UNICODE_PATTERN = Pattern.compile("[\\u4E00-\\u9FCC]+");
 
-        return pattern.matcher(str.trim()).find();
+    /**
+     * use unicode range check the string is chinese<br/>
+     * note: This method is not accurate, because there are still many chinese characters are not in this range.
+     *
+     * @param str characters for ready check
+     *
+     * @return true if this String range is chinese, false otherwise
+     */
+    public static boolean isChineseByRange(String str) {
+        return !StringUtils.isBlank(str) && CHINESE_UNICODE_PATTERN.matcher(str).find();
     }
 
     private static Boolean isMessy(char c) {
@@ -58,7 +76,7 @@ public class ChineseUtil {
     }
 
     /**
-     * 移除乱码
+     * remove messy characters
      *
      * @author Yogurt_lei
      * @date 2018-04-24 12:02
