@@ -1,5 +1,3 @@
 不区分优先级
 
 1.xfyun配置抽到springboot中 不要单独的config.properties
-
-2.文件md5 判断是否已经处理过 已经处理 直接去取结果返回
