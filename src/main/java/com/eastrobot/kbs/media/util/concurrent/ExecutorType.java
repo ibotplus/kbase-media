@@ -1,6 +1,8 @@
 package com.eastrobot.kbs.media.util.concurrent;
 
 /**
+ * 线程池executor类型<br/>
+ *
  * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
  * @version v1.0 , 2018-09-17 10:56
  */

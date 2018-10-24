@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 线程池工具类
  *
+ *
  * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
  * @version v1.0 , 2018-09-17 10:33
  */
@@ -31,29 +32,24 @@ public class ThreadPoolUtil {
         if (!THREAD_POOL_MAP.containsKey(ExecutorType.GENERIC_CPU_INTENSIVE)) {
             AtomicInteger cpuThreadCounter = new AtomicInteger(1);
             ExecutorService executor = new ThreadPoolExecutor(NCPU, NCPU,
-                    KEEP_ALIVE_TIME, TimeUnit.SECONDS, new LinkedBlockingQueue<>(NCPU),
+                    0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(NCPU),
                     r -> new Thread(r,
                             ExecutorType.GENERIC_CPU_INTENSIVE + "-POOL-" + cpuThreadCounter.getAndIncrement()),
-                    //cpu密集型不会造成io阻塞,并行变串行,降低任务提交速度
-                    new ThreadPoolExecutor.CallerRunsPolicy());
+                    // cpu密集型不会io阻塞,并行变串行,降低任务提交速度
+                    new ThreadPoolExecutor.DiscardOldestPolicy());
             THREAD_POOL_MAP.put(ExecutorType.GENERIC_CPU_INTENSIVE, executor);
         }
 
-        //通用IO密集型线程池
+        //通用IO密集型线程池-注意:io可能阻塞而导致主线程等待
         if (!THREAD_POOL_MAP.containsKey(ExecutorType.GENERIC_IO_INTENSIVE)) {
             AtomicInteger ioThreadCounter = new AtomicInteger(1);
             ExecutorService executor = new ThreadPoolExecutor(NCPU, 2 * NCPU + 10,
                     KEEP_ALIVE_TIME, TimeUnit.SECONDS, new SynchronousQueue<>(),
                     r -> new Thread(r,
                             ExecutorType.GENERIC_IO_INTENSIVE + "-POOL-" + ioThreadCounter.getAndIncrement()),
-                    // io密集型可能会io阻塞,所以选择丢弃最老的来执行本次任务 并抛出异常
-                    (r, exe) -> {
-                        if (!exe.isShutdown()) {
-                            exe.getQueue().poll();
-                            exe.execute(r);
-                        }
-                        throw new RejectedExecutionException("Task " + r.toString() + " rejected from " + exe.toString());
-                    });
+                    // io密集型可能会io阻塞,并行变串行,降低任务提交速度
+                    // 在media中每段内容都是所需的,所以这里不抛弃任务,如果不在意完整性,可以考虑其他的拒绝策略
+                    new ThreadPoolExecutor.CallerRunsPolicy());
             THREAD_POOL_MAP.put(ExecutorType.GENERIC_IO_INTENSIVE, executor);
         }
     }
