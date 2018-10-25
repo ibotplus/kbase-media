@@ -143,7 +143,7 @@ public class ConvertController {
 
             Map<String, Object> recognitionParam = ImmutableMap.<String, Object>builder()
                     .put(IS_ASYNC_PARSE, false)
-                    .put(AI_IS_FRAME_EXTRACT_KEYWORD, request.getParameter(AI_IS_FRAME_EXTRACT_KEYWORD))
+                    .put(AI_IS_FRAME_EXTRACT_KEYWORD, Optional.ofNullable(request.getParameter(AI_IS_FRAME_EXTRACT_KEYWORD)).orElse(""))
                     .put(AI_RESOURCE_FILE_PATH, targetFile)
                     .put(AI_TYPE, aiType)
                     .build();
