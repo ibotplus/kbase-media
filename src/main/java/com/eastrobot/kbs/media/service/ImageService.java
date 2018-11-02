@@ -3,6 +3,8 @@ package com.eastrobot.kbs.media.service;
 import com.eastrobot.kbs.media.model.ParseResult;
 import com.eastrobot.kbs.media.model.aitype.OCR;
 
+import java.util.Map;
+
 /**
  * ImageService
  *
@@ -11,15 +13,10 @@ import com.eastrobot.kbs.media.model.aitype.OCR;
  */
 public interface ImageService {
     /**
-     * 解析图片 生成文本
-     */
-    ParseResult<OCR> handle(String imageFilePath);
-
-    /**
-     * 解析文件夹下图片 生成文本
+     * 解析图片
      *
-     * @param folder                    文件夹
-     * @param eachPictureExtractKeyword 每张图片都提取关键字合并 还是最终结果合并后提取关键字
+     * @param imageFilePath 图片文件or存放图片文件夹(用于视频帧解析)
+     * @param paramMap      参数列表
      */
-    ParseResult<OCR> handleMultiFiles(String folder, boolean eachPictureExtractKeyword);
+    ParseResult<OCR> handle(String imageFilePath, Map paramMap);
 }

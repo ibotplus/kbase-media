@@ -28,4 +28,10 @@ public class VAC implements AiRecognition {
      */
     @ApiModelProperty("asr内容")
     private ASR asr;
+
+    /**
+     * 视频缩略图
+     */
+    @ApiModelProperty("视频缩略图")
+    private byte[] poster;
 }

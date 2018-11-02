@@ -16,12 +16,15 @@ import java.util.Map;
 public interface AudioService {
 
     /**
-     * 解析音频(pcm格式) 生成文本
+     * 解析音频
+     *
+     * @param audioFilePath 音频文件路径
+     * @param paramMap      可选参数列表
      *
      * @author Yogurt_lei
      * @date 2018-03-27 11:54
      */
-    ParseResult<ASR> handle(String audioFilePath);
+    ParseResult<ASR> handle(String audioFilePath, Map paramMap);
 
     /**
      * 文本合成音频（byte[]输出）

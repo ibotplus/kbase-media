@@ -36,6 +36,10 @@ public interface Constants {
      */
     String AI_IS_FRAME_EXTRACT_KEYWORD = "isFrameExtractKeyword";
     /**
+     * 视频文件是否需要预览图
+     */
+    String AI_WHETHER_NEED_VIDEO_POSTER = "whetherNeedVideoPoster";
+    /**
      * AiType see {@link com.eastrobot.kbs.media.model.AiType}
      */
     String AI_TYPE = "AI_TYPE";

@@ -11,7 +11,7 @@ logging:
   file:
     max-history: 7
     max-size: 100MB
-  file: ./stdout.log
+  path: ./stdout.log
 
 # default server config
 server:

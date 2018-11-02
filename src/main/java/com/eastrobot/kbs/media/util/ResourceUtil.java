@@ -1,9 +1,12 @@
 package com.eastrobot.kbs.media.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
@@ -14,29 +17,31 @@ import java.util.Map;
  * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
  * @version v1.0 , 2018-03-26 9:23
  */
+@Slf4j
 public class ResourceUtil {
 
     /**
-     * 获取文件夹路径, 若不存在则以文件名创建新的子文件夹
+     * 获取parentPath/parentName/文件夹路径, 若不存在则创建
      *
      * @param parentPath 父路径
-     * @param subPath    子路径
      *
-     * @return parentPath/parentName/subPath
+     * @return path parentPath/parentName/ or "" (empty, mark create directory failed)
      *
      * @author Yogurt_lei
      * @date 2018-03-26 11:46
      */
-    public static String getFolder(String parentPath, String subPath) {
-        String folder = FilenameUtils.getFullPath(parentPath) + FilenameUtils.getBaseName(parentPath) + File.separator
-                + subPath;
-
-        File file = new File(folder);
-        if (!file.exists()) {
-            file.mkdirs();
+    public static String ofFileNameFolder(String parentPath) {
+        try {
+            return Files
+                    .createDirectories(
+                            Paths.get(FilenameUtils.getFullPath(parentPath), FilenameUtils.getBaseName(parentPath))
+                    ).toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.warn("Files.createDirectories {}", parentPath);
         }
 
-        return folder;
+        return "";
     }
 
     /**
@@ -83,10 +88,12 @@ public class ResourceUtil {
      * @date 2018-03-29 20:20
      */
     public static String map2SortByKeyAndMergeWithSplit(Map<Integer, String> map, final String split) {
-        return map.entrySet().stream()
+        return map.entrySet()
+                .stream()
                 .sorted(Map.Entry.comparingByKey())
                 .map(Map.Entry::getValue)
-                .reduce((a, b) -> a + split + b).orElse("");
+                .reduce((a, b) -> a + split + b)
+                .orElse("");
     }
 
     /**

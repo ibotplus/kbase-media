@@ -36,7 +36,10 @@ public class ResponseMessage<T extends AiType> implements Serializable {
      */
     @ApiModelProperty("序列号")
     private String md5;
-
+    /**
+     * ai类型
+     */
+    @ApiModelProperty("ai类型")
     private com.eastrobot.kbs.media.model.AiType aiType;
     /**
      * 结果封装

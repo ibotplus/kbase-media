@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -14,14 +13,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 线程池工具类
  *
- *
  * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
  * @version v1.0 , 2018-09-17 10:33
  */
 @Slf4j
 @Component
 public class ThreadPoolUtil {
-    private static final Map<ExecutorType, ExecutorService> THREAD_POOL_MAP = new HashMap<>(3);
+    private static final Map<ExecutorType, ExecutorService> THREAD_POOL_MAP = new ConcurrentHashMap<>(3);
     private static final int SHUTDOWN_TIMEOUT = 30;
     private static final int KEEP_ALIVE_TIME = 60;
     private static final int NCPU = Runtime.getRuntime().availableProcessors();

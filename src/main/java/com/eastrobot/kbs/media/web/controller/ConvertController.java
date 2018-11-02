@@ -42,26 +42,26 @@ import static com.eastrobot.kbs.media.model.Constants.*;
 @Slf4j
 @RestController()
 @RequestMapping("/convert")
+@SuppressWarnings("unchecked")
 public class ConvertController {
 
     @Autowired
     private ConvertService converterService;
 
+    @Autowired
+    private HttpServletRequest request;
+
     @ApiOperation("(AI识别通用接口)视频,音频,图片,转换为文本.")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "file", value = "待转换文件", dataType = "__file", required = true, paramType = "form"),
-            @ApiImplicitParam(name = "isFrameExtractKeyword", dataType = "boolean", defaultValue = "false",
-                    paramType = "form",
-                    value = "视频的图片解析结果是每帧提取关键字后合并的还是全部合并后提取关键字<br/>(*仅当视频文件此参数才有效)"
-            )
+            @ApiImplicitParam(name = "file", value = "待转换文件", dataType = "__file", required = true, paramType = "form")
     })
     @PostMapping(
             value = "",
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
-    public ResponseMessage recognition(MultipartFile file, HttpServletRequest request) {
-        return getRecognitionResponse(file, AiType.GENERIC_RECOGNITION, request);
+    public ResponseMessage recognition(MultipartFile file) {
+        return getRecognitionResponse(file, AiType.GENERIC_RECOGNITION);
     }
 
     @ApiOperation("自动语音识别[ASR].")
@@ -73,8 +73,8 @@ public class ConvertController {
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
-    public ResponseMessage<ASR> asr(MultipartFile file, HttpServletRequest request) {
-        return getRecognitionResponse(file, AiType.ASR, request);
+    public ResponseMessage<ASR> asr(MultipartFile file) {
+        return getRecognitionResponse(file, AiType.ASR);
     }
 
     @ApiOperation("光学图像识别[OCR].")
@@ -86,25 +86,21 @@ public class ConvertController {
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
-    public ResponseMessage<OCR> ocr(MultipartFile file, HttpServletRequest request) {
-        return getRecognitionResponse(file, AiType.OCR, request);
+    public ResponseMessage<OCR> ocr(MultipartFile file) {
+        return getRecognitionResponse(file, AiType.OCR);
     }
 
     @ApiOperation("视频解析转写[VAC].")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "file", value = "待转换文件", dataType = "__file", required = true, paramType = "form"),
-            @ApiImplicitParam(name = "isFrameExtractKeyword", dataType = "boolean", defaultValue = "false",
-                    paramType = "form",
-                    value = "视频的图片解析结果是每帧提取关键字后合并的还是全部合并后提取关键字<br/>"
-            )
+            @ApiImplicitParam(name = "file", value = "待转换文件", dataType = "__file", required = true, paramType = "form")
     })
     @PostMapping(
             value = "/vac",
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
-    public ResponseMessage<VAC> vac(MultipartFile file, HttpServletRequest request) {
-        return getRecognitionResponse(file, AiType.VAC, request);
+    public ResponseMessage<VAC> vac(MultipartFile file) {
+        return getRecognitionResponse(file, AiType.VAC);
     }
 
     @ApiOperation("文本语音合成[TTS]")
@@ -130,7 +126,7 @@ public class ConvertController {
         }
     }
 
-    private ResponseMessage getRecognitionResponse(MultipartFile file, AiType aiType, HttpServletRequest request) {
+    private ResponseMessage getRecognitionResponse(MultipartFile file, AiType aiType) {
         try {
             Optional.ofNullable(file).filter(v -> !v.isEmpty()).orElseThrow(BusinessException::new);
             String md5 = DigestUtils.md5Hex(file.getBytes());
@@ -144,6 +140,7 @@ public class ConvertController {
             Map<String, Object> recognitionParam = ImmutableMap.<String, Object>builder()
                     .put(IS_ASYNC_PARSE, false)
                     .put(AI_IS_FRAME_EXTRACT_KEYWORD, Optional.ofNullable(request.getParameter(AI_IS_FRAME_EXTRACT_KEYWORD)).orElse(""))
+                    .put(AI_WHETHER_NEED_VIDEO_POSTER, Optional.ofNullable(request.getParameter(AI_WHETHER_NEED_VIDEO_POSTER)).orElse(""))
                     .put(AI_RESOURCE_FILE_PATH, targetFile)
                     .put(AI_TYPE, aiType)
                     .build();

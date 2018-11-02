@@ -2,6 +2,9 @@ package com.eastrobot.kbs.media.model;
 
 /**
  * 定义解析结果码
+ *
+ * @author Yogurt_lei
+ * @date 2018-05-02 15:33
  */
 public enum ResultCode {
     /**

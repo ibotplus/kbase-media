@@ -44,7 +44,7 @@ public class AudioServiceImpl implements AudioService {
     private AudioParserTemplate audioParserTemplate;
 
     @Override
-    public ParseResult<ASR> handle(String audioFilePath) {
+    public ParseResult<ASR> handle(String audioFilePath, Map paramMap) {
         if (Constants.BAIDU.equals(audioTool)) {
             return audioParserTemplate.handle(audioFilePath, this::baiduAsrHandler);
         } else if (Constants.SHHAN.equals(audioTool)) {

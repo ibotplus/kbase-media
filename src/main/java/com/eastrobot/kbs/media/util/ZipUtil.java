@@ -29,7 +29,7 @@ public class ZipUtil {
      * @return 返回解压后文件名的绝对路径list
      */
     public static List<String> unZip(File zipFile, String unzipDir) {
-        // 如果 destDir 为 null, 空字符串, 或者全是空格, 则解压到压缩文件所在目录
+        // 如果 destDir 不存在, 则解压到压缩文件所在目录
         if (StringUtils.isBlank(unzipDir)) {
             unzipDir = zipFile.getParent();
         }
@@ -38,17 +38,22 @@ public class ZipUtil {
 
         List<String> fileNames = new ArrayList<>();
 
-        try (ZipArchiveInputStream is = new ZipArchiveInputStream(new BufferedInputStream(new FileInputStream(zipFile), BUFFER_SIZE))) {
+        try (
+                ZipArchiveInputStream zais =
+                        new ZipArchiveInputStream(new BufferedInputStream(new FileInputStream(zipFile), BUFFER_SIZE))
+        ) {
 
             ZipArchiveEntry entry;
-            while ((entry = is.getNextZipEntry()) != null) {
+            while ((entry = zais.getNextZipEntry()) != null) {
                 if (entry.isDirectory()) {
                     File directory = new File(unzipDir, entry.getName());
                     directory.mkdirs();
                 } else {
                     fileNames.add(unzipDir + entry.getName());
-                    try (OutputStream os = new BufferedOutputStream(new FileOutputStream(new File(unzipDir, entry.getName())), BUFFER_SIZE)) {
-                        IOUtils.copy(is, os);
+                    try (
+                            OutputStream os = new BufferedOutputStream(new FileOutputStream(new File(unzipDir, entry.getName())), BUFFER_SIZE)
+                    ) {
+                        IOUtils.copy(zais, os);
                     }
                 }
             }
@@ -62,7 +67,7 @@ public class ZipUtil {
     /**
      * 解压 zip 文件
      *
-     * @param zipFile zip 压缩文件的路径
+     * @param zipFile  zip 压缩文件的路径
      * @param unzipDir zip 压缩文件解压后保存的目录
      *
      * @return 返回解压后文件名的绝对路径list

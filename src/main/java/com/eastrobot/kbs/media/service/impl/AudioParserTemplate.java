@@ -19,11 +19,13 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -41,19 +43,19 @@ public class AudioParserTemplate {
 
     ParseResult<ASR> handle(String audioFilePath, ParserCallBack callBack) {
         try {
-            // 1. 是否切割文件 {segmentDuration} 每段 文件放入当前文件夹下当前文件名命名的文件夹下
+            // 1. 是否切割文件 {segmentDuration} 每段,文件放入当前文件夹下 filename-%d.pcm
             FFmpegUtil.splitSegFileToPcm(audioFilePath, segmentDuration);
         } catch (IOException e) {
             log.error("splitSegToPcm occurred exception, check the ffmpeg location is right.");
             return new ParseResult<>(ResultCode.ASR_FAILURE, null);
         }
 
-        File[] allPcmFiles = Optional.ofNullable(new File(ResourceUtil.getFolder(audioFilePath, ""))
-                .listFiles(filename ->
-                        FileExtensionType.PCM.ext().equals(FilenameUtils.getExtension(filename.getName()))))
-                .orElse(new File[]{});
+        // 得到所有待解析pcm
+        File[] allPcmFiles = Paths.get(FilenameUtils.getFullPath(audioFilePath))
+                .toFile()
+                .listFiles(filename -> filename.getName().endsWith(FileExtensionType.PCM.ext()));
 
-        if (allPcmFiles.length > 1) {
+        if (Objects.requireNonNull(allPcmFiles).length > 1) {
             return multiSegAudioFileParse(allPcmFiles, callBack);
         } else {
             try {
@@ -78,28 +80,26 @@ public class AudioParserTemplate {
     private ParseResult<ASR> multiSegAudioFileParse(File[] allPcmFiles, ParserCallBack callBack) {
         // 2. 遍历pcm文件 解析每段文本
         ExecutorService executor = ThreadPoolUtil.ofExecutor(ExecutorType.GENERIC_IO_INTENSIVE);
+        int taskCount = allPcmFiles.length;
         // 总任务数门阀
-        final CountDownLatch latch = new CountDownLatch(allPcmFiles.length);
+        CountDownLatch latch = new CountDownLatch(taskCount);
         // 存储音轨解析段-内容
-        final ConcurrentHashMap<Integer, String> audioContentMap = new ConcurrentHashMap<>(allPcmFiles.length);
+        ConcurrentHashMap<Integer, String> audioContentMap = new ConcurrentHashMap<>(taskCount);
         AtomicBoolean hasOccurredException = new AtomicBoolean(false);
-        // 存储音轨解析异常信息 [seg:message]
-        StringBuffer exceptionBuffer = new StringBuffer();
-
-        for (final File file : allPcmFiles) {
-            final String filepath = file.getAbsolutePath();
+        for (File file : allPcmFiles) {
+            String filePath = file.getAbsolutePath();
             //提交音轨转文字任务
+            log.debug("asrHandler executor submit asrTask {}", filePath);
             executor.submit(() -> {
-                String baseName = FilenameUtils.getBaseName(filepath);
+                String baseName = FilenameUtils.getBaseName(filePath);
                 String currentSegIndex = StringUtils.substringAfterLast(baseName, "-");
                 try {
-                    String content = callBack.doInParser(filepath);
-                    log.debug("asrHandler parse {} result : {}", filepath, content);
+                    String content = callBack.doInParser(filePath);
+                    log.debug("asrHandler parse {} result : {}", filePath, content);
                     audioContentMap.put(Integer.parseInt(currentSegIndex), content);
                 } catch (Exception e) {
-                    log.warn("asrHandler parse seg audio occurred exception: {}", e.getMessage());
+                    log.warn("asrHandler parse seg audio {} occurred exception: {}", baseName, e.getMessage());
                     hasOccurredException.set(true);
-                    exceptionBuffer.append("[").append(currentSegIndex).append(":").append(e.getMessage()).append("]");
                 } finally {
                     latch.countDown();
                 }
@@ -108,10 +108,9 @@ public class AudioParserTemplate {
 
         try {
             // 阻塞等待结束
-            latch.await();
-        } catch (Exception e) {
+            latch.await(taskCount * 5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
             hasOccurredException.set(true);
-            exceptionBuffer.append("[").append(e.getMessage()).append("]");
             log.error("asrHandler parse audio thread occurred exception : {}", e.getMessage());
         }
 
@@ -122,7 +121,6 @@ public class AudioParserTemplate {
             List<String> keywords = HanLP.extractKeyword(resultText, 100);
             String keyword = ResourceUtil.list2String(keywords, ",");
             if (hasOccurredException.get()) {
-                log.warn("asrHandler parse audio occurred exception: {}", exceptionBuffer.toString());
                 return new ParseResult<>(ResultCode.ASR_FAILURE, new ASR(resultText, keyword));
             } else {
                 return new ParseResult<>(ResultCode.SUCCESS, new ASR(resultText, keyword));

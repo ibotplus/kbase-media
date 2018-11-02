@@ -193,7 +193,6 @@ public class ConvertServiceImpl implements ConvertService {
     private ResponseMessage aiRecognition(AiType aiType, Map<String, Object> paramMap) {
         String resPath = MapUtils.getString(paramMap, Constants.AI_RESOURCE_FILE_PATH);
         String md5 = FilenameUtils.getBaseName(resPath);
-        boolean eachPictureExtractKeyword = MapUtils.getBoolean(paramMap, Constants.AI_IS_FRAME_EXTRACT_KEYWORD, false);
         ParseResult parseResult = null;
 
         if (AiType.GENERIC_RECOGNITION.equals(aiType)) {
@@ -207,12 +206,12 @@ public class ConvertServiceImpl implements ConvertService {
         }
 
         // 明细解析
-        if (AiType.ASR.equals(aiType) && ResourceUtil.isAudio(resPath)) {
-            parseResult = audioService.handle(resPath);
-        } else if (AiType.OCR.equals(aiType) && ResourceUtil.isImage(resPath)) {
-            parseResult = imageService.handle(resPath);
-        } else if (AiType.VAC.equals(aiType) && ResourceUtil.isVideo(resPath)) {
-            parseResult = videoService.handle(resPath, eachPictureExtractKeyword);
+        if (AiType.ASR.equals(aiType)) {
+            parseResult = audioService.handle(resPath, paramMap);
+        } else if (AiType.OCR.equals(aiType)) {
+            parseResult = imageService.handle(resPath, paramMap);
+        } else if (AiType.VAC.equals(aiType)) {
+            parseResult = videoService.handle(resPath, paramMap);
         }
 
         if (parseResult == null) {
