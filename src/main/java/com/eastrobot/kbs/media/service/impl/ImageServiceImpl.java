@@ -143,7 +143,7 @@ public class ImageServiceImpl implements ImageService {
 
         if (StringUtils.isNotBlank(imageContent)) {
             // 是否每个提取的图片都抽取关键字
-            boolean eachPictureExtractKeyword = MapUtils.getBoolean(paramMap, Constants.AI_IS_FRAME_EXTRACT_KEYWORD, false);
+            boolean eachPictureExtractKeyword = MapUtils.getBoolean(paramMap, Constants.AI_WHETHER_EACH_IMAGE_EXTRACT_KEYWORD, false);
             if (!eachPictureExtractKeyword) {
                 List<String> phraseList = HanLP.extractKeyword(imageContent, 100);
                 imageKeyword = ResourceUtil.list2String(phraseList, "");

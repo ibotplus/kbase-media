@@ -48,9 +48,6 @@ public class ConvertController {
     @Autowired
     private ConvertService converterService;
 
-    @Autowired
-    private HttpServletRequest request;
-
     @ApiOperation("(AI识别通用接口)视频,音频,图片,转换为文本.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "file", value = "待转换文件", dataType = "__file", required = true, paramType = "form")
@@ -60,8 +57,8 @@ public class ConvertController {
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
-    public ResponseMessage recognition(MultipartFile file) {
-        return getRecognitionResponse(file, AiType.GENERIC_RECOGNITION);
+    public ResponseMessage recognition(MultipartFile file, HttpServletRequest request) {
+        return getRecognitionResponse(file, AiType.GENERIC_RECOGNITION, request);
     }
 
     @ApiOperation("自动语音识别[ASR].")
@@ -73,8 +70,8 @@ public class ConvertController {
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
-    public ResponseMessage<ASR> asr(MultipartFile file) {
-        return getRecognitionResponse(file, AiType.ASR);
+    public ResponseMessage<ASR> asr(MultipartFile file, HttpServletRequest request) {
+        return getRecognitionResponse(file, AiType.ASR, request);
     }
 
     @ApiOperation("光学图像识别[OCR].")
@@ -86,8 +83,8 @@ public class ConvertController {
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
-    public ResponseMessage<OCR> ocr(MultipartFile file) {
-        return getRecognitionResponse(file, AiType.OCR);
+    public ResponseMessage<OCR> ocr(MultipartFile file, HttpServletRequest request) {
+        return getRecognitionResponse(file, AiType.OCR, request);
     }
 
     @ApiOperation("视频解析转写[VAC].")
@@ -99,8 +96,8 @@ public class ConvertController {
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
-    public ResponseMessage<VAC> vac(MultipartFile file) {
-        return getRecognitionResponse(file, AiType.VAC);
+    public ResponseMessage<VAC> vac(MultipartFile file, HttpServletRequest request) {
+        return getRecognitionResponse(file, AiType.VAC, request);
     }
 
     @ApiOperation("文本语音合成[TTS]")
@@ -126,7 +123,7 @@ public class ConvertController {
         }
     }
 
-    private ResponseMessage getRecognitionResponse(MultipartFile file, AiType aiType) {
+    private ResponseMessage getRecognitionResponse(MultipartFile file, AiType aiType, HttpServletRequest request) {
         try {
             Optional.ofNullable(file).filter(v -> !v.isEmpty()).orElseThrow(BusinessException::new);
             String md5 = DigestUtils.md5Hex(file.getBytes());
@@ -139,7 +136,7 @@ public class ConvertController {
 
             Map<String, Object> recognitionParam = ImmutableMap.<String, Object>builder()
                     .put(IS_ASYNC_PARSE, false)
-                    .put(AI_IS_FRAME_EXTRACT_KEYWORD, Optional.ofNullable(request.getParameter(AI_IS_FRAME_EXTRACT_KEYWORD)).orElse(""))
+                    .put(AI_WHETHER_EACH_IMAGE_EXTRACT_KEYWORD, Optional.ofNullable(request.getParameter(AI_WHETHER_EACH_IMAGE_EXTRACT_KEYWORD)).orElse(""))
                     .put(AI_WHETHER_NEED_VIDEO_POSTER, Optional.ofNullable(request.getParameter(AI_WHETHER_NEED_VIDEO_POSTER)).orElse(""))
                     .put(AI_RESOURCE_FILE_PATH, targetFile)
                     .put(AI_TYPE, aiType)

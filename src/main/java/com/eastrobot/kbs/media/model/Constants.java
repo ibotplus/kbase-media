@@ -34,7 +34,7 @@ public interface Constants {
     /**
      * ai识别视频文件是否按帧提取关键字
      */
-    String AI_IS_FRAME_EXTRACT_KEYWORD = "isFrameExtractKeyword";
+    String AI_WHETHER_EACH_IMAGE_EXTRACT_KEYWORD = "whetherEachImageExtractKeyword";
     /**
      * 视频文件是否需要预览图
      */
