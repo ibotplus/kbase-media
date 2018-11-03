@@ -38,13 +38,12 @@ public class XfyunAsrUtil {
 
     /**
      * {
-     *     "bg":250,    \\当前这句话的说话开始时间，单位为毫秒
-     *     "ed":2890,  \\当前这句话的说话结束时间，单位为毫秒
-     *     "onebest":"噢，你，你听得到我这边的声音吗？",
-     *     "speaker":"1" \\说话人编号（数字“1”和“2”为不同说话人，电话专用版功能）
+     * "bg":250,    \\当前这句话的说话开始时间，单位为毫秒
+     * "ed":2890,  \\当前这句话的说话结束时间，单位为毫秒
+     * "onebest":"噢，你，你听得到我这边的声音吗？",
+     * "speaker":"1" \\说话人编号（数字“1”和“2”为不同说话人，电话专用版功能）
      * }﻿
      * see http://www.xfyun.cn/doccenter/lfasr#go_sdk_doc_v2
-     *
      */
     public static JSONObject asr(String path) {
         JSONObject resultJson = new JSONObject();
