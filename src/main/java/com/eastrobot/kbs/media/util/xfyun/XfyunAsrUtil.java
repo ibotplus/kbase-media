@@ -1,18 +1,21 @@
 package com.eastrobot.kbs.media.util.xfyun;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.eastrobot.kbs.media.model.Constants;
-import com.iflytek.msp.cpdb.lfasr.client.LfasrClientImp;
-import com.iflytek.msp.cpdb.lfasr.exception.LfasrException;
-import com.iflytek.msp.cpdb.lfasr.model.Message;
-import com.iflytek.msp.cpdb.lfasr.model.ProgressStatus;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.IOUtils;
+import org.json.JSONObject;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.util.HashMap;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * IflytekAsrUtil
@@ -25,17 +28,6 @@ import java.util.HashMap;
 @ConditionalOnProperty(prefix = "convert", name = "video.asr.default", havingValue = Constants.XFYUN)
 public class XfyunAsrUtil {
 
-    private static LfasrClientImp lfasrClient;
-
-    @PostConstruct
-    private void init() {
-        try {
-            lfasrClient = LfasrClientImp.initLfasrClient();
-        } catch (LfasrException e) {
-            log.error("initialize xfyun occurred exception.", e);
-        }
-    }
-
     /**
      * {
      * "bg":250,    \\当前这句话的说话开始时间，单位为毫秒
@@ -45,100 +37,44 @@ public class XfyunAsrUtil {
      * }﻿
      * see http://www.xfyun.cn/doccenter/lfasr#go_sdk_doc_v2
      */
-    public static JSONObject asr(String path) {
-        JSONObject resultJson = new JSONObject();
+    public static JSONObject asr(String path) throws Exception {
+        final String url = "http://api.xfyun.cn/v1/service/v1/iat";
+        String apiKey = "da08f42480e67f574a61290717e8f945";
+        String appId = "5be241a0";
+        //{"engine_type":"sms16k","aue":"raw"} 固定值
+        String paramBase64 = "eyJlbmdpbmVfdHlwZSI6ICJzbXMxNmsiLCJhdWUiOiJyYXcifQ==";
+        String currentTimeMillis = System.currentTimeMillis() / 1000L + "";
+        String md5Hex = DigestUtils.md5Hex((apiKey + currentTimeMillis + paramBase64).getBytes());
 
-        HashMap<String, String> params = new HashMap<>();
-        // params.put("has_participle", "true");
-        // params.put("not_wait", "true");
+        URL httpUrl = new URL(url);
+        HttpURLConnection conn = (HttpURLConnection) httpUrl.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("X-CurTime", currentTimeMillis);
+        conn.setRequestProperty("X-Param", paramBase64);
+        conn.setRequestProperty("X-Appid", appId);
+        conn.setRequestProperty("X-CheckSum", md5Hex);
+        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+        // 设置请求 body
+        conn.setDoOutput(true);
+        conn.setDoInput(true);
 
-        String taskId = "";
-        try {
-            // 上传音频文件
-            Message uploadMsg = lfasrClient.lfasrUpload(path, XfyunAsrConstants.TYPE, params);
-            if (uploadMsg.getOk() == XfyunAsrConstants.UPLOAD_OK) {
-                taskId = uploadMsg.getData();
-            } else {
-                // 创建任务失败-服务端异常
-                resultJson.put(XfyunAsrConstants.ERROR_CODE, uploadMsg.getErr_no());
-                resultJson.put(XfyunAsrConstants.MESSAGE, uploadMsg.getFailed());
+        //设置连接超时和读取超时时间
+        conn.setConnectTimeout(20000);
+        conn.setReadTimeout(20000);
+        conn.connect();
+        //POST请求
+        OutputStream out = conn.getOutputStream();
+        byte[] bytes = Base64.encodeBase64(Files.readAllBytes(Paths.get(path)));
+        String body = URLEncoder.encode(new String(bytes), "utf-8");
+        out.write(("audio=" + body).getBytes());
+        out.flush();
+        //读取响应
+        InputStream is = conn.getInputStream();
+        String result = IOUtils.toString(is, "utf-8");
+        out.close();
+        is.close();
+        conn.disconnect();
 
-                return resultJson;
-            }
-        } catch (LfasrException e) {
-            log.error("upload asr file to xfyun server occurred exception", e);
-        }
-
-        // 循环等待音频处理结果
-        while (true) {
-            try {
-                Thread.sleep(XfyunAsrConstants.SLEEP_SECOND * 1000);
-                log.warn("task {} waiting for xfyun result.", taskId);
-            } catch (InterruptedException e) {
-                // do nothing
-            }
-
-            try {
-                // 获取处理进度
-                Message progressMsg = lfasrClient.lfasrGetProgress(taskId);
-
-                if (progressMsg.getOk() != XfyunAsrConstants.PROGRESS_OK) {
-                    log.error("task {} was fail.", taskId);
-                    // 服务端处理异常-服务端内部有重试机制（不排查极端无法恢复的任务）
-                    // 客户端可根据实际情况选择：
-                    // 1. 客户端循环重试获取进度
-                    // 2. 退出程序，反馈问题
-
-                    resultJson.put(XfyunAsrConstants.ERROR_CODE, progressMsg.getErr_no());
-                    resultJson.put(XfyunAsrConstants.MESSAGE, progressMsg.getFailed());
-
-                    return resultJson;
-                } else {
-                    ProgressStatus progressStatus = JSON.parseObject(progressMsg.getData(), ProgressStatus.class);
-                    if (progressStatus.getStatus() == XfyunAsrConstants.PROGRESS_COMPLETED) {
-                        // 处理完成
-                        log.info("task {} was completed. ", taskId);
-                        break;
-                    } else {
-                        // 未处理完成
-                        log.warn("task {} was incomplete. current status {}", taskId, progressStatus.getDesc());
-                    }
-                }
-            } catch (LfasrException e) {
-                // 获取进度异常处理，根据返回信息排查问题后，再次进行获取
-                Message progressMsg = JSON.parseObject(e.getMessage(), Message.class);
-                resultJson.put(XfyunAsrConstants.ERROR_CODE, progressMsg.getErr_no());
-                resultJson.put(XfyunAsrConstants.MESSAGE, progressMsg.getFailed());
-
-                return resultJson;
-            }
-        }
-
-        // 获取任务结果
-        try {
-            Message resultMsg = lfasrClient.lfasrGetResult(taskId);
-            log.info("task {} result is [{}].", taskId, resultMsg.getData());
-            if (resultMsg.getOk() == XfyunAsrConstants.RESULT_COMPLETED) {
-                String onebest = JSON.parseObject(resultMsg.getData()).getString("onebest");
-
-                resultJson.put(XfyunAsrConstants.ERROR_CODE, XfyunAsrConstants.SUCCESS);
-                resultJson.put(XfyunAsrConstants.MESSAGE, onebest.trim());
-
-                return resultJson;
-            } else {
-                // 转写失败，根据失败信息进行处理
-                resultJson.put(XfyunAsrConstants.ERROR_CODE, resultMsg.getErr_no());
-                resultJson.put(XfyunAsrConstants.MESSAGE, resultMsg.getFailed());
-
-                return resultJson;
-            }
-        } catch (LfasrException e) {
-            // 获取结果异常处理，解析异常描述信息
-            Message resultMsg = JSON.parseObject(e.getMessage(), Message.class);
-            resultJson.put(XfyunAsrConstants.ERROR_CODE, resultMsg.getErr_no());
-            resultJson.put(XfyunAsrConstants.MESSAGE, resultMsg.getFailed());
-
-            return resultJson;
-        }
+        return new JSONObject(result);
     }
 }

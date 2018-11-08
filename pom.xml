@@ -193,15 +193,6 @@
             <scope>system</scope>
             <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.abbyy.FREngine.jar</systemPath>
         </dependency>
-        <!--xfyun-->
-        <dependency>
-            <groupId>com.iflytek</groupId>
-            <artifactId>lfas</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/lfasr-sdk-client-2.0.0.1005-jar-with-dependencies.jar
-            </systemPath>
-        </dependency>
     </dependencies>
 
     <build>

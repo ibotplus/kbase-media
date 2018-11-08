@@ -56,7 +56,7 @@ public enum ResultCode {
      */
     NOT_COMPLETED(201, "解析未完成."),
     /**
-     * 结果文件读取失败吖
+     * 结果文件读取失败
      */
     READ_RESULT_FILE_FAILURE(202, "读取解析结果文件失败.");
 

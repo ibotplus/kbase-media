@@ -60,7 +60,7 @@ public class AudioServiceImpl implements AudioService {
         } else if (Constants.SHHAN.equals(audioTool)) {
             return AudioParserTemplate.handle(audioFilePath, 20, this::shhanAsrHandler);
         } else if (Constants.XFYUN.equals(audioTool)) {
-            return AudioParserTemplate.handle(audioFilePath, 20, this::xfyunAsrHandler);
+            return AudioParserTemplate.handle(audioFilePath, 60, this::xfyunAsrHandler);
         } else {
             return new ParseResult<>(ResultCode.PARSE_EMPTY, null);
         }
@@ -137,9 +137,9 @@ public class AudioServiceImpl implements AudioService {
     }
 
     private String xfyunAsrHandler(String audioFilePath) throws Exception {
-        com.alibaba.fastjson.JSONObject asr = XfyunAsrUtil.asr(audioFilePath);
-        if (asr.getString(XfyunAsrConstants.ERROR_CODE).equals(XfyunAsrConstants.SUCCESS)) {
-            return asr.getString(XfyunAsrConstants.MESSAGE);
+        JSONObject asr = XfyunAsrUtil.asr(audioFilePath);
+        if (asr.optString(XfyunAsrConstants.ERROR_CODE).equals(XfyunAsrConstants.SUCCESS)) {
+            return asr.optString(XfyunAsrConstants.MESSAGE);
         } else {
             throw new Exception(asr.toString());
         }
@@ -159,7 +159,7 @@ public class AudioServiceImpl implements AudioService {
     private static class AudioParserTemplate {
 
         /**
-         * 解析音频的前置准备
+         * 解析音频的前置准备, 切割分段文件 然后调用具体解析器
          *
          * @param audioFilePath   音频文件
          * @param segmentDuration 针对各个解析器,所支持的每段文件最大时长
@@ -177,7 +177,8 @@ public class AudioServiceImpl implements AudioService {
             // 得到所有待解析pcm
             File[] allPcmFiles = Paths.get(FilenameUtils.getFullPath(audioFilePath))
                     .toFile()
-                    .listFiles(filename -> filename.getName().endsWith(FileExtensionType.PCM.ext()));
+                    .listFiles(filename -> filename.getName().startsWith(FilenameUtils.getBaseName(audioFilePath))
+                            && filename.getName().endsWith(FileExtensionType.PCM.ext()));
 
             if (Objects.requireNonNull(allPcmFiles).length > 1) {
                 return multiSegAudioFileParse(allPcmFiles, callBack);
@@ -231,7 +232,6 @@ public class AudioServiceImpl implements AudioService {
             }
 
             try {
-                // 阻塞等待结束
                 latch.await(taskCount * 5, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 hasOccurredException.set(true);
@@ -245,7 +245,7 @@ public class AudioServiceImpl implements AudioService {
                 List<String> keywords = HanLP.extractKeyword(resultText, 100);
                 String keyword = ResourceUtil.list2String(keywords, ",");
                 if (hasOccurredException.get()) {
-                    return new ParseResult<>(ResultCode.ASR_FAILURE, new ASR(resultText, keyword));
+                    return new ParseResult<>(ResultCode.PART_PARSE_FAILURE, new ASR(resultText, keyword));
                 } else {
                     return new ParseResult<>(ResultCode.SUCCESS, new ASR(resultText, keyword));
                 }
@@ -254,4 +254,5 @@ public class AudioServiceImpl implements AudioService {
             }
         }
     }
+
 }
