@@ -31,6 +31,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * MultiMediaConverterServiceImpl
@@ -150,8 +151,11 @@ public class ConvertServiceImpl implements ConvertService {
         if (!resultFile.exists()) {
             resp = new ResponseMessage(ResultCode.NOT_COMPLETED);
         } else {
-            try {
-                String content = Files.lines(resultFile.toPath(), Charset.defaultCharset()).reduce("", (a, b) -> a + b);
+            // note: read Files.lines api javadoc,
+            // if you don't use try-with-resource you will see some error like too many open files in server
+            try (Stream<String> streams = Files.lines(resultFile.toPath(), Charset.defaultCharset())) {
+                String content = streams.reduce("", (a, b) -> a + b);
+
                 JSONObject contentJson = Optional.ofNullable(content)
                         .filter(StringUtils::isNotBlank)
                         .map(JSON::parseObject)
@@ -177,8 +181,7 @@ public class ConvertServiceImpl implements ConvertService {
                     default:
                         break;
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (IOException | BusinessException e) {
                 log.warn("read result file occurred exception:" + e.getMessage());
                 resp = new ResponseMessage(ResultCode.READ_RESULT_FILE_FAILURE);
             }
