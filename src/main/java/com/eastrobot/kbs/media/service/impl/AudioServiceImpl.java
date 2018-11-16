@@ -175,7 +175,8 @@ public class AudioServiceImpl implements AudioService {
             }
 
             // 得到所有待解析pcm
-            File[] allPcmFiles = Paths.get(FilenameUtils.getFullPath(audioFilePath))
+
+            File[] allPcmFiles = Paths.get(ResourceUtil.ofFileNameFolder(audioFilePath))
                     .toFile()
                     .listFiles(filename -> filename.getName().startsWith(FilenameUtils.getBaseName(audioFilePath))
                             && filename.getName().endsWith(FileExtensionType.PCM.ext()));

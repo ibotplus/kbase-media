@@ -8,7 +8,6 @@ import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
 import net.bramp.ffmpeg.builder.FFmpegOutputBuilder;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -72,8 +71,12 @@ public class FFmpegUtil {
                         .createJob(new FFmpegBuilder()
                                 .addInput(filePath)
                                 .overrideOutputFiles(true)
-                                .addOutput(Paths.get(FilenameUtils.getFullPath(filePath),
-                                        FilenameUtils.getBaseName(filePath) + "-" + i + PCM.pExt()).toString())
+                                .addOutput(
+                                        Paths.get(
+                                                ResourceUtil.ofFileNameFolder(filePath),
+                                                FilenameUtils.getBaseName(filePath) + "-" + i + PCM.pExt()
+                                        ).toString()
+                                )
                                 .disableVideo()
                                 .disableSubtitle()
                                 .setStartOffset((i - 1) * segDuration, TimeUnit.SECONDS)
@@ -91,7 +94,7 @@ public class FFmpegUtil {
             if (!PCM.ext().equalsIgnoreCase(FilenameUtils.getExtension(filePath))) {
                 FFmpegUtil.transformAudio(filePath, PCM);
                 //删除原始文件
-                FileUtils.deleteQuietly(Paths.get(filePath).toFile());
+                // FileUtils.deleteQuietly(Paths.get(filePath).toFile());
             }
         }
     }
@@ -146,11 +149,10 @@ public class FFmpegUtil {
      * @date 2018-04-13 11:36
      */
     public static void extractFrameImage(String videoPath, double fps) {
-        String folder = ResourceUtil.ofFileNameFolder(videoPath);
         fFmpegExecutor.createJob(new FFmpegBuilder()
                 .addInput(videoPath)
                 .overrideOutputFiles(true)
-                .addOutput(Paths.get(folder, "%005d" + JPG.pExt()).toString())
+                .addOutput(Paths.get(ResourceUtil.ofFileNameFolder(videoPath), "%005d" + JPG.pExt()).toString())
                 .disableVideo()
                 .disableSubtitle()
                 .disableAudio()
