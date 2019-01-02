@@ -31,7 +31,7 @@ public class BaiduAsrUtils {
     private static AipSpeech client;
 
     @PostConstruct
-    public void init() {
+    private void init() {
         client = new AipSpeech(APP_ID, API_KEY, SECRET_KEY);
         log.info("initialize baidu asr tools complete.");
     }

@@ -33,7 +33,7 @@ public class ShhanAsrUtil {
     private static ShhanAsrUtil shhanUtil;
 
     @PostConstruct
-    public void init() {
+    private void init() {
         shhanUtil = this;
         log.info("initialize shhan asr tools complete.");
     }

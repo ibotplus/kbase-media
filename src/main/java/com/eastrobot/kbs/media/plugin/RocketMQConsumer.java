@@ -52,7 +52,7 @@ public class RocketMQConsumer {
      * @date 2018-04-18 15:31
      */
     @PostConstruct
-    public void init() {
+    private void init() {
         consumer = new DefaultMQPushConsumer(consumerGroup);
         consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);//Consumer第一次启动从队列头部开始消费
         consumer.setNamesrvAddr(namesrvAddr);

@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,7 +32,7 @@ public class ThreadPoolUtil {
                     0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(NCPU),
                     r -> new Thread(r,
                             ExecutorType.GENERIC_CPU_INTENSIVE + "-POOL-" + cpuThreadCounter.getAndIncrement()),
-                    // cpu密集型不会io阻塞,并行变串行,降低任务提交速度
+                    // cpu密集型不会io阻塞,如果发生子线程阻塞,丢弃最老的执行任务
                     new ThreadPoolExecutor.DiscardOldestPolicy());
             THREAD_POOL_MAP.put(ExecutorType.GENERIC_CPU_INTENSIVE, executor);
         }
@@ -50,23 +49,8 @@ public class ThreadPoolUtil {
                     new ThreadPoolExecutor.CallerRunsPolicy());
             THREAD_POOL_MAP.put(ExecutorType.GENERIC_IO_INTENSIVE, executor);
         }
-    }
 
-    /**
-     * 获取线程池
-     */
-    public static ExecutorService ofExecutor(ExecutorType type) {
-        return THREAD_POOL_MAP.get(type);
-    }
-
-    /**
-     * 异步关闭线程池
-     *
-     * @author Yogurt_lei
-     * @date 2018-09-03 10:54
-     */
-    @PreDestroy
-    private void destroy() {
+        // 注册关闭的钩子事件
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             for (Map.Entry<ExecutorType, ExecutorService> entry : THREAD_POOL_MAP.entrySet()) {
                 ExecutorType key = entry.getKey();
@@ -85,6 +69,13 @@ public class ThreadPoolUtil {
                 }
             }
         }));
+    }
+
+    /**
+     * 获取线程池
+     */
+    public static ExecutorService ofExecutor(ExecutorType type) {
+        return THREAD_POOL_MAP.get(type);
     }
 
 }

@@ -46,7 +46,7 @@ public class RocketMQProducer {
      * @date 2018-04-18 15:31
      */
     @PostConstruct
-    public void init() {
+    private void init() {
         producer = new DefaultMQProducer(producerGroup);
         producer.setNamesrvAddr(namesrvAddr);
         // 设置重试次数

@@ -35,7 +35,7 @@ public class FileMonitor {
     private String asyncOutputFolder;
 
     @PostConstruct
-    public void init() throws Exception {
+    private void init() throws Exception {
         log.info("*************file monitor is starting*************");
         // 默认轮询5s
         long interval = TimeUnit.SECONDS.toMillis(5);
