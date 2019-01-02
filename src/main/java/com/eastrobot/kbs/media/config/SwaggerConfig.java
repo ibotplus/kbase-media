@@ -34,7 +34,7 @@ public class SwaggerConfig {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("Convert API")
-                .description("easy convert video audio image to text, and revert text to audio(base64)")
+                .description("easy convert video audio image to text, or revert text to audio(base64), more feature can expected")
                 .termsOfServiceUrl("http://kbs55.demo.xiaoi.com/kbase-media/swagger-ui.html")
                 .contact(new Contact("Yogurt_lei", "", "yogurt_lei@foxmail.com"))
                 .version("2.0")

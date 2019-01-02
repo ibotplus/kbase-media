@@ -1,5 +1,12 @@
-There have some api to easy convert video audio image to text, and revert text to audio(base64).
-Here is [api-docs](http://kbs55.demo.xiaoi.com/kbase-media/swagger-ui.html) which use Swagger2.
+
+> easy convert video audio image to text, or revert text to audio(base64), more features can expected.
+Here is [api-docs](http://kbs41.demo.xiaoi.com/kbase-media/swagger-ui.html) which use Swagger2.
+
+>
+[![Build Status](https://travis-ci.org/Yogurt-lei/kbase-media.svg?branch=develop)](https://travis-ci.org/Yogurt-lei/kbase-media)
+![license](https://img.shields.io/github/license/mashape/apistatus.svg)
+![Java v1.8](https://img.shields.io/badge/Java-v1.8.0__162-blue.svg)
+![Maven v3.5.3](https://img.shields.io/badge/Maven-v3.5.3-blue.svg)
 
 **配置文件说明**
 
@@ -26,7 +33,7 @@ convert:
     output-folder: ./convert/async/
   video:
     vca:
-	  # 项目依赖于ffmpeg,必须要安装,默认即可
+      # 项目依赖于ffmpeg,必须要安装,默认即可
       default: ffmpeg
       ffmpeg:
         # ffmpeg的安装路径
@@ -37,7 +44,7 @@ convert:
   audio:
     # asr引擎配置
     asr:
-	  # 可选值:shhan:声瀚引擎(私有化部署),baidu:百度引擎
+      # 可选值:shhan:声瀚引擎(私有化部署),baidu:百度引擎
       default: shhan
       # asr接口对音频时间长度有限制,所以此值为切割文件的长度,声瀚为20s/段,百度为60s/段 
       seg-duration: 20 
@@ -46,8 +53,12 @@ convert:
         appId: 11067243
         apiKey: iDEvPvY4zT9CzFgYKMQY6eAi
         secretKey: Wkeh8gIbB2LrNBtGwuechG8TUkLlB2TY
+      xfyun:
+        apiUrl: http://api.xfyun.cn/v1/service/v1/iat
+        appId: 5be241a0
+        apiKey: da08f42480e67f574a61290717e8f945
       shhan:
-	    # 声瀚引擎base-url
+        # 声瀚引擎base-url
         base-url: http://172.16.8.103:8177/shRecBase/
   image:
     # ocr 引擎配置
