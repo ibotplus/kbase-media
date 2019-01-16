@@ -1,5 +1,6 @@
 package com.eastrobot.kbs.media.web.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.eastrobot.kbs.media.exception.BusinessException;
 import com.eastrobot.kbs.media.model.AiType;
 import com.eastrobot.kbs.media.model.ResponseMessage;
@@ -106,9 +107,15 @@ public class ConvertController {
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
             consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE}
     )
-    public ResponseMessage<TTS> tts(@RequestBody String text) {
+    public ResponseMessage<TTS> tts(@RequestBody String reqBody) {
         try {
-            Optional.ofNullable(text).filter(StringUtils::isNotBlank).orElseThrow(BusinessException::new);
+            JSONObject reqJson = Optional.ofNullable(reqBody)
+                    .filter(StringUtils::isNotBlank)
+                    .map(JSONObject::parseObject)
+                    .orElseThrow(BusinessException::new);
+
+            String text = reqJson.getString("text");
+
             Map<String, Object> ttsParam = ImmutableMap.<String, Object>builder()
                     .put(IS_ASYNC_PARSE, false)
                     .put(AI_TYPE, AiType.TTS)
@@ -116,7 +123,6 @@ public class ConvertController {
                     .put(AI_TTS_OPTION, Collections.emptyMap())
                     .put(AI_RESOURCE_FILE_PATH, DigestUtils.md5Hex(text))
                     .build();
-
             return converterService.driver(ttsParam);
         } catch (BusinessException e) {
             return new ResponseMessage<>(ResultCode.PARAM_ERROR);
