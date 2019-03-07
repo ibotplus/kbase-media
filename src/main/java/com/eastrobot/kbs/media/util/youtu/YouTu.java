@@ -58,6 +58,40 @@ public class YouTu {
         return  sendHttpsRequest(data, "ocrapi/generalocr");
     }
 
+    /**
+     * 智能鉴黄，识别一个图像是否为色情图像。
+     *
+     * @return com.alibaba.fastjson.JSONObject
+     *
+     * @author eko.zhan
+     * @date 2019/3/7 11:33
+     */
+    public JSONObject imagePorn(String image_path) throws IOException {
+        JSONObject data = new JSONObject();
+
+        data.put("image", getBase64FromFile(image_path));
+        data.put("app_id", m_appid);
+
+        return sendHttpsRequest(data, "imageapi/imageporn");
+    }
+
+    /**
+     * 识别一个图像是否为暴恐图像
+     *
+     * @return com.alibaba.fastjson.JSONObject
+     *
+     * @author eko.zhan
+     * @date 2019/3/7 14:17
+     */
+    public JSONObject imageTerrorism(String image_path) throws IOException {
+        JSONObject data = new JSONObject();
+
+        data.put("image", getBase64FromFile(image_path));
+        data.put("app_id", m_appid);
+
+        return sendHttpsRequest(data, "imageapi/imageterrorism");
+    }
+
     private String getBase64FromFile(String filePath) throws IOException {
         File imageFile = new File(filePath);
         if (imageFile.exists()) {
