@@ -1,5 +1,6 @@
 package com.eastrobot.kbs.media.util.ffmpeg;
 
+import com.eastrobot.kbs.media.exception.BusinessException;
 import com.eastrobot.kbs.media.model.FileExtensionType;
 import com.eastrobot.kbs.media.util.ResourceUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.eastrobot.kbs.media.model.FileExtensionType.*;
@@ -34,13 +36,16 @@ public class FFmpegUtil {
 
     private static FFprobe ffprobe;
 
+    private static FFmpeg fFmpeg;
+
     private static FFmpegExecutor fFmpegExecutor;
 
     @PostConstruct
     private void init() {
         try {
             ffprobe = new FFprobe(path + "ffprobe");
-            fFmpegExecutor = new FFmpegExecutor(new FFmpeg(path + "ffmpeg"), ffprobe);
+            fFmpeg = new FFmpeg(path + "ffmpeg");
+            fFmpegExecutor = new FFmpegExecutor(fFmpeg, ffprobe);
             log.info("initialize ffmpeg tools complete.");
         } catch (IOException e) {
             log.error("initialize ffmpeg occurred error !", e);
@@ -130,13 +135,20 @@ public class FFmpegUtil {
         } else if (AAC.equals(fileType)) {
             outputBuilder.setAudioCodec("aac");
         } else {
-            outputBuilder.setAudioCodec("copy");
+            throw new RuntimeException("unsupport file transform type.");
         }
         try {
+            ffprobe = new FFprobe("D:\\ffmpeg\\bin\\" + "ffprobe");
+            fFmpegExecutor = new FFmpegExecutor(new FFmpeg("D:\\ffmpeg\\bin\\" + "ffmpeg"), ffprobe);
+
             fFmpegExecutor.createJob(outputBuilder.done()).run();
         } catch (Exception e) {
-            log.error("transformAudio occurred exception: {}" + e.getMessage());
+            log.error("transformAudio occurred exception: {} " + e.getMessage());
         }
+    }
+
+    public static void ffmepegRun(List<String> args) throws IOException {
+        fFmpeg.run(args);
     }
 
     /**
@@ -161,4 +173,5 @@ public class FFmpegUtil {
                 .done()
         ).run();
     }
+
 }

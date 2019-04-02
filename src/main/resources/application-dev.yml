@@ -56,7 +56,7 @@ convert:
   audio:
     # default asr tool
     asr:
-      default: baidu
+      default: m2
       #baidu asr config
       baidu:
         appId: 11067243
@@ -68,6 +68,8 @@ convert:
         apiKey: da08f42480e67f574a61290717e8f945
       shhan:
         base-url: http://172.16.8.103:8177/shRecBase/
+      m2:
+        base-url: http://222.73.111.245:9090
   image:
     #default ocr tool
     ocr:

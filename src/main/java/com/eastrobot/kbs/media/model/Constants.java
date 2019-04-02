@@ -25,6 +25,10 @@ public interface Constants {
     String SHHAN = "shhan";
     String XFYUN = "xfyun";
     //------------------------------------
+    // tts supplier param
+    //------------------------------------
+    String M2 = "m2";
+    //------------------------------------
     // AiRecognition request param constants
     //------------------------------------
     /**

@@ -7,10 +7,13 @@ package com.eastrobot.kbs.media.model;
  * @date 2018-04-18 17:57
  */
 public enum FileExtensionType {
+    // 音频格式
     PCM("pcm", ".pcm"),
-    JPG("jpg", ".jpg"),
-    TXT("txt", ".txt"),
+    WAV("wav", ".wav"),
     AAC("aac", ".aac"),
+    // 其他格式
+    TXT("txt", ".txt"),
+    JPG("jpg", ".jpg"),
     ZIP("zip", ".zip"),
     /**
      * parse result file extension
