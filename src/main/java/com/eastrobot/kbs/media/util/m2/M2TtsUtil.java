@@ -1,7 +1,6 @@
 package com.eastrobot.kbs.media.util.m2;
 
 import com.alibaba.fastjson.JSONObject;
-import com.eastrobot.kbs.media.model.Constants;
 import com.eastrobot.kbs.media.model.FileExtensionType;
 import com.eastrobot.kbs.media.util.HttpClientUtil;
 import com.eastrobot.kbs.media.util.ffmpeg.FFmpegUtil;
@@ -15,7 +14,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -35,8 +33,8 @@ import java.util.Optional;
 // @ConditionalOnProperty(prefix = "convert", name = "audio.asr.default", havingValue = Constants.M2)
 public class M2TtsUtil {
 
-    // @Value("${convert.audio.asr.m2.base-url}")
-    // private String baseUrl;
+    @Value("${convert.audio.asr.m2.base-url}")
+    private String baseUrl;
 
     @Value("${convert.sync.output-folder}")
     private String syncOutputFolder;
@@ -56,8 +54,8 @@ public class M2TtsUtil {
      */
     public static String tts(String text) throws IOException {
         HttpClient httpClient = HttpClientUtil.getHttpClient();
-        // HttpPost httpPost = new HttpPost(m2TtsUtil.baseUrl);
-        HttpPost httpPost = new HttpPost("http://222.73.111.245:9090");
+        HttpPost httpPost = new HttpPost(m2TtsUtil.baseUrl);
+        // HttpPost httpPost = new HttpPost("http://222.73.111.245:9090");
         JSONObject data = new JSONObject();
         data.put("name", "nannan");
         data.put("text", text);
