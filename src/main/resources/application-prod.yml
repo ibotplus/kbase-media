@@ -22,11 +22,11 @@ convert:
   # sync interface config
   sync:
     upload-file-size: 500MB
-    output-folder: /tmp/convert/
+    output-folder: ./convert/
    # async interface config
   async:
     upload-file-size: 500MB
-    output-folder: /tmp/convert/async/
+    output-folder: ./convert/async/
   video:
     vca:
       default: ffmpeg
@@ -38,7 +38,7 @@ convert:
   audio:
     # default asr tool
     asr:
-      default: shhan
+      default: baidu
       #baidu asr config
       baidu:
         appId: 11067243
@@ -66,23 +66,23 @@ convert:
         datapath: /opt/tesseract/tessdata
 
 # kbase-monitor config
-spring:
-  application:
-    name: kbase-media
-  boot:
-    admin:
-      client:
-        url: "http://172.16.8.143:8888"
-        username: admin
-        password: admin
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    health:
-      show-details: ALWAYS
-  server:
-    ssl:
-      enabled: false
+#spring:
+#  application:
+#    name: kbase-media
+#  boot:
+#    admin:
+#      client:
+#        url: "http://172.16.8.143:8888"
+#        username: admin
+#        password: admin
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: "*"
+#  endpoint:
+#    health:
+#      show-details: ALWAYS
+#  server:
+#    ssl:
+#      enabled: false

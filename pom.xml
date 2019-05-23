@@ -3,9 +3,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.eastrobot</groupId>
+    <groupId>com.eastrobot.kbs</groupId>
     <artifactId>kbase-media</artifactId>
-    <version>1.1.0-Beta</version>
+    <version>1.1.0-GA</version>
     <packaging>jar</packaging>
 
     <name>kbase-media</name>
@@ -196,12 +196,11 @@
             <artifactId>FREngine</artifactId>
             <version>1.0</version>
             <scope>system</scope>
-            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.abbyy.FREngine.jar</systemPath>
+            <systemPath>${basedir}/library/com.abbyy.FREngine.jar</systemPath>
         </dependency>
     </dependencies>
 
     <build>
-        <finalName>kbase-media</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
