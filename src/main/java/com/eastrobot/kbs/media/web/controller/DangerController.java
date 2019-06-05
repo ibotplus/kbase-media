@@ -3,7 +3,6 @@
  */
 package com.eastrobot.kbs.media.web.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.eastrobot.kbs.media.exception.BusinessException;
 import com.eastrobot.kbs.media.model.ResponseMessage;
 import com.eastrobot.kbs.media.model.ResultCode;
@@ -12,7 +11,6 @@ import com.eastrobot.kbs.media.util.youtu.YouTuOcrUtil;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +21,7 @@ import java.util.Optional;
 
 /**
  * 黄色，暴力，恐怖图片识别接口
+ *
  * @author <a href="mailto:eko.z@outlook.com">eko.zhan</a>
  * @version 1.0
  * @date 2019/3/7 13:38

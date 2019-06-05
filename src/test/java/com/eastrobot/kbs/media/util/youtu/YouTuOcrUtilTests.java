@@ -9,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Paths;
 
 /**
@@ -24,16 +23,16 @@ public class YouTuOcrUtilTests {
     @Test
     public void testPorn() throws Exception {
         File dir = Paths.get("E:\\Pictures\\2019\\porn-check").toFile();
-        for (File file : dir.listFiles()){
+        for (File file : dir.listFiles()) {
             System.out.println(YouTuOcrUtil.porn(file.getAbsolutePath()));
 
         }
     }
 
     @Test
-    public void testTerrorism() throws Exception{
+    public void testTerrorism() throws Exception {
         File dir = Paths.get("E:\\Pictures\\2019\\porn-check").toFile();
-        for (File file : dir.listFiles()){
+        for (File file : dir.listFiles()) {
             System.out.println(YouTuOcrUtil.terrorism(file.getAbsolutePath()));
 
         }
