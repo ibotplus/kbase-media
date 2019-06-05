@@ -233,7 +233,7 @@ public class AudioServiceImpl implements AudioService {
             }
 
             try {
-                latch.await(taskCount * 5, TimeUnit.SECONDS);
+                latch.await(taskCount * 5, TimeUnit.MINUTES);
             } catch (InterruptedException e) {
                 hasOccurredException.set(true);
                 log.error("asrHandler parse audio thread occurred exception : {}", e.getMessage());
