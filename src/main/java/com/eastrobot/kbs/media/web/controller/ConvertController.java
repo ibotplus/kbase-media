@@ -10,7 +10,6 @@ import com.eastrobot.kbs.media.model.aitype.OCR;
 import com.eastrobot.kbs.media.model.aitype.TTS;
 import com.eastrobot.kbs.media.model.aitype.VAC;
 import com.eastrobot.kbs.media.service.ConvertService;
-import com.eastrobot.kbs.media.util.m2.M2TtsUtil;
 import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -18,16 +17,16 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -49,29 +48,6 @@ public class ConvertController {
 
     @Autowired
     private ConvertService converterService;
-
-    @RequestMapping("tts-demo")
-    public void ttsDemo(String text, HttpServletResponse resp) throws IOException {
-        OutputStream os = resp.getOutputStream();
-        try {
-            String wavFile = M2TtsUtil.tts(text);
-            FileInputStream fi = new FileInputStream(wavFile);
-            int available = fi.available();
-            resp.setHeader("Accept-Ranges", "bytes");
-            resp.setHeader("Content-Length", available + "");
-            resp.setHeader("Content-Range", "bytes 0-" + (available - 1) + "/" + available);
-            resp.addHeader("Content-Type", "audio/wav");
-            IOUtils.copy(fi, os);
-            os.flush();
-            os.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            os.write(e.getMessage().getBytes());
-            os.flush();
-            os.close();
-        }
-    }
 
     @ApiOperation("(AI识别通用接口)视频,音频,图片,转换为文本.")
     @ApiImplicitParams({
