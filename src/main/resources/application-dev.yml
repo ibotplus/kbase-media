@@ -68,6 +68,12 @@ convert:
         apiKey: da08f42480e67f574a61290717e8f945
       shhan:
         base-url: http://172.16.8.103:8177/shRecBase/
+    # default tts tool
+    tts:
+      default: m2
+      # tts engine support once request max text length
+      max-text-length: 500
+      # m2 tts config
       m2:
         base-url: http://222.73.111.245:9090
   image:

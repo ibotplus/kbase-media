@@ -23,7 +23,7 @@ convert:
   sync:
     upload-file-size: 500MB
     output-folder: ./convert/
-   # async interface config
+    # async interface config
   async:
     upload-file-size: 500MB
     output-folder: ./convert/async/
@@ -46,6 +46,14 @@ convert:
         secretKey: Wkeh8gIbB2LrNBtGwuechG8TUkLlB2TY
       shhan:
         base-url: http://172.16.8.103:8177/shRecBase/
+    # default tts tool
+    tts:
+      default: m2
+      # tts engine support once request max text length
+      max-text-length: 500
+      # m2 tts config
+      m2:
+        base-url: http://222.73.111.245:9090
   image:
     #default ocr tool
     ocr:

@@ -23,8 +23,8 @@ public class TTS implements AiSynthesis {
     @ApiModelProperty("原始文本")
     private String originText;
     /**
-     * 文字转语音音频byte数组 base64
+     * 文字转语音音频 base64结果
      */
     @ApiModelProperty("TTS结果, base64")
-    private byte[] textAudio;
+    private String textAudio;
 }
