@@ -60,6 +60,14 @@ convert:
       shhan:
         # 声瀚引擎base-url
         base-url: http://172.16.8.103:8177/shRecBase/
+    # tts 引擎配置
+      tts:
+        default: m2
+        # tts引擎所支持的单次请求最大文字长度
+        max-text-length: 500
+        # m2 tts config
+        m2:
+          base-url: http://222.73.111.245:9090
   image:
     # ocr 引擎配置
     ocr:
