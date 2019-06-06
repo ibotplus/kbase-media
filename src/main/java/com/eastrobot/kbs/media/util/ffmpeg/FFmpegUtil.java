@@ -125,8 +125,7 @@ public class FFmpegUtil {
                         ).toString()
                 )
                 .disableVideo()
-                .disableSubtitle()
-                .setStrict(FFmpegBuilder.Strict.EXPERIMENTAL);
+                .disableSubtitle();
         if (PCM.equals(fileType)) {
             outputBuilder.setAudioCodec("pcm_s16le")
                     .setFormat("s16le")
@@ -134,17 +133,12 @@ public class FFmpegUtil {
                     .setAudioSampleRate(16000);
         } else if (AAC.equals(fileType)) {
             outputBuilder.setAudioCodec("aac");
+        } else if (WAV.equals(fileType)) {
+            outputBuilder.setAudioChannels(1).setAudioSampleRate(16000).setFormat("s16le");
         } else {
             throw new RuntimeException("unsupport file transform type.");
         }
-        try {
-            ffprobe = new FFprobe("D:\\ffmpeg\\bin\\" + "ffprobe");
-            fFmpegExecutor = new FFmpegExecutor(new FFmpeg("D:\\ffmpeg\\bin\\" + "ffmpeg"), ffprobe);
-
-            fFmpegExecutor.createJob(outputBuilder.done()).run();
-        } catch (Exception e) {
-            log.error("transformAudio occurred exception: {} " + e.getMessage());
-        }
+        fFmpegExecutor.createJob(outputBuilder.done()).run();
     }
 
     public static void ffmepegRun(List<String> args) throws IOException {

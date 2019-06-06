@@ -9,10 +9,7 @@ import com.eastrobot.kbs.media.model.aitype.ASR;
 import com.eastrobot.kbs.media.model.aitype.OCR;
 import com.eastrobot.kbs.media.model.aitype.TTS;
 import com.eastrobot.kbs.media.model.aitype.VAC;
-import com.eastrobot.kbs.media.service.AudioService;
-import com.eastrobot.kbs.media.service.ConvertService;
-import com.eastrobot.kbs.media.service.ImageService;
-import com.eastrobot.kbs.media.service.VideoService;
+import com.eastrobot.kbs.media.service.*;
 import com.eastrobot.kbs.media.util.ResourceUtil;
 import com.eastrobot.kbs.media.util.ZipUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +31,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * MultiMediaConverterServiceImpl
+ * ConvertServiceImpl
  *
  * @author <a href="yogurt_lei@foxmail.com">Yogurt_lei</a>
  * @version v1.0 , 2018-03-29 14:39
@@ -72,6 +69,9 @@ public class ConvertServiceImpl implements ConvertService {
 
     @Autowired
     private ImageService imageService;
+
+    @Autowired
+    private TtsService ttsService;
 
     @Override
     public String uploadFile(MultipartFile file, String md5, boolean async) throws IOException, BusinessException {
@@ -238,7 +238,7 @@ public class ConvertServiceImpl implements ConvertService {
         String text = MapUtils.getString(paramMap, Constants.AI_TTS_TEXT);
         Map ttsOption = MapUtils.getMap(paramMap, Constants.AI_TTS_OPTION);
 
-        ParseResult ttsResult = audioService.handleTts(text, ttsOption);
+        ParseResult ttsResult = ttsService.handle(text, ttsOption);
         return ResponseMessage.builder()
                 .aiType(aiType)
                 .code(ttsResult.getCode().code())

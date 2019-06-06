@@ -14,5 +14,9 @@ public enum ExecutorType {
     /**
      * 通用IO密集型
      */
-    GENERIC_IO_INTENSIVE
+    GENERIC_IO_INTENSIVE,
+    /**
+     * Fork/Join
+     */
+    FORK_JOIN
 }

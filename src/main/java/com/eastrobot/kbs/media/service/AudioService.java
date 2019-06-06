@@ -3,7 +3,6 @@ package com.eastrobot.kbs.media.service;
 
 import com.eastrobot.kbs.media.model.ParseResult;
 import com.eastrobot.kbs.media.model.aitype.ASR;
-import com.eastrobot.kbs.media.model.aitype.TTS;
 
 import java.util.Map;
 
@@ -25,9 +24,4 @@ public interface AudioService {
      * @date 2018-03-27 11:54
      */
     ParseResult<ASR> handle(String audioFilePath, Map paramMap);
-
-    /**
-     * 文本合成音频（byte[]输出）
-     */
-    ParseResult<TTS> handleTts(String text, Map ttsOption);
 }

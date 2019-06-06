@@ -5,7 +5,6 @@ import com.eastrobot.kbs.media.model.FileExtensionType;
 import com.eastrobot.kbs.media.model.ParseResult;
 import com.eastrobot.kbs.media.model.ResultCode;
 import com.eastrobot.kbs.media.model.aitype.ASR;
-import com.eastrobot.kbs.media.model.aitype.TTS;
 import com.eastrobot.kbs.media.service.AudioService;
 import com.eastrobot.kbs.media.service.ParserCallBack;
 import com.eastrobot.kbs.media.util.ChineseUtil;
@@ -20,7 +19,6 @@ import com.eastrobot.kbs.media.util.xfyun.XfyunAsrUtil;
 import com.hankcs.hanlp.HanLP;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +27,9 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -66,56 +66,6 @@ public class AudioServiceImpl implements AudioService {
         }
     }
 
-    @Override
-    public ParseResult<TTS> handleTts(String text, Map ttsOption) {
-        HashMap<String, Object> options = new HashMap<>(0);
-        if (!ttsOption.isEmpty()) {
-            options = (HashMap<String, Object>) ttsOption;
-        }
-        byte[] data = null;
-        // 需截取
-        if (text.length() > 512) {
-            List<String> splitList = splitText(text);
-            for (String sText : splitList) {
-                byte[] bytes = baiduTtsHandler(sText, options);
-                if (data == null) {
-                    data = bytes;
-                } else if (bytes != null) {
-                    data = ArrayUtils.addAll(data, bytes);
-                }
-            }
-        } else {
-            data = baiduTtsHandler(text, options);
-        }
-        if (data != null) {
-            return new ParseResult<>(ResultCode.SUCCESS, new TTS(text, data));
-        } else {
-            return new ParseResult<>(ResultCode.PARSE_EMPTY, null);
-        }
-    }
-
-    /**
-     * 根据长度500和句号进行混合截取
-     */
-    private List<String> splitText(String text) {
-        ArrayList<String> result = new ArrayList<>();
-        while (text.length() > 500) {
-            String value = text.substring(0, Math.min(500, text.length()));
-            text = text.substring(500);
-            if (!value.endsWith("。")) {
-                value = value + text.substring(0, text.indexOf("。") + 1);
-                text = text.substring(text.indexOf("。") + 1);
-            }
-            result.add(value);
-        }
-
-        if (text.length() < 100) {
-            result.add(text);
-        }
-
-        return result;
-    }
-
     private String baiduAsrHandler(String audioFilePath) throws Exception {
         JSONObject asr = BaiduAsrUtils.asr(audioFilePath, PCM, RATE);
         if (asr.optInt("err_no", -1) == 0) {
@@ -143,14 +93,6 @@ public class AudioServiceImpl implements AudioService {
         } else {
             throw new Exception(asr.toString());
         }
-    }
-
-    private byte[] baiduTtsHandler(String tex, HashMap<String, Object> options) {
-        //String tex = "每次启动和定时器每天晚上校验 license";
-        String lan = "zh";// 固定值zh。语言选择,目前只有中英文混合模式，填写固定值zh
-        int ctp = 1; // 客户端类型选择，web端填写固定值1
-
-        return BaiduAsrUtils.tts(tex, lan, ctp, options);
     }
 
     /**
@@ -255,5 +197,4 @@ public class AudioServiceImpl implements AudioService {
             }
         }
     }
-
 }
