@@ -39,7 +39,7 @@ public class TtsServiceImpl implements TtsService {
         if (Constants.BAIDU.equals(audioTool)) {
             return TtsParserTemplate.handle(text, maxTextLength, ttsOption, this::baiduTtsHandler);
         } else if (Constants.M2.equals(audioTool)) {
-            return TtsParserTemplate.handle(text, maxTextLength, ttsOption, null);
+            return TtsParserTemplate.handle(text, maxTextLength, ttsOption, this::m2TtsHandler);
         } else {
             return new ParseResult<>(ResultCode.PARSE_EMPTY, null);
         }
