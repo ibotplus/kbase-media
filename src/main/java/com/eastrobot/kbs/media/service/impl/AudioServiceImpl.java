@@ -9,6 +9,7 @@ import com.eastrobot.kbs.media.service.AudioService;
 import com.eastrobot.kbs.media.service.ParserCallBack;
 import com.eastrobot.kbs.media.util.ChineseUtil;
 import com.eastrobot.kbs.media.util.ResourceUtil;
+import com.eastrobot.kbs.media.util.ali.AliSpeechUtil;
 import com.eastrobot.kbs.media.util.baidu.BaiduAsrUtils;
 import com.eastrobot.kbs.media.util.concurrent.ExecutorType;
 import com.eastrobot.kbs.media.util.concurrent.ThreadPoolUtil;
@@ -61,6 +62,8 @@ public class AudioServiceImpl implements AudioService {
             return AudioParserTemplate.handle(audioFilePath, 20, this::shhanAsrHandler);
         } else if (Constants.XFYUN.equals(audioTool)) {
             return AudioParserTemplate.handle(audioFilePath, 60, this::xfyunAsrHandler);
+        } else if (Constants.ALI.equals(audioTool)) {
+            return AudioParserTemplate.handle(audioFilePath, 60 * 10, this::aliAsrHandler);
         } else {
             return new ParseResult<>(ResultCode.PARSE_EMPTY, null);
         }
@@ -95,6 +98,10 @@ public class AudioServiceImpl implements AudioService {
         }
     }
 
+    private String aliAsrHandler(String audioFilePath) throws Exception {
+        return AliSpeechUtil.asr(audioFilePath);
+    }
+
     /**
      * 音频解析器模版
      */
@@ -112,7 +119,7 @@ public class AudioServiceImpl implements AudioService {
                 // 1. 是否切割文件 {segmentDuration} 每段,文件放入当前文件夹下 filename-%d.pcm
                 FFmpegUtil.splitSegFileToPcm(audioFilePath, segmentDuration);
             } catch (IOException e) {
-                log.error("splitSegToPcm occurred exception, check the ffmpeg location is right.");
+                log.error("splitSegToPcm occurred exception, {}.", e.getMessage());
                 return new ParseResult<>(ResultCode.ASR_FAILURE, null);
             }
 

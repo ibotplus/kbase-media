@@ -61,7 +61,7 @@ public class YouTu {
     /**
      * 智能鉴黄，识别一个图像是否为色情图像。
      *
-     * @return com.alibaba.fastjson.JSONObject
+     * @return com.ali.fastjson.JSONObject
      *
      * @author eko.zhan
      * @date 2019/3/7 11:33
@@ -78,7 +78,7 @@ public class YouTu {
     /**
      * 识别一个图像是否为暴恐图像
      *
-     * @return com.alibaba.fastjson.JSONObject
+     * @return com.ali.fastjson.JSONObject
      *
      * @author eko.zhan
      * @date 2019/3/7 14:17

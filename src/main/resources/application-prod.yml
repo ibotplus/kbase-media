@@ -46,6 +46,10 @@ convert:
         secretKey: Wkeh8gIbB2LrNBtGwuechG8TUkLlB2TY
       shhan:
         base-url: http://172.16.8.103:8177/shRecBase/
+      ali:
+        apiUrl: ws://172.16.7.51:8101/ws/v1
+        appKey: default
+        token: default
     # default tts tool
     tts:
       default: m2

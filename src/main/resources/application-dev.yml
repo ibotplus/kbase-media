@@ -56,7 +56,7 @@ convert:
   audio:
     # default asr tool
     asr:
-      default: m2
+      default: ali
       #baidu asr config
       baidu:
         appId: 11067243
@@ -68,6 +68,10 @@ convert:
         apiKey: da08f42480e67f574a61290717e8f945
       shhan:
         base-url: http://172.16.8.103:8177/shRecBase/
+      ali:
+        apiUrl: ws://172.16.7.51:8101/ws/v1
+        appKey: default
+        token: default
     # default tts tool
     tts:
       default: m2

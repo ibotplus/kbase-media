@@ -24,6 +24,7 @@ public interface Constants {
     String BAIDU = "baidu";
     String SHHAN = "shhan";
     String XFYUN = "xfyun";
+    String ALI = "ali";
     //------------------------------------
     // tts supplier param
     //------------------------------------
