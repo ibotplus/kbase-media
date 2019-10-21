@@ -14,10 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 
 /**
@@ -63,7 +60,11 @@ public class TtsServiceImpl implements TtsService {
 
         private static ParseResult<TTS> handle(String text, int maxTextLength, Map<String, Object> ttsOption,
                                                TtsParserCallBack callBack) {
-            HashMap<String, Object> options = (HashMap<String, Object>) ttsOption;
+            HashMap<String, Object> options = new HashMap<>();
+            if (!ttsOption.isEmpty()) {
+               options = (HashMap<String, Object>) ttsOption;
+            }
+
             // fork-join text content
             ForkJoinPool forkJoinPool = ThreadPoolUtil.ofForkJoin();
             List<String> splitList = forkJoinPool.invoke(new SplitTextTask(text, 0, text.length() - 1, maxTextLength));
@@ -72,9 +73,9 @@ public class TtsServiceImpl implements TtsService {
             for (String sText : splitList) {
                 String result = null;
                 try {
-                    result = callBack.doInParser(text, options);
+                    result = callBack.doInParser(sText, options);
                 } catch (Exception e) {
-                    log.warn("parse text error :" + e.getMessage());
+                    e.printStackTrace();
                 }
                 resultList.add(result);
             }

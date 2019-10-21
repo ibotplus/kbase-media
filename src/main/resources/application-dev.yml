@@ -50,7 +50,7 @@ convert:
       default: ffmpeg
       ffmpeg:
         # in windows os, it's Necessary, in unix os, it will load by system environment
-        path: D:\ffmpeg\bin\
+        path: /usr/local/bin/
         toImage:
           fps: 0.2
   audio:
@@ -70,7 +70,8 @@ convert:
         base-url: http://172.16.8.103:8177/shRecBase/
     # default tts tool
     tts:
-      default: m2
+      # baidu or m2
+      default: baidu
       # tts engine support once request max text length
       max-text-length: 500
       # m2 tts config

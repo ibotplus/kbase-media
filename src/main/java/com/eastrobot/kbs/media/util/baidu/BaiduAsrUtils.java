@@ -18,7 +18,6 @@ import java.util.HashMap;
  */
 @Slf4j
 @Component
-@ConditionalOnProperty(prefix = "convert", name = "audio.asr.default", havingValue = Constants.BAIDU)
 public class BaiduAsrUtils {
 
     @Value("${convert.audio.asr.baidu.appId}")
@@ -55,19 +54,17 @@ public class BaiduAsrUtils {
     }
 
     /**
-     *
-     * @param tex 合成的文本，使用UTF-8编码。小于512个中文字或者英文数字。（文本在百度服务器内转换为GBK后，长度必须小于1024字节）
-     * @param lan 固定值zh。语言选择,目前只有中英文混合模式，填写固定值zh
-     * @param ctp 客户端类型选择，web端填写固定值1
+     * @param tex     合成的文本，使用UTF-8编码。小于512个中文字或者英文数字。（文本在百度服务器内转换为GBK后，长度必须小于1024字节）
+     * @param lan     固定值zh。语言选择,目前只有中英文混合模式，填写固定值zh
+     * @param ctp     客户端类型选择，web端填写固定值1
      * @param options 可选参数
      *                spd:语速，取值0-9，默认为5中语速,
      *                pit:音调，取值0-9，默认为5中语调,
      *                vol:音量，取值0-15，默认为5中音量,
      *                per:发音人选择, 0为女声，1为男声，3为情感合成-度逍遥，4为情感合成-度丫丫，默认为普通女
-     * @return
      */
-    public static byte[] tts(String tex, String lan, int ctp, HashMap<String, Object> options){
-        TtsResponse tts = client.synthesis(tex,lan,ctp, options);
+    public static byte[] tts(String tex, String lan, int ctp, HashMap<String, Object> options) {
+        TtsResponse tts = client.synthesis(tex, lan, ctp, options);
         return tts.getData();
     }
 

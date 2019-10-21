@@ -1,7 +1,13 @@
 # default logger config
 logging:
   level:
-    root: WARN
+    root: debug
+    net.bramp: debug
+    springfox.documentation: warn
+    de.codecentric: warn
+    sun: warn
+    org: warn
+    io: warn
   file:
     max-history: 7
     max-size: 100MB
@@ -12,6 +18,18 @@ server:
   port: 12345
   servlet:
     context-path: /kbase-media
+
+# default rocketmq config
+apache:
+  rocketmq:
+    consumer:
+      # consumer group
+      push-consumer: yogurt-consumer
+    producer:
+      # producer group
+      producer-group: yogurt-producer
+    # nameserver address
+    namesrvAddr: 192.168.255.130:9876
 
 # default user converter config
 convert:
@@ -31,8 +49,8 @@ convert:
     vca:
       default: ffmpeg
       ffmpeg:
-        # ffmpeg bin path
-        path: /opt/ffmpeg/ffmpeg-3.0/
+        # in windows os, it's Necessary, in unix os, it will load by system environment
+        path: /usr/local/bin/
         toImage:
           fps: 0.2
   audio:
@@ -44,11 +62,16 @@ convert:
         appId: 11067243
         apiKey: iDEvPvY4zT9CzFgYKMQY6eAi
         secretKey: Wkeh8gIbB2LrNBtGwuechG8TUkLlB2TY
+      xfyun:
+        apiUrl: http://api.xfyun.cn/v1/service/v1/iat
+        appId: 5be241a0
+        apiKey: da08f42480e67f574a61290717e8f945
       shhan:
         base-url: http://172.16.8.103:8177/shRecBase/
     # default tts tool
     tts:
-      default: m2
+      # baidu or m2
+      default: baidu
       # tts engine support once request max text length
       max-text-length: 500
       # m2 tts config
@@ -71,7 +94,7 @@ convert:
       # tesseract config
       tesseract:
         # language package path
-        datapath: /opt/tesseract/tessdata
+        datapath: D:\tessdata
 
 # kbase-monitor config
 #spring:
