@@ -1,6 +1,7 @@
 package com.eastrobot.kbs.media.util.shhan;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.eastrobot.kbs.media.model.Constants;
 import com.eastrobot.kbs.media.util.HttpClientUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,8 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -29,6 +32,15 @@ public class ShhanAsrUtil {
 
     @Value("${convert.audio.asr.shhan.base-url}")
     private String shhanBaseUrl;
+
+    @Value("${convert.audio.asr.shhan.key}")
+    private String key;
+
+    @Value("${convert.audio.asr.shhan.concurrent-number}")
+    private String concurrentNumber;
+
+    @Value("${convert.audio.asr.shhan.app-key}")
+    private String appKey;
 
     private static ShhanAsrUtil shhanUtil;
 
@@ -47,22 +59,25 @@ public class ShhanAsrUtil {
         }
 
         HttpClient client = HttpClientUtil.getHttpClient();
-        HttpPost httpPost = new HttpPost(shhanUtil.shhanBaseUrl + "recogBatch"); // 离线 支持多
+        HttpPost httpPost = new HttpPost(shhanUtil.shhanBaseUrl + "/recog?appKey=" + shhanUtil.appKey);
 
-        // httpPost.setHeader("requestId", "");
         httpPost.setHeader("contextCode", "CHN-CMN");
         httpPost.setHeader("sampleRate", "16000");
         httpPost.setHeader("length", String.valueOf(data.length));
-        ByteArrayEntity entity = new ByteArrayEntity(data, ContentType.create("audio/basic"));
+        httpPost.setHeader("content-type", "audio/wav");
+        // ByteArrayEntity entity = new ByteArrayEntity(data, ContentType.create("audio/basic"));
+        ByteArrayEntity entity = new ByteArrayEntity(data, ContentType.create("audio/wav"));
         httpPost.setEntity(entity);
         try {
             HttpResponse response = client.execute(httpPost);
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode == HttpStatus.SC_OK) {
-                String result = EntityUtils.toString(response.getEntity(), Charset.forName("utf-8"));
-                result = StringUtils.substringAfter(result, "<s>");
-
-                return result.replaceAll("\\s*|\t|\n", "");
+                String result = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+                log.debug("shhan-asr result: [{}] - [{}]", filePath, result);
+                return Optional.ofNullable(result)
+                        .map(JSONObject::parseObject)
+                        .map(v -> v.getString("info"))
+                        .orElse("");
             }
         } catch (IOException e) {
             e.printStackTrace();

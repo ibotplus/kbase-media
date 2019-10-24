@@ -11,7 +11,7 @@ logging:
   file:
     max-history: 7
     max-size: 100MB
-  path: ./stdout.log
+  path: ./log
 
 # default server config
 server:
@@ -40,11 +40,11 @@ convert:
   # sync interface config
   sync:
     upload-file-size: 50MB
-    output-folder: E:\converter-output\
+    output-folder: ./convert/
   # async interface config
   async:
     upload-file-size: 500MB
-    output-folder: E:\converter-output\async\
+    output-folder: ./convert/async/
   video:
     vca:
       default: ffmpeg
@@ -56,7 +56,7 @@ convert:
   audio:
     # default asr tool
     asr:
-      default: m2
+      default: shhan
       #baidu asr config
       baidu:
         appId: 11067243
@@ -67,7 +67,10 @@ convert:
         appId: 5be241a0
         apiKey: da08f42480e67f574a61290717e8f945
       shhan:
-        base-url: http://172.16.8.103:8177/shRecBase/
+        base-url: http://ivsapi.demo.xiaoi.net/ivs
+        key: icbc
+        concurrent-number: 10
+        app-key: icbcc516f6bd25944385b61c5792b6824e02
     # default tts tool
     tts:
       # baidu or m2
@@ -77,6 +80,13 @@ convert:
       # m2 tts config
       m2:
         base-url: http://222.73.111.245:9090
+      # data-baker
+      baker:
+        base-url: http://172.16.36.10:8100/tts
+        access-token: speech
+        domain: 1
+        voice-name: 静静
+        language: zh
   image:
     #default ocr tool
     ocr:
