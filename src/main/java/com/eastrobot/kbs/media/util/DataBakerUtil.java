@@ -60,6 +60,7 @@ public class DataBakerUtil {
         String actionUrl = String.format(bakerUtil.baseUrl +
                         "?access_token=%s&language=%s&domain=%s&voice_name=%s&text=%s",
                 bakerUtil.accessToken, bakerUtil.language, bakerUtil.domain, bakerUtil.voiceName, text);
+        log.debug("baker tts: [{}]", actionUrl);
         httpGet.setURI(URI.create(actionUrl));
         try {
             HttpResponse response = httpClient.execute(httpGet);
@@ -69,7 +70,7 @@ public class DataBakerUtil {
 
             if (httpEntity.isPresent()) {
                 try (InputStream is = httpEntity.get().getContent()) {
-                    return IOUtils.readFully(is, is.available());
+                    return IOUtils.readFully(is, ((int) httpEntity.get().getContentLength()));
                 }
             }
         } catch (IOException e) {
