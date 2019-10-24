@@ -6,6 +6,7 @@ import com.eastrobot.kbs.media.model.ResultCode;
 import com.eastrobot.kbs.media.model.aitype.TTS;
 import com.eastrobot.kbs.media.service.TtsParserCallBack;
 import com.eastrobot.kbs.media.service.TtsService;
+import com.eastrobot.kbs.media.util.DataBakerUtil;
 import com.eastrobot.kbs.media.util.baidu.BaiduAsrUtils;
 import com.eastrobot.kbs.media.util.concurrent.ThreadPoolUtil;
 import com.eastrobot.kbs.media.util.m2.M2TtsUtil;
@@ -37,6 +38,8 @@ public class TtsServiceImpl implements TtsService {
             return TtsParserTemplate.handle(text, maxTextLength, ttsOption, this::baiduTtsHandler);
         } else if (Constants.M2.equals(audioTool)) {
             return TtsParserTemplate.handle(text, maxTextLength, ttsOption, this::m2TtsHandler);
+        } else if (Constants.DATA_BAKER.equals(audioTool)) {
+            return TtsParserTemplate.handle(text, maxTextLength, ttsOption, this::dataBakerTtsHandler);
         } else {
             return new ParseResult<>(ResultCode.PARSE_EMPTY, null);
         }
@@ -56,13 +59,18 @@ public class TtsServiceImpl implements TtsService {
         return Base64Util.encode(tts);
     }
 
+    private String dataBakerTtsHandler(String text, Map<String, Object> options) {
+        byte[] tts = DataBakerUtil.tts(text);
+        return Base64Util.encode(tts);
+    }
+
     private static class TtsParserTemplate {
 
         private static ParseResult<TTS> handle(String text, int maxTextLength, Map<String, Object> ttsOption,
                                                TtsParserCallBack callBack) {
             HashMap<String, Object> options = new HashMap<>();
             if (!ttsOption.isEmpty()) {
-               options = (HashMap<String, Object>) ttsOption;
+                options = (HashMap<String, Object>) ttsOption;
             }
 
             // fork-join text content

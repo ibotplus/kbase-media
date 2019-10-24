@@ -73,8 +73,8 @@ convert:
         app-key: icbcc516f6bd25944385b61c5792b6824e02
     # default tts tool
     tts:
-      # baidu or m2
-      default: baidu
+      # baidu or m2 or baker
+      default: baker
       # tts engine support once request max text length
       max-text-length: 500
       # m2 tts config
