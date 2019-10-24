@@ -3,11 +3,18 @@ package com.eastrobot.kbs.media.web.controller;
 import com.eastrobot.kbs.media.util.DataBakerUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ResponseHeader;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.apache.commons.io.IOUtils;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 @Api(tags = "转换接口(byte)")
 @Slf4j
@@ -16,11 +23,16 @@ import org.springframework.web.bind.annotation.*;
 public class ByteController {
 
     @ApiOperation("文本转语音")
-    @ApiResponse(code = 200, message = "tts语音生成成功.", responseHeaders = {
-            @ResponseHeader(name = "Content-disposition", description = "attachment; filename=download.mp3")
-    })
     @PostMapping(value = "/tts", produces = "audio/mp3")
-    public ResponseEntity<byte[]> tts(@RequestParam String text) {
-        return ResponseEntity.ok(DataBakerUtil.tts(text));
+    public void tts(@RequestBody String text, HttpServletResponse response) {
+        byte[] tts = DataBakerUtil.tts(text);
+        BufferedInputStream bis = new BufferedInputStream(new ByteArrayInputStream(tts));
+        response.setHeader("Content-disposition", "attachment; filename=tts.mp3");
+        try (ServletOutputStream sos = response.getOutputStream()) {
+            IOUtils.copy(bis, sos);
+            sos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
