@@ -1,12 +1,7 @@
 package com.eastrobot.kbs.media.util;
 
 import com.eastrobot.kbs.media.model.Constants;
-import com.eastrobot.kbs.media.model.FileExtensionType;
-import com.eastrobot.kbs.media.util.ffmpeg.FFmpegUtil;
-import com.eastrobot.kbs.media.util.m2.M2TtsUtil;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -16,11 +11,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-import sun.net.www.protocol.http.HttpCallerInfo;
 
 import javax.annotation.PostConstruct;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;

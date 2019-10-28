@@ -25,6 +25,7 @@ public class ByteController {
     @ApiOperation("文本转语音")
     @PostMapping(value = "/tts", produces = "audio/mp3")
     public void tts(@RequestBody String text, HttpServletResponse response) {
+        log.debug("tts text: [{}]", text);
         byte[] tts = DataBakerUtil.tts(text);
         BufferedInputStream bis = new BufferedInputStream(new ByteArrayInputStream(tts));
         response.setHeader("Content-disposition", "attachment; filename=tts.mp3");
