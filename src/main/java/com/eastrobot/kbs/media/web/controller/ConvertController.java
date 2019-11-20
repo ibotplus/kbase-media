@@ -11,10 +11,7 @@ import com.eastrobot.kbs.media.model.aitype.TTS;
 import com.eastrobot.kbs.media.model.aitype.VAC;
 import com.eastrobot.kbs.media.service.ConvertService;
 import com.google.common.collect.ImmutableMap;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -101,13 +98,14 @@ public class ConvertController {
         return getRecognitionResponse(file, AiType.VAC, request);
     }
 
-    @ApiOperation("文本语音合成[TTS]")
+    @ApiOperation(value = "文本语音合成[TTS]", notes = "根据输入的文本，返回json，包含一段base64的音频码，可采用 base64 转 blob 用于前端播放")
+
     @PostMapping(
             value = "/tts",
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
             consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE}
     )
-    public ResponseMessage<TTS> tts(@RequestBody String reqBody) {
+    public ResponseMessage<TTS> tts(@ApiParam(name = "reqBody", value = "参数格式：{\"text\": \"我和我的祖国\"}", required = true) @RequestBody String reqBody) {
         try {
             JSONObject reqJson = Optional.ofNullable(reqBody)
                     .filter(StringUtils::isNotBlank)
