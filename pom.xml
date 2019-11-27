@@ -201,7 +201,7 @@
             <artifactId>FREngine</artifactId>
             <version>1.0</version>
             <scope>system</scope>
-            <systemPath>${basedir}/library/com.abbyy.FREngine.jar</systemPath>
+            <systemPath>${basedir}/lib/com.abbyy.FREngine.jar</systemPath>
         </dependency>
     </dependencies>
 
