@@ -24,3 +24,5 @@ dist/
 nbdist/
 .nb-gradle/
 logs/
+convert/
+log/

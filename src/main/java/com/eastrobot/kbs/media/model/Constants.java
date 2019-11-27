@@ -29,6 +29,7 @@ public interface Constants {
     // tts supplier param
     //------------------------------------
     String M2 = "m2";
+    String DATA_BAKER = "baker";
     //------------------------------------
     // AiRecognition request param constants
     //------------------------------------

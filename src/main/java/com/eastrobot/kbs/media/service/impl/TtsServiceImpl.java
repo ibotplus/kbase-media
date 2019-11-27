@@ -6,6 +6,7 @@ import com.eastrobot.kbs.media.model.ResultCode;
 import com.eastrobot.kbs.media.model.aitype.TTS;
 import com.eastrobot.kbs.media.service.TtsParserCallBack;
 import com.eastrobot.kbs.media.service.TtsService;
+import com.eastrobot.kbs.media.util.DataBakerUtil;
 import com.eastrobot.kbs.media.util.baidu.BaiduAsrUtils;
 import com.eastrobot.kbs.media.util.concurrent.ThreadPoolUtil;
 import com.eastrobot.kbs.media.util.m2.M2TtsUtil;
@@ -14,10 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 
 /**
@@ -40,6 +38,8 @@ public class TtsServiceImpl implements TtsService {
             return TtsParserTemplate.handle(text, maxTextLength, ttsOption, this::baiduTtsHandler);
         } else if (Constants.M2.equals(audioTool)) {
             return TtsParserTemplate.handle(text, maxTextLength, ttsOption, this::m2TtsHandler);
+        } else if (Constants.DATA_BAKER.equals(audioTool)) {
+            return TtsParserTemplate.handle(text, maxTextLength, ttsOption, this::dataBakerTtsHandler);
         } else {
             return new ParseResult<>(ResultCode.PARSE_EMPTY, null);
         }
@@ -59,11 +59,20 @@ public class TtsServiceImpl implements TtsService {
         return Base64Util.encode(tts);
     }
 
+    private String dataBakerTtsHandler(String text, Map<String, Object> options) {
+        byte[] tts = DataBakerUtil.tts(text);
+        return Base64Util.encode(tts);
+    }
+
     private static class TtsParserTemplate {
 
         private static ParseResult<TTS> handle(String text, int maxTextLength, Map<String, Object> ttsOption,
                                                TtsParserCallBack callBack) {
-            HashMap<String, Object> options = (HashMap<String, Object>) ttsOption;
+            HashMap<String, Object> options = new HashMap<>();
+            if (!ttsOption.isEmpty()) {
+                options = (HashMap<String, Object>) ttsOption;
+            }
+
             // fork-join text content
             ForkJoinPool forkJoinPool = ThreadPoolUtil.ofForkJoin();
             List<String> splitList = forkJoinPool.invoke(new SplitTextTask(text, 0, text.length() - 1, maxTextLength));
@@ -72,9 +81,9 @@ public class TtsServiceImpl implements TtsService {
             for (String sText : splitList) {
                 String result = null;
                 try {
-                    result = callBack.doInParser(text, options);
+                    result = callBack.doInParser(sText, options);
                 } catch (Exception e) {
-                    log.warn("parse text error :" + e.getMessage());
+                    e.printStackTrace();
                 }
                 resultList.add(result);
             }
