@@ -1,0 +1,10 @@
+version: '3'
+services:
+  kbase-media-image:
+    build: .
+    ports:
+    - '12345:12345'
+    volumes:
+    - './convert:/convert'
+    - './log:/log'
+    container_name: kbase-media-container

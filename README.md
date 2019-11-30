@@ -1,3 +1,4 @@
+# 多媒体内容识别、语音转写、语音合成服务
 
 > easy convert video audio image to text, or revert text to audio(base64), more features can expected.
 Here is [api-docs](http://kbs41.demo.xiaoi.com/kbase-media/swagger-ui.html) which use Swagger2.
@@ -8,9 +9,9 @@ Here is [api-docs](http://kbs41.demo.xiaoi.com/kbase-media/swagger-ui.html) whic
 ![Java v1.8](https://img.shields.io/badge/Java-v1.8.0__162-blue.svg)
 ![Maven v3.5.3](https://img.shields.io/badge/Maven-v3.5.3-blue.svg)
 
-**配置文件说明**
+## 配置文件说明
 
-**注意启动日志: 当ocr引擎使用abbyy时,启动是若提示fineReader engine license 过期需要再启动一次..**
+**注意启动日志: 当`ocr`引擎使用`abbyy`时,启动是若提示`fineReader engine license` 过期需要再启动一次..**
 
 ``` yaml
 # convert部分配置
@@ -110,10 +111,12 @@ management:
     ssl:
       enabled: false
 ```
-### Restful Apis
+## Restful Apis
 [http://kbs55.demo.xiaoi.com/kbase-media/swagger-ui.html](http://kbs55.demo.xiaoi.com/kbase-media/swagger-ui.html)
 
-### Thanks For
+![api预览](docs/api-docs.png)
+
+## Thanks For
 [Tencent-YouTu](https://github.com/Tencent-YouTu/java_sdk)
 
 [Baidu-AIP](https://ai.baidu.com/docs#/ASR-Online-Java-SDK/top)
@@ -126,9 +129,9 @@ management:
 
 
 
-**附:SpringBoot项目开机自启动配置**
+## 附:SpringBoot项目开机自启动配置
 
-1.开机自启文件配置
+1. 开机自启文件配置
 ``` bash
 vim /usr/lib/systemd/system/kbase-media.service 增加
 
@@ -148,21 +151,47 @@ SuccessExitStatus=143
 WantedBy=multi-user.target
 ```
 
-2.startup.sh
+2. startup.sh
 ``` bash
 #! /bin/sh
 /usr/local/jdk1.8/bin/java -Xms1024M -Xmx1024M -Xmn384M -Xss256k -jar /opt/kbase-media/kbase-media-1.0-SNAPSHOT.jar --spring.config.location=/opt/kbase-media/application.yml > /opt/kbase-media/logs/stdout.log &
 ```
 *注意使用spring.config.location直接指定springboot配置文件位置*
 
-3.shutdown.sh
+3. shutdown.sh
 ``` bash
 #! /bin/sh
 kill -9 `ps -ef|grep java|grep -v grep|grep kbase-media|awk '{print $2}'`
 ```
-4.重载配置文件&注册服务&查看console的日志
+
+4. 重载配置文件&注册服务&查看console的日志
 ``` bash
 systemctl daemon-reload
 systemctl enable kbase-media.service
 journalctl -u kbase-media
 ```
+
+## Docker 部署
+**内置`ffmpeg`，配置文件中的`ffmpeg`路径请设置为空**
+```
+.
+├── application.yml
+├── convert
+│   ├── 066b0d47ba45041bbc287418adace090
+│   │   └── 066b0d47ba45041bbc287418adace090.aac
+│   ├── 066b0d47ba45041bbc287418adace090.mp4
+│   ├── f172d854b2a950f7f12f61ce9cf4aec6
+│   │   └── f172d854b2a950f7f12f61ce9cf4aec6.pcm
+│   ├── f172d854b2a950f7f12f61ce9cf4aec6.rs
+│   └── f172d854b2a950f7f12f61ce9cf4aec6.wav
+├── docker-compose.yml
+├── Dockerfile
+├── log
+│   └── spring.log
+└── target
+    └── dependency
+        ├── BOOT-INF
+        ├── META-INF
+        └── org
+```
+
