@@ -51,6 +51,7 @@ public interface Constants {
     String AI_TYPE = "AI_TYPE";
     String AI_TTS_TEXT = "AI_TTS_TEXT";
     String AI_TTS_OPTION = "AI_TTS_OPTION";
+    String VAC_TYPE = "VAC_TYPE";
     //------------------------------------
     // RocketMQ default constants
     //------------------------------------

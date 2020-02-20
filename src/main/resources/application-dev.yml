@@ -72,7 +72,7 @@ convert:
         concurrent-number: 10
         app-key: icbcc516f6bd25944385b61c5792b6824e02
       ali:
-        apiUrl: ws://172.16.7.51:8101/ws/v1
+        apiUrl: ws://172.16.7.56:8101/ws/v1
         appKey: default
         token: default
     # default tts tool

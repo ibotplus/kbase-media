@@ -1,10 +1,7 @@
 package com.eastrobot.kbs.media.model;
 
 import com.eastrobot.kbs.media.model.aitype.AiType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * ParseResult
@@ -16,6 +13,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ParseResult<T extends AiType> {
     /**
      * 错误码

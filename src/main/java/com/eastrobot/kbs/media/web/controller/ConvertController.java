@@ -5,6 +5,7 @@ import com.eastrobot.kbs.media.exception.BusinessException;
 import com.eastrobot.kbs.media.model.AiType;
 import com.eastrobot.kbs.media.model.ResponseMessage;
 import com.eastrobot.kbs.media.model.ResultCode;
+import com.eastrobot.kbs.media.model.VacType;
 import com.eastrobot.kbs.media.model.aitype.ASR;
 import com.eastrobot.kbs.media.model.aitype.OCR;
 import com.eastrobot.kbs.media.model.aitype.TTS;
@@ -87,14 +88,28 @@ public class ConvertController {
 
     @ApiOperation("视频解析转写[VAC].")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "file", value = "待转换文件", dataType = "__file", required = true, paramType = "form")
+            @ApiImplicitParam(name = "file", value = "待转换文件", dataType = "__file", required = true, paramType = "form"),
+            @ApiImplicitParam(name = "type", value = "0-默认值，根据视频中的帧画和音轨进行解析, 1-仅解析视频中的帧画，2-仅解析视频中的音轨", dataType = "Integer")
     })
     @PostMapping(
             value = "/vac",
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
-    public ResponseMessage<VAC> vac(MultipartFile file, HttpServletRequest request) {
+    public ResponseMessage<VAC> vac(MultipartFile file, Integer type, HttpServletRequest request) {
+        VacType vacType = VacType.VAC;
+        type = type==null?0:type;
+        switch (type){
+            case 1:
+                vacType = VacType.VAC_OCR;
+                break;
+            case 2:
+                vacType = VacType.VAC_ASR;
+                break;
+            default:
+
+        }
+        request.setAttribute(VAC_TYPE, vacType.name());
         return getRecognitionResponse(file, AiType.VAC, request);
     }
 
@@ -144,6 +159,7 @@ public class ConvertController {
                     .put(AI_WHETHER_NEED_VIDEO_POSTER, Optional.ofNullable(request.getParameter(AI_WHETHER_NEED_VIDEO_POSTER)).orElse(""))
                     .put(AI_RESOURCE_FILE_PATH, targetFile)
                     .put(AI_TYPE, aiType)
+                    .put(VAC_TYPE, Optional.ofNullable(request.getAttribute(VAC_TYPE)).orElse(VacType.VAC.name()))
                     .build();
 
             return converterService.driver(recognitionParam);
