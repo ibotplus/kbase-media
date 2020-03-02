@@ -56,7 +56,7 @@ convert:
   audio:
     # default asr tool
     asr:
-      default: ali
+      default: ali #ali_nls, baidu_bce
       #baidu asr config
       baidu:
         appId: 11067243
@@ -75,6 +75,18 @@ convert:
         apiUrl: ws://172.16.7.56:8101/ws/v1
         appKey: default
         token: default
+      ali-nls:
+        access-token: default
+        app-key: default
+        server-ip: ws://172.16.7.56:8101/ws/v1
+        customization-id:
+      baidu-bce:
+        app-name: kbase-trainer
+        user-name: zhangkazhongxing
+        password: zhangkazhongxing
+        server-ip: asr.baiduai.cloud
+        server-port: 8051
+        asr-product: speech_service
     # default tts tool
     tts:
       # baidu or m2 or baker
