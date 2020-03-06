@@ -6,11 +6,6 @@ RUN echo "https://mirror.tuna.tsinghua.edu.cn/alpine/v3.9/main" > /etc/apk/repos
     && apk update \
     && apk add yasm && apk add ffmpeg
 
-# install ffmpeg
-RUN apk update
-RUN apk add yasm && apk add ffmpeg
-
-
 # install kbase-media
 VOLUME /tmp
 
